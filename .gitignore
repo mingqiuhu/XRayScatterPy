@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# Don't ignore the .gitignore file
+!.gitignore
+
+# Don't ignore the following folders
+!examples/
+!tests/
+!xray_scatter_py/
+
+!setup.py
+!README.md
+
+#
