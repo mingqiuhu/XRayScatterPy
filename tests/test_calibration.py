@@ -2,7 +2,7 @@ import unittest
 import os
 import numpy as np
 from xray_scatter_py import calibration, utils
-#
+
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tiff_files_calibration_q')
 START_INDEX = 77023
 END_INDEX = 77026

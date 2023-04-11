@@ -1,9 +1,0 @@
-numpy
-matplotlib
-scipy
-scikit-image
-pandas
-tifffile
-bornagain
-xmltodict
-requests
