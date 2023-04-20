@@ -3,44 +3,59 @@
 import os
 import numpy as np
 from xray_scatter_py import data_plotting, utils, calibration, data_processing
-
+import matplotlib.pyplot as plt
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'synchrotron')
-
-
 image = utils.read_synchrotron_image(DATA_PATH, 'ST_20s_exposure_2_2m.edf_mod.tif')
+
+I0, DiodeNorm = 110533, 30467
+thickness = 0.1055
+
+
+factor = 53954218.44159385
+image = 10**image
+image[np.isnan(image)] = -1
+image[1150:, 650:700] = -1
+image_array = image[np.newaxis, :, :]
 params_dict = {}
 params_dict['beamcenter_actual'] = '[1178.31 682.88]'
 params_dict['pixelsize'] = '[0.172 0.172]'
 params_dict['detx'] = '3524.18'
-params_dict['det_exposure_time'] = '20'
+params_dict['det_exposure_time'] = '1'
 params_dict['wavelength'] = '1.23984'
-params_dict['sample_transfact'] = '0.5'
-params_dict['sample_thickness'] = '1.0'
-params_dict['saxsconf_Izero'] = '20000000'
+params_dict['sample_transfact'] = str(DiodeNorm/I0)
+params_dict['sample_thickness'] = str(thickness)
+params_dict['saxsconf_Izero'] = str(I0)
+params_dict_list = [params_dict]
 
- 
-"""
-theta_array, azimuth_array = calibration.calculate_angle(DETX0, params_dict_list, image_array)
-qx_array, qy_array, qz_array = calibration.calculate_q(DETX0, params_dict_list, image_array)
+theta_array, azimuth_array = calibration.calculate_angle(0, params_dict_list, image_array)
+qx_array, qy_array, qz_array = calibration.calculate_q(0, params_dict_list, image_array)
 q_array = np.sqrt(qx_array**2 + qy_array**2 + qz_array**2)
-omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
+omega = calibration.calculate_omega(0, params_dict_list, theta_array)
 image_array_rel = calibration.calibrate_rel_intensity(params_dict_list, image_array, omega)
 image_array_abs = calibration.calibrate_abs_intensity(params_dict_list, image_array_rel)
 
+data_plotting.plot_2d_scattering(-qz_array, qy_array, image_array_abs, video=False)
 
-header_info, data_array_esaxs, xml_dict = utils.read_grad_file(DATA_PATH, '06022022 AgBH ESAXS.grad')
-header_info, data_array_saxs, xml_dict = utils.read_grad_file(DATA_PATH, '06022022 AgBH SAXS.grad')
-header_info, data_array_maxs, xml_dict = utils.read_grad_file(DATA_PATH, '06022022 AgBH MAXS.grad')
-header_info, data_array_waxs, xml_dict = utils.read_grad_file(DATA_PATH, '06022022 AgBH WAXS.grad')
-
+Q_MIN = 0.00827568
+Q_MAX = 0.24740200
+Q_NUM = 59
 
 q_1d = np.linspace(Q_MIN, Q_MAX, Q_NUM)
-i_1d = data_processing.calculate_1d(Q_MIN, Q_MAX, Q_NUM, q_array, image_array_abs, omega, index_list=INDEX_LIST)
 
+i_1d = data_processing.calculate_1d(Q_MIN, Q_MAX, Q_NUM, q_array, image_array_abs, omega)
 
-data_plotting.plot_1d_compare(q_1d, i_1d[0], data_array_esaxs[:, 0], data_array_esaxs[:, 1])
-data_plotting.plot_1d_compare(q_1d, i_1d[1], data_array_saxs[:, 0], data_array_saxs[:, 1])
-data_plotting.plot_1d_compare(q_1d, i_1d[2], data_array_maxs[:, 0], data_array_maxs[:, 1])
-data_plotting.plot_1d_compare(q_1d, i_1d[3], data_array_waxs[:, 0], data_array_waxs[:, 1])
-"""
+srm = np.loadtxt(os.path.join(DATA_PATH, 'srm.csv'), delimiter=',')
+data_plotting.plot_set()
+plt.figure()
+cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+plt.plot(q_1d, i_1d[0, :]/factor, '.')
+plt.plot(srm[:,0], srm[:,1])
+plt.plot(srm[:,0], srm[:,1]+srm[:,2], '--', color=cycle[1])
+plt.plot(srm[:,0], srm[:,1]-srm[:,2], '--', color=cycle[1])
+plt.xlabel(r'$q\ \mathrm{(Å^{-1})}$', fontsize=22)
+plt.ylabel(r'$I\ \mathrm{(cm^{-1}sr^{-1})}$', fontsize=22)
+plt.xscale('log')
+plt.yscale('linear')
+plt.legend(['measured', 'reference', '95% confidence range'], fontsize=20)
+plt.show()
