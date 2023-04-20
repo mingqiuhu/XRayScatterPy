@@ -44,6 +44,44 @@ def read_image(directory_path: str, index: int) -> tuple:
     return params_dict, image
 
 
+def read_synchrotron_image(directory_path: str, index: int) -> tuple:
+    """
+    Read a TIFF image file of GANESHA SAXSLAB and its metadata from the given directory path and index.
+
+    Args:
+        directory_path (str): The directory path where the TIFF file is located.
+        index (int): The index of the TIFF file to be read.
+
+    Returns:
+        tuple: A tuple containing a dictionary with the parsed metadata parameters and the image data as a NumPy array.
+
+    Raises:
+        FileNotFoundError: If the given directory path or file index does not exist.
+    """
+    if not os.path.isdir(directory_path):
+        raise FileNotFoundError(f"Directory not found: {directory_path}")
+
+    file_template = "latest_{:07d}_craw.tiff"
+    file_path = os.path.join(directory_path, file_template.format(index))
+
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    with tifffile.TiffFile(file_path) as tiff:
+        first_page = tiff.pages[0]
+        image = first_page.asarray()
+        tags = first_page.tags
+
+        xml_tag = next(tag for tag_name, tag in tags.items() if 'xml' in str(tag.value))
+        xml = xml_tag.value
+
+    xml_dict = xmltodict.parse(xml)
+    # parameters = xml_dict['SAXSLABparameters']
+    # params_dict = {param['@name']: param.get('#text', None) for param in parameters['param']}
+
+    return xml_dict, image
+
+
 def read_multiimage(directory_path: str, start_index: int, end_index: int = 0) -> tuple:
     """
     Read multiple TIFF image files and their metadata from the given directory path and index range.
