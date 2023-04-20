@@ -5,8 +5,39 @@ import numpy as np
 from xray_scatter_py import data_plotting, utils, calibration, data_processing
 import matplotlib.pyplot as plt
 
-FILE_NAME = 'ST_20s_exposure_2_2m'
-thickness = 0.1055
+
+thickness_dict = {
+    'A_1_1_20s_exposure_2m':0.048,
+    'A_1_20s_exposure_5_2m':0.05,
+    'A_2_1_20s_exposure_2m':0.053,
+    'A_2_20s_exposure_2_2m':0.05,
+    'A_3_1_20s_exposure_2m':0.05,
+    'A_3_20s_exposure_2m':0.056,
+    'A_4_1_20s_exposure_2m':0.05,
+    'A_4_20s_exposure_2m':0.056,
+    'A_5_1_20s_exposure_2_2m':0.049,
+    'A_5_20s_exposure_2m':0.054,
+    'A_6_20s_exposure_2m':0.055,
+    'B_1_1_20s_exposure_2m':0.055,
+    'B_1_20s_exposure_2_2m':0.053,
+    'B_2_1_20s_exposure_2m':0.059,
+    'B_2_20s_exposure_3_2m':0.055,
+    'B_3_1_20s_exposure_2_2m':0.063,
+    'B_3_20s_exposure_2m':0.054,
+    'B_4_20s_exposure_2m':0.052,
+    'B_6_20s_exposure_2m':0.054,
+    'C_1_1_20s_exposure_2m':0.055,
+    'C_1_20s_exposure_2_2m':0.05,
+    'C_2_20s_exposure_2m':0.057,
+    'C_3_20s_exposure_2m':0.052,
+    'D_1_20s_exposure_2m':0.05,
+    'D_3_20s_exposure_2_2m':0.053,
+    'D_3_20s_exposure_2m':0.053,
+    'D_4_20s_exposure_2_2m':0.05,
+    'D_4_20s_exposure_2m':0.05,
+    'ST_20s_exposure_2_2m':0.1055,
+    'ST_60s_exposure_2m':0.1055
+}
 
 Q_MIN = 0.00827568
 Q_MAX = 0.24740200
@@ -41,13 +72,14 @@ def calculate_synchrotron_abs(FILE_NAME, thickness, Q_MIN, Q_MAX, Q_NUM):
     image_array_rel = calibration.calibrate_rel_intensity(params_dict_list, image_array, omega)
     image_array_abs = calibration.calibrate_abs_intensity(params_dict_list, image_array_rel)
 
-    data_plotting.plot_2d_scattering(-qz_array, qy_array, image_array_abs/factor, video=False)
-
     q_1d = np.linspace(Q_MIN, Q_MAX, Q_NUM)
     i_1d = data_processing.calculate_1d(Q_MIN, Q_MAX, Q_NUM, q_array, image_array_abs, omega)
+    np.savetxt(FILE_NAME+'.txt', np.stack((q_1d, i_1d[0, :]/factor), axis=-1))
+    
+    """
+    data_plotting.plot_2d_scattering(-qz_array, qy_array, image_array_abs/factor, video=False)
 
     srm = np.loadtxt(os.path.join(DATA_PATH, 'srm.csv'), delimiter=',')
-
     data_plotting.plot_set()
     plt.figure()
     cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -61,5 +93,8 @@ def calculate_synchrotron_abs(FILE_NAME, thickness, Q_MIN, Q_MAX, Q_NUM):
     plt.yscale('linear')
     plt.legend(['measured', 'reference', '95% confidence range'], fontsize=20)
     plt.show()
+    """
+    
 
-calculate_synchrotron_abs(FILE_NAME, thickness, Q_MIN, Q_MAX, Q_NUM)
+for FILE_NAME, thickness in thickness_dict.items():
+    calculate_synchrotron_abs(FILE_NAME, thickness, Q_MIN, Q_MAX, Q_NUM)
