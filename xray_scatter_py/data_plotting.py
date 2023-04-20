@@ -78,7 +78,6 @@ def plot_2d_scattering(qy_array, qz_array, image_array, index_list=None, crop=Fa
         zmax = np.max(image_array[i])
         zmin = np.min(image_array[i][image_array[i] > 0])
         # zmin = max(zmax*1e-6, np.min(image_array[i][image_array[i] > 0]))
-        print(zmin, zmax)
         norm = matplotlib.colors.LogNorm(zmin, zmax)
         plt.pcolormesh(qy_array[i],
                        qz_array[i],
