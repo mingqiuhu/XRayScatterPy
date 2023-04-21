@@ -1,6 +1,27 @@
-# xray_scatter_py/calibration.py
+"""
+This module provides utility functions to process and analyze X-ray scattering data from
+a 2D detector. The main functions in this module are used to:
+
+1. Calculate the coordinates of each detector pixel in the unit of mm (calculate_mm).
+2. Calculate the theta and azimuth angles for each detector pixel (calculate_angle).
+3. Calculate the q-vectors (qx, qy, qz) for each detector pixel (calculate_q).
+4. Calculate the azimuthal angle with the largest integrated intensity, kai,
+   for each image (calculate_kai).
+5. Calculate the solid angle (sr) for each detector pixel (calculate_sr).
+6. Normalize the intensity for each detector pixel by exposure time and solid angle
+   (calibrate_rel_intensity).
+
+These functions take in various parameters related to the X-ray scattering experiment, such as
+the zero position of the detector, a list of dictionaries containing the parameters of each
+measurement, and the 3D array of input detector images.
+
+The functions return arrays with the same shape as the input image_array, containing information
+such as coordinates, angles, q-vectors, kai angles, solid angles, and normalized intensities for
+each detector pixel.
+"""
 
 import numpy as np
+
 
 def calculate_mm(detx0: float, params_dict_list: list[dict],
                  image_array: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -144,6 +165,7 @@ def calculate_q(detx0: float, params_dict_list: list[dict], image_array: np.ndar
 
     return qx_array, qy_array, qz_array
 
+
 # -1 needs to be excluded
 def calculate_kai(params_dict_list: list[dict], azimuth_array: np.ndarray, image_array: np.ndarray,
                   num_azimuth: int = 720, center_mask: int = 20):
@@ -243,18 +265,61 @@ def calculate_sr(detx0: float, params_dict_list: list[dict], theta_array: np.nda
 
     return sr_array
 
+
 def calibrate_rel_intensity(params_dict_list: list[dict], image_array: np.ndarray,
-                            sr_array: np.ndarray):
+                            sr_array: np.ndarray) -> np.ndarray:
+    """
+    Normalize the intensity for each pixel of the detector image by exposure time and solid angle.
+
+    Args:
+    - params_dict_list (list[dict]): List of dictionaries containing parameters of each measurement.
+        Each dictionary should contain the following key:
+            - 'det_exposure_time': The exposure time of the detector as a string.
+    - image_array (np.ndarray): A 3D array of the input images.
+        The first index is the serial number of measurement. The second and third indices are the
+        y and z indices of the detector image.
+    - sr_array (np.ndarray): A 3D array of the solid angles for each pixel of the detector image.
+        The array has the same shape as the input image_array.
+
+    Returns:
+    - np.ndarray: A 3D array containing the normalized relative intensities for each pixel of the
+        detector image. The array has the same shape as the input image_array.
+    """
+
     # get the exposure time of each measurement
     time = np.empty(image_array.shape[0])
     for i in range(image_array.shape[0]):
         time[i] = float(params_dict_list[i]['det_exposure_time'])
+
+    # normalize the intensity by exposure time and solid angle, keeping the invalid pixels as -1
     image_array_bool = image_array==-1
     image_array = image_array / time[:, np.newaxis, np.newaxis] / sr_array
     image_array[image_array_bool] = -1
+
     return image_array
 
-def calibrate_abs_intensity(params_dict_list, image_array):
+
+def calibrate_abs_intensity(params_dict_list: list[dict], image_array: np.ndarray) -> np.ndarray:
+    """
+    Calculate absolute intensity for each pixel of the detector image by normalizing the intensity
+    by transmission factor, sample thickness, and incident intensity.
+
+    Args:
+    - params_dict_list (list[dict]): List of dictionaries containing parameters of each measurement.
+        Each dictionary should contain the following keys:
+            - 'sample_transfact': The transmission factor of the sample as a string.
+            - 'sample_thickness': The thickness of the sample as a string.
+            - 'saxsconf_Izero': The incident intensity as a string.
+    - image_array (np.ndarray): A 3D array of the input images.
+        The first index is the serial number of measurement. The second and third indices are the
+        y and z indices of the detector image.
+
+    Returns:
+    - np.ndarray: A 3D array containing the absolute intensities for each pixel of the detector
+        image. The array has the same shape as the input image_array.
+    """
+
+    # get the transmission factor, sample thickness, and incident intensity of each measurement
     transmission = np.empty(image_array.shape[0])
     thickness = np.empty(image_array.shape[0])
     incidence = np.empty(image_array.shape[0])
@@ -262,7 +327,11 @@ def calibrate_abs_intensity(params_dict_list, image_array):
         transmission[i] = float(params_dict_list[i]['sample_transfact'])
         thickness[i] = float(params_dict_list[i]['sample_thickness'])
         incidence[i] = float(params_dict_list[i]['saxsconf_Izero'])
+
+    # Normalize the intensity by transmission factor, sample thickness, and incident intensity,
     image_array_bool = image_array==-1
-    image_array = image_array / transmission[:, np.newaxis, np.newaxis] / thickness[:, np.newaxis, np.newaxis] / incidence[:, np.newaxis, np.newaxis]
+    image_array = image_array / transmission[:, np.newaxis, np.newaxis] /\
+        thickness[:, np.newaxis, np.newaxis] / incidence[:, np.newaxis, np.newaxis]
     image_array[image_array_bool] = -1
+
     return image_array
