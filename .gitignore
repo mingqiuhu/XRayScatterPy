@@ -9,8 +9,8 @@
 !tests/
 !xray_scatter_py/
 !data/
-
 !setup.py
 !README.md
+!CODEOWNERS
 
 #

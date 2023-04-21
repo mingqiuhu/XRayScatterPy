@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 setup(
     name="xray-scatter-py",
     version="1.0.0",
-    author="Your Name",
+    author="Mingqiu Hu, Xuchen Gan",
     author_email="your.email@example.com",
     description="A Python package for processing and analyzing x-ray scattering, GISAXS, and x-ray reflectivity data",
     long_description=long_description,
