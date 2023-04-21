@@ -27,3 +27,4 @@ data_plotting.plot_1d_compare(theta_1d[:-5], spillover_array[:-5], theta_1d[:-5]
                               legend=['Original data', 'Fitting with Gaussian beam'],
                               legend_fontsize=18)
 data_plotting.plot_1d(theta_1d, total_array, xlabel='theta sample', ylabel='total')
+np.savetxt('si.txt', np.stack((qz_1d, normalized_reflectivity), axis=-1))

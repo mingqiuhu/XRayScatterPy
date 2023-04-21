@@ -76,7 +76,8 @@ def plot_2d_scattering(qy_array, qz_array, image_array, index_list=None, crop=Fa
     for i in index_list:
         plt.figure()
         zmax = np.max(image_array[i])
-        zmin = max(zmax*1e-6, np.min(image_array[i][image_array[i] > 0]))
+        zmin = np.min(image_array[i][image_array[i] > 0])
+        # zmin = max(zmax*1e-6, np.min(image_array[i][image_array[i] > 0]))
         norm = matplotlib.colors.LogNorm(zmin, zmax)
         plt.pcolormesh(qy_array[i],
                        qz_array[i],
@@ -320,7 +321,7 @@ def plot_1d_compare(q1, i1, q2, i2, xscale='log', xlabel='q', ylabel=None, yunit
     plt.show()
 
 
-def plot_1d(q, i, xscale='linear', xlabel='qz', yunit='a.u.', ylabel=None, yticks=None):
+def plot_1d(q, i, xscale='linear', xlabel='qz', yunit='a.u.', ylabel=None, yscale='log', yticks=None):
     plot_set()
     plt.figure()
     plt.plot(q, i)
@@ -339,7 +340,7 @@ def plot_1d(q, i, xscale='linear', xlabel='qz', yunit='a.u.', ylabel=None, ytick
     if ylabel == 'total':
         plt.ylabel(r'$I_\mathrm{total}\ \mathrm{(a.u.)}$', fontsize=22)
     plt.xscale(xscale)
-    plt.yscale('log')
+    plt.yscale(yscale)
     if yticks is not None:
         plt.yticks(yticks)
     plt.show()
