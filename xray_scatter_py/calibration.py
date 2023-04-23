@@ -11,27 +11,30 @@ The main functions in this module are used to:
 2. calculate_angle: Calculate the theta and azimuth angles for each detector pixel.
 3. calculate_q: Calculate the q-vectors (qx, qy, qz) for each detector pixel.
 4. calculate_kai: Calculate the azimuthal angle with the largest integrated intensity, kai,
-   for each image. This is used to correct the non-zero rotation of the sample
-   stage around kai axis, the axis paralell to the incident beam.
+   for each image. This is used to correct the non-zero rotation of the sample stage around kai
+   axis, the axis paralell to the incident beam. In a grazing incicence experiment, it is usually
+   the out-of-plane direction that has the strongest total scattering intensity, as a result of
+   the waveguiding effect in thin film samlpes.
 5. calculate_sr: Calculate the solid angle (sr) for each detector pixel. The solid angle is defined
-   as the area on the surface of a phere normalized by square of radius of the sphere.
-6. calibrate_rel_intensity: Normalize the intensity for each detector pixel by exposure time and
+   as the area on the surface of a sphere normalized by square of radius of the sphere.
+6. calculate_rel_intensity: Normalize the intensity for each detector pixel by exposure time and
    solid angle.
-7. calibrate_abs_intensity: Normalize the intensity for each detector pixel by exposure time, solid
-   angle, sample transmission, sample thickness, and incidence beam intensity. The absolute intensity
-   is also known as the differential scattering cross section at a certain q per sample thickness
-   (cm) per solid angle (sr).
+7. calculate_abs_intensity: Normalize the intensity for each detector pixel by exposure time, solid
+   angle, sample transmission, sample thickness, and incidence beam intensity. The absolute
+   intensity is also known as the differential scattering cross section at a certain q per
+   sample thickness (cm) per solid angle (sr).
 
 These functions take in various parameters related to the X-ray scattering geometry, such as
-the zero position of the detector, a list of dictionaries containing the parameters of each
-measurement, and the 3D array of input detector images.
+the zero position of the detector (detx0), a list of dictionaries containing the parameters of
+each measurement (params_dict_list), and the 3D array of detector images (image_array).
 
-The functions return arrays, containing information such as coordinates, angles, q-vectors,
+These functions return arrays, containing information such as coordinates, angles, q-vectors,
 kai angles, solid angles, and normalized intensities.
 """
 
 
 import numpy as np
+from xray_scatter_py import utils
 
 
 def calculate_mm(detx0: float, params_dict_list: list[dict],
@@ -41,12 +44,12 @@ def calculate_mm(detx0: float, params_dict_list: list[dict],
     of detector, the paramters of each measurement, and the shape of the original detector images.
 
     Args:
-    - detx0 (float): Zero position of detector. detx0+detx is the sample-detector distance.
+    - detx0 (float): Zero position of detector motor. detx0+detx is the sample-detector distance.
     - params_dict_list (list[dict]): List of dictionaries containing parameters of each measurement.
         Each dictionary should contain the following keys:
-            - 'detx': The relative sample-detector distance as a string.
+            - 'detx': The relative sample-detector distance as a string in the unit of mm.
             - 'beamcenter_actual': The actual beam center position as a string '[y z]'.
-            - 'pixelsize': The pixel size as a string '[y z]'.
+            - 'pixelsize': The pixel size as a string '[y z]' in the unit of mm.
     - image_array (np.ndarray): A 3D array of the input images. 
         The first index is the serial number of measurement. The second and third indices are the
         y and z indices of the detector image.
@@ -55,6 +58,9 @@ def calculate_mm(detx0: float, params_dict_list: list[dict],
     - tuple: A tuple of three 3D arrays representing the coordinate of each detector pixel in mm.
         Each array has the same shape as the input image_array.
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_list_len(params_dict_list, image_array.shape[0])
 
     # initialize the output arrays containing the x, y, z coordinates of each detector pixel
     x_array = np.ones_like(image_array, dtype=float)
@@ -104,13 +110,18 @@ def calculate_angle(detx0: float, params_dict_list: list[dict], image_array: np.
         y and z indices of the detector image.
     - kwargs:
         - kai (np.ndarray, optional): sample stage rotation around the kai axis paralell to x-ray.
-            The 1D array has the same shape as the first dimension of the 3D image array.
-            If not provided, default to an array of 0.5 * np.pi.
+            The 1D array has the same shape as the first dimension of the 3D image array,
+            representing the kai angle for each measurement. If not provided, default to an array
+            of 0.5 * np.pi.
 
     Returns:
     - tuple: A tuple of two 3D arrays representing the theta and azimuth angles of each detector.
         Each array has the same shape as the input image_array.
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_list_len(params_dict_list, image_array.shape[0])
+    utils.validate_kwargs({'kai'}, kwargs)
 
     # initialize the kai angle array if not provided.
     kai = kwargs.get('kai', np.ones(image_array.shape[0]) * 0.5 * np.pi)
@@ -169,6 +180,10 @@ def calculate_q(detx0: float, params_dict_list: list[dict], image_array: np.ndar
         Each array has the same shape as the input image_array.
     """
 
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_list_len(params_dict_list, image_array.shape[0])
+    utils.validate_kwargs({'kai'}, kwargs)
+
     # initialize the kai angle array if not provided.
     kai = kwargs.get('kai', np.ones(image_array.shape[0]) * 0.5 * np.pi)
 
@@ -209,6 +224,11 @@ def calculate_kai(params_dict_list: list[dict], azimuth_array: np.ndarray, image
     Returns:
         np.ndarray: A 1D array containing the computed kai angles for each measurement.
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_list_len(params_dict_list, image_array.shape[0])
+    utils.validate_array_shape(image_array, azimuth_array)
+    utils.validate_kwargs({'num_azimuth', 'center_mask'}, kwargs)
 
     num_azimuth = kwargs.get('num_azimuth', 720)
     center_mask = kwargs.get('center_mask', 20)
@@ -273,6 +293,9 @@ def calculate_sr(detx0: float, params_dict_list: list[dict], theta_array: np.nda
         The array has the same shape as the input theta_array.
     """
 
+    utils.validate_array_dimension(theta_array, 3)
+    utils.validate_list_len(params_dict_list, theta_array.shape[0])
+
     # initialize the output solid angle array wih the same shape as theta_array
     sr_array = np.empty_like(theta_array)
 
@@ -288,7 +311,7 @@ def calculate_sr(detx0: float, params_dict_list: list[dict], theta_array: np.nda
     return sr_array
 
 
-def calibrate_rel_intensity(params_dict_list: list[dict], image_array: np.ndarray,
+def calculate_rel_intensity(params_dict_list: list[dict], image_array: np.ndarray,
                             sr_array: np.ndarray) -> np.ndarray:
     """
     Normalize the intensity for each pixel of the detector image by exposure time and solid angle.
@@ -308,6 +331,10 @@ def calibrate_rel_intensity(params_dict_list: list[dict], image_array: np.ndarra
         detector image. The array has the same shape as the input image_array.
     """
 
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_list_len(params_dict_list, image_array.shape[0])
+    utils.validate_array_shape(image_array, sr_array)
+
     # get the exposure time of each measurement
     time = np.empty(image_array.shape[0])
     for i in range(image_array.shape[0]):
@@ -321,7 +348,7 @@ def calibrate_rel_intensity(params_dict_list: list[dict], image_array: np.ndarra
     return image_array
 
 
-def calibrate_abs_intensity(params_dict_list: list[dict], image_array: np.ndarray) -> np.ndarray:
+def calculate_abs_intensity(params_dict_list: list[dict], image_array: np.ndarray) -> np.ndarray:
     """
     Calculate absolute intensity for each pixel of the detector image by normalizing the intensity
     by transmission factor, sample thickness, and incident intensity.
@@ -340,6 +367,9 @@ def calibrate_abs_intensity(params_dict_list: list[dict], image_array: np.ndarra
     - np.ndarray: A 3D array containing the absolute intensities for each pixel of the detector
         image. The array has the same shape as the input image_array.
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_list_len(params_dict_list, image_array.shape[0])
 
     # get the transmission factor, sample thickness, and incident intensity of each measurement
     transmission = np.empty(image_array.shape[0])

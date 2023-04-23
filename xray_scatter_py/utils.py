@@ -6,6 +6,58 @@ import numpy as np
 import tifffile
 import xmltodict
 
+
+def validate_kwargs(valid_kwargs: set, kwargs: dict):
+    """
+    Assert that all keyword arguments are valid.
+
+    Args:
+    - valid_kwargs (set): A set of valid keyword arguments.
+    - kwargs (dict): A dictionary of keyword arguments.
+    """
+
+    unrecognized_kwargs = set(kwargs.keys()) - valid_kwargs
+    if unrecognized_kwargs:
+        raise ValueError(f"Unrecognized keyword arguments: {unrecognized_kwargs}")
+
+
+def validate_array_dimension(ndarray: np.ndarray, dimension: int):
+    """
+    Assert that the given array has the expected dimension.
+
+    Args:
+    - ndarray (np.ndarray): A NumPy array.
+    - dimension (int): The expected dimension of the array.
+    """
+    if len(ndarray.shape) != dimension:
+        raise ValueError(f"Array dimension {len(ndarray.shape)} does not match expected dimension {dimension}")
+
+
+def validate_list_len(params_dict_list: list[dict], len_: int):
+    """
+    Assert that the params_dict_list has the expected length.
+
+    Args:
+    - params_dict_list (list[dict]): A list of the experiment parameters of each measurements.
+    - len_ (int): The expected number of total measurements.
+    """
+    if len(params_dict_list) != len_:
+        raise ValueError(f"length of parameters dictionary list does not match expected value {len_}")
+
+
+def validate_array_shape(*args):
+    """
+    Assert that all given arrays have the same shape.
+
+    Args:
+    - *args (np.ndarray): A variable number of NumPy arrays.
+    """
+
+    shapes = [arg.shape for arg in args]
+    if not all(shape == shapes[0] for shape in shapes):
+        raise ValueError(f"Array shapes {shapes} are not uniform")
+
+
 def read_image(directory_path: str, index: int) -> tuple:
     """
     Read a TIFF image file of GANESHA SAXSLAB and its metadata from the given directory path and index.

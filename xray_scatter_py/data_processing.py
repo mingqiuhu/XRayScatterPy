@@ -1,23 +1,26 @@
 """
 This module provides functions to process the 2D detector images with calibration to calculate 1D
-intensity as a funciton of q. It includes three main functions:
+intensity as a funciton of q.
+
+The main functions in this module are used to:
 
 1. calculate_1d: Calculates the 1D intensity as a function of q (Å**-1) from a 2D image array.
-The intensity is averaged over all the azimuthal angles at each q value.
+   The intensity is averaged over all the azimuthal angles at each q value.
 2. calculate_1d_lowmemo: Similar to calculate_1d but designed for use with limited memory.
 3. calculate_1d_oop: Calculates the 1D scattering intensity in the out-of-plane direction at qy=0
-for grazing indicence x-ray scattering experiments, with I as a function of qz (Å**-1).
+   for grazing indicence x-ray scattering experiments, with I as a function of qz (Å**-1).
 Each function takes the following inputs:
 
-q_array (np.ndarray): A 3D array of q values corresponding to every pixel on the detector.
-image_array (np.ndarray): A 3D array of detector images, either relative or absolute intensity.
-sr_array (np.ndarray): A 3D array of solid angles corresponding to every pixel on the detector.
-kwargs: Additional keyword arguments, including q_min, q_max, q_num, and index_list.
-The output is a 1D scattering intensity profile in the form of a numpy array.
+These functions take in q_array, a 3D array of q values corresponding to every pixel on the
+detector; image_array a 3D array of detector images, either relative or absolute intensity; and
+sr_array, a 3D array of solid angles corresponding to every pixel on the detector.
+
+These functions return 1D scattering intensity profile in the form of a numpy array.
 """
 
 
 import numpy as np
+from xray_scatter_py import utils
 
 
 def calculate_1d(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndarray,
@@ -45,6 +48,10 @@ def calculate_1d(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndar
         - index_list (list[int], optional): Serial numbers of the measurements to be processed.
             If not provided, default to [0].
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_array_shape(q_array, image_array, sr_array)
+    utils.validate_kwargs({'q_min', 'q_max', 'q_num', 'index_list'}, kwargs)
 
     q_min = kwargs.get('q_min', 0)
     q_max = kwargs.get('q_max', 3)
@@ -109,6 +116,10 @@ def calculate_1d_lowmemo(q_array: np.ndarray, image_array: np.ndarray, sr_array:
         - index_list (list[int], optional): Serial numbers of the measurements to be processed.
             If not provided, default to [0].
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_array_shape(q_array, image_array, sr_array)
+    utils.validate_kwargs({'q_min', 'q_max', 'q_num', 'index_list'}, kwargs)
 
     q_min = kwargs.get('q_min', 0)
     q_max = kwargs.get('q_max', 3)
@@ -175,6 +186,11 @@ def calculate_1d_oop(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np
         - index_list (list[int], optional): Serial numbers of the measurements to be processed.
             If None, only the first measurement will be processed.
     """
+
+    utils.validate_array_dimension(image_array, 3)
+    utils.validate_array_shape(qy_array, qz_array, image_array, sr_array)
+    utils.validate_kwargs({'qy_fwhm', 'qz_min', 'qz_max', 'qz_num', 'index_list'}, kwargs)
+
     qy_fwhm = kwargs.get('qy_fwhm', 0.002)
     qz_min = kwargs.get('qz_min', 0)
     qz_max = kwargs.get('qz_max', 0.2)
