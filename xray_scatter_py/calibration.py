@@ -1,24 +1,35 @@
 """
-This module provides utility functions to process and analyze X-ray scattering data from
-a 2D detector. The main functions in this module are used to:
+This module provides functions to calibrate the 2D detector of an x-ray scatttering experiment. 
+The calibration mainly involves calculating real-spece coordinates (mm), scattering angles,
+azimuth angles, q-vectors, and solid angles for each detector pixel. The module also provides
+functions to normalize the intensity for each detector pixel, giving relative intensities and
+absolute intensities.
 
-1. Calculate the coordinates of each detector pixel in the unit of mm (calculate_mm).
-2. Calculate the theta and azimuth angles for each detector pixel (calculate_angle).
-3. Calculate the q-vectors (qx, qy, qz) for each detector pixel (calculate_q).
-4. Calculate the azimuthal angle with the largest integrated intensity, kai,
-   for each image (calculate_kai).
-5. Calculate the solid angle (sr) for each detector pixel (calculate_sr).
-6. Normalize the intensity for each detector pixel by exposure time and solid angle
-   (calibrate_rel_intensity).
+The main functions in this module are used to:
 
-These functions take in various parameters related to the X-ray scattering experiment, such as
+1. calculate_mm: Calculate the real space coordinates of each detector pixel in the unit of mm.
+2. calculate_angle: Calculate the theta and azimuth angles for each detector pixel.
+3. calculate_q: Calculate the q-vectors (qx, qy, qz) for each detector pixel.
+4. calculate_kai: Calculate the azimuthal angle with the largest integrated intensity, kai,
+   for each image. This is used to correct the non-zero rotation of the sample
+   stage around kai axis, the axis paralell to the incident beam.
+5. calculate_sr: Calculate the solid angle (sr) for each detector pixel. The solid angle is defined
+   as the area on the surface of a phere normalized by square of radius of the sphere.
+6. calibrate_rel_intensity: Normalize the intensity for each detector pixel by exposure time and
+   solid angle.
+7. calibrate_abs_intensity: Normalize the intensity for each detector pixel by exposure time, solid
+   angle, sample transmission, sample thickness, and incidence beam intensity. The absolute intensity
+   is also known as the differential scattering cross section at a certain q per sample thickness
+   (cm) per solid angle (sr).
+
+These functions take in various parameters related to the X-ray scattering geometry, such as
 the zero position of the detector, a list of dictionaries containing the parameters of each
 measurement, and the 3D array of input detector images.
 
-The functions return arrays with the same shape as the input image_array, containing information
-such as coordinates, angles, q-vectors, kai angles, solid angles, and normalized intensities for
-each detector pixel.
+The functions return arrays, containing information such as coordinates, angles, q-vectors,
+kai angles, solid angles, and normalized intensities.
 """
+
 
 import numpy as np
 
@@ -77,10 +88,10 @@ def calculate_mm(detx0: float, params_dict_list: list[dict],
 
 
 def calculate_angle(detx0: float, params_dict_list: list[dict], image_array: np.ndarray,
-                    kai: np.ndarray = None) -> tuple[np.ndarray, np.ndarray]:
+                    **kwargs) -> tuple[np.ndarray, np.ndarray]:
     """
     Calculate the theta and azimuth angles for each detector pixel in the image_array.
-    
+
     Args:
     - detx0 (float): Zero position of detector. detx0+detx is the sample-detector distance.
     - params_dict_list (list[dict]): List of dictionaries containing parameters of each measurement.
@@ -91,20 +102,22 @@ def calculate_angle(detx0: float, params_dict_list: list[dict], image_array: np.
     - image_array (np.ndarray): A 3D array of the input images. 
         The first index is the serial number of measurement. The second and third indices are the
         y and z indices of the detector image.
-    - kai (np.ndarray, optional): Array of initial azimuth angles. 
-        If None, an array of 0.5 * pi is used.
+    - kwargs:
+        - kai (np.ndarray, optional): sample stage rotation around the kai axis paralell to x-ray.
+            The 1D array has the same shape as the first dimension of the 3D image array.
+            If not provided, default to an array of 0.5 * np.pi.
 
     Returns:
     - tuple: A tuple of two 3D arrays representing the theta and azimuth angles of each detector.
         Each array has the same shape as the input image_array.
     """
+
+    # initialize the kai angle array if not provided.
+    kai = kwargs.get('kai', np.ones(image_array.shape[0]) * 0.5 * np.pi)
+
     # initialize the output arrays containing the theta and azimuth angles of each detector pixel
     theta_array = np.empty_like(image_array, dtype=float)
     azimuth_array = np.empty_like(image_array, dtype=float)
-
-    # initialize the kai angle array if not provided.
-    if kai is None:
-        kai = np.ones(image_array.shape[0]) * 0.5 * np.pi
 
     # iterate through each measurement
     for i in range(image_array.shape[0]):
@@ -131,7 +144,7 @@ def calculate_angle(detx0: float, params_dict_list: list[dict], image_array: np.
 
 
 def calculate_q(detx0: float, params_dict_list: list[dict], image_array: np.ndarray,
-                kai: np.ndarray = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+                **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate the q-vectors (qx, qy, qz) for each pixel of the detector image.
 
@@ -146,16 +159,21 @@ def calculate_q(detx0: float, params_dict_list: list[dict], image_array: np.ndar
     - image_array (np.ndarray): A 3D array of the input images. 
         The first index is the serial number of measurement. The second and third indices are the
         y and z indices of the detector image.
-    - kai (np.ndarray, optional): Array of initial azimuth angles. 
-        If None, an array of 0.5 * pi is used.
+    - kwargs:
+        - kai (np.ndarray, optional): sample stage rotation around the kai axis paralell to x-ray.
+            The 1D array has the same shape as the first dimension of the 3D image array.
+            If not provided, default to an array of 0.5 * np.pi.
 
     Returns:
     - tuple: A tuple of three 3D arrays representing the qx, qy, qz in A-1 of each detector pixel.
         Each array has the same shape as the input image_array.
     """
 
+    # initialize the kai angle array if not provided.
+    kai = kwargs.get('kai', np.ones(image_array.shape[0]) * 0.5 * np.pi)
+
     # Calculate the theta and azimuthal angle of each detector pixel
-    theta_array, azimuth_array = calculate_angle(detx0, params_dict_list, image_array, kai)
+    theta_array, azimuth_array = calculate_angle(detx0, params_dict_list, image_array, kai=kai)
 
     # Calculate the q-vectors for each detector pixel, assuming the wavelength is the same for all.
     wavelength = float(params_dict_list[0]['wavelength'])
@@ -168,7 +186,7 @@ def calculate_q(detx0: float, params_dict_list: list[dict], image_array: np.ndar
 
 # -1 needs to be excluded
 def calculate_kai(params_dict_list: list[dict], azimuth_array: np.ndarray, image_array: np.ndarray,
-                  num_azimuth: int = 720, center_mask: int = 20):
+                  **kwargs) -> np.ndarray:
     """
     Calculate kai, the azimuthal angle with the largest integrated intensity, for each image.
 
@@ -182,14 +200,18 @@ def calculate_kai(params_dict_list: list[dict], azimuth_array: np.ndarray, image
     - image_array (np.ndarray): A 3D array of the input images.
         The first index is the serial number of measurement. The second and third indices are the
         y and z indices of the detector image.
-    - num_azimuth (int, optional): The number of azimuth values to consider.
-        Defaults to 720
-    - center_mask (int, optional): Radius of the mask used to exclude spill-over incident beam.
-        Defaults to 20
+    - kwargs:
+        - num_azimuth (int, optional): The number of azimuth values to screen.
+            If not provided, default to 720.
+        - center_mask (int, optional): Radius of the mask used to exclude spill-over incident beam.
+            If not provided, default to 20 (pixels)
 
     Returns:
         np.ndarray: A 1D array containing the computed kai angles for each measurement.
     """
+
+    num_azimuth = kwargs.get('num_azimuth', 720)
+    center_mask = kwargs.get('center_mask', 20)
 
     # initialize the 1D array of azimuth angles from 0 to 2pi for calculating the kai values
     azimuth_1d = np.linspace(0, 2 * np.pi, num_azimuth)
@@ -232,7 +254,7 @@ def calculate_kai(params_dict_list: list[dict], azimuth_array: np.ndarray, image
     return kai_1d
 
 
-def calculate_sr(detx0: float, params_dict_list: list[dict], theta_array: np.ndarray):
+def calculate_sr(detx0: float, params_dict_list: list[dict], theta_array: np.ndarray) -> np.ndarray:
     """
     Calculate the solid angle (sr) for each pixel of the detector images.
 

@@ -1,4 +1,21 @@
-# xray_scatter_py/data_processing.py
+"""
+This module provides functions to process the 2D detector images with calibration to calculate 1D
+intensity as a funciton of q. It includes three main functions:
+
+1. calculate_1d: Calculates the 1D intensity as a function of q (Å**-1) from a 2D image array.
+The intensity is averaged over all the azimuthal angles at each q value.
+2. calculate_1d_lowmemo: Similar to calculate_1d but designed for use with limited memory.
+3. calculate_1d_oop: Calculates the 1D scattering intensity in the out-of-plane direction at qy=0
+for grazing indicence x-ray scattering experiments, with I as a function of qz (Å**-1).
+Each function takes the following inputs:
+
+q_array (np.ndarray): A 3D array of q values corresponding to every pixel on the detector.
+image_array (np.ndarray): A 3D array of detector images, either relative or absolute intensity.
+sr_array (np.ndarray): A 3D array of solid angles corresponding to every pixel on the detector.
+kwargs: Additional keyword arguments, including q_min, q_max, q_num, and index_list.
+The output is a 1D scattering intensity profile in the form of a numpy array.
+"""
+
 
 import numpy as np
 
