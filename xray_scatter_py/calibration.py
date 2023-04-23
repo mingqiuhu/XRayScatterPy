@@ -306,7 +306,8 @@ def calculate_sr(detx0: float, params_dict_list: list[dict], theta_array: np.nda
                                        params_dict_list[i]['pixelsize'].strip('[]').split())
         detx = float(params_dict_list[i]['detx'])
         # calculate the solid angle for each pixel
-        sr_array[i] = pixelsize_y * pixelsize_z / (detx0 + detx)**2 * (np.cos(2 * theta_array[i]))**3
+        sr_array[i] = pixelsize_y * pixelsize_z / (detx0 + detx)**2 * (np.cos(2 *
+                                                                              theta_array[i]))**3
 
     return sr_array
 

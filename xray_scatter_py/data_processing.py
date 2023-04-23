@@ -82,7 +82,7 @@ def calculate_1d(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndar
                                q_bool *
                                image_bool[:, :, np.newaxis],
                                axis=(0, 1))
-        # assign the 1D intensity profile to the 1D intensity array after normalization with 
+        # assign the 1D intensity profile to the 1D intensity array after normalization with
         # the total solid angle of the pixels used in the sum
         i_1d[i] = sum_intensity / np.sum(sr_array[i][:, :, np.newaxis] *
                                          q_bool * image_bool[:, :, np.newaxis],
@@ -224,7 +224,7 @@ def calculate_1d_oop(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np
                                qz_bool * image_bool[:, :, np.newaxis] *
                                qy_bool[:, :, np.newaxis],
                                axis=(0, 1))
-        # assign the 1D intensity profile to the 1D intensity array after normalization with 
+        # assign the 1D intensity profile to the 1D intensity array after normalization with
         # the total solid angle of the pixels used in the sum
         i_1d[i] = sum_intensity / np.sum(sr_array[i][:, :, np.newaxis] *
                                          qz_bool *

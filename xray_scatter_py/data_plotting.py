@@ -14,7 +14,7 @@ The main functions in this module are used to:
    (plot_3D, plot_3D_mm, plot_3D_grating)
 7. plot 2D Small Angle Neutron Scattering plot (plot_sans)
 8. plot 1D penentration plot (plot_penetration, plot_penetration_compare)
-0. plot 2D penentration plot (plot_penetration_2D)
+10. plot 2D penentration plot (plot_penetration_2D)
 
 These functions take in various q arraies and intensity arries calculated and processed by 
 other modules like calibrations.py and dataprocessing.py
