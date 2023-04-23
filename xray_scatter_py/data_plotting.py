@@ -18,6 +18,7 @@ The main functions in this module are used to:
 
 These functions take in various q arraies and intensity arries calculated and processed by 
 other modules like calibrations.py and dataprocessing.py
+These function don't have typical return values, they create plots
 """
 
 import numpy as np
@@ -191,7 +192,6 @@ def plot_2d_scattering_withlines(qy_array: np.ndarray, qz_array: np.ndarray,
                                   ], -qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))])
             plt.ylim(-qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))
                                   ], -qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))])
-
         plt.show()
 
 
@@ -223,7 +223,6 @@ def plot_2d_scattering_onlylines(qy_lines_array: np.ndarray, qz_lines_array: np.
     Returns:
         None
     """
-
     xmin = kwargs.get('xmin')
     xmax = kwargs.get('xmax')
     ymin = kwargs.get('ymin')
@@ -440,17 +439,17 @@ def plot_1d(q: np.ndarray, i: np.ndarray, **kwargs):
     plt.show()
 
 
-def plot_1d_compare(q1: np.ndarray, i1: np.ndarray,
-                    q2: np.ndarray, i2: np.ndarray,
+def plot_1d_compare(q_1: np.ndarray, i_1: np.ndarray,
+                    q_2: np.ndarray, i_2: np.ndarray,
                     **kwargs):
     """
     Plot 1D plot comparing datasets 1 and datasets 2.
 
     Args:
-        - q1 (np.ndarray): Array of q values in the x direction.
-        - i1 (np.ndarray): Array of q values in the y direction.
-        - q2 (np.ndarray): Array of q values in the z direction.
-        - i2 (np.ndarray): Array of scattering images.
+        - q_1 (np.ndarray): Array of q values in the x direction.
+        - i_1 (np.ndarray): Array of q values in the y direction.
+        - q_2 (np.ndarray): Array of q values in the z direction.
+        - i_2 (np.ndarray): Array of scattering images.
         - kwargs:
             - xscale (str, optional): the type of x axis scale.
                 If not provided, default to 'log'
@@ -462,7 +461,7 @@ def plot_1d_compare(q1: np.ndarray, i1: np.ndarray,
                 If not provided, default to None
             - yunit (str, optional): the unit of y axis.
                 If not provided, default to 'abs'
-            - legend (str, optional): the legend name.
+            - legend (list[str], optional): the legend name list.
                 If not provided, default to None
             - legend_fontsize (int, optional): the font size of legend.
                 If not provided, default to 20
@@ -479,8 +478,8 @@ def plot_1d_compare(q1: np.ndarray, i1: np.ndarray,
 
     plot_set()
     plt.figure()
-    plt.plot(q1, i1)
-    plt.plot(q2, i2)
+    plt.plot(q_1, i_1)
+    plt.plot(q_2, i_2)
     if xlabel == 'q':
         plt.xlabel(r'$q\ \mathrm{(Å^{-1})}$', fontsize=22)
     elif xlabel == 'qz':
@@ -751,13 +750,13 @@ def plot_3d_grating(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.nda
         plt.show()
 
 
-def plot_sans(qy: np.ndarray, qz: np.ndarray, intensity: np.ndarray):
+def plot_sans(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
     """
     Plot 2D SANS contour plot with input qy, qz array and intensity array.
 
     Args:
-        - qy (np.ndarray): 1D array of q values in the y direction.
-        - qz (np.ndarray): 1D array of q values in the z direction.
+        - q_y (np.ndarray): 1D array of q values in the y direction.
+        - q_z (np.ndarray): 1D array of q values in the z direction.
         - intensity (np.ndarray): 2D array of scattering intensity.
         
     Returns:
@@ -765,15 +764,15 @@ def plot_sans(qy: np.ndarray, qz: np.ndarray, intensity: np.ndarray):
     """
     plot_set()
     plt.figure()
-    MIN = np.min(np.log10(intensity[intensity > 0]))
-    MAX = np.max(np.log10(intensity[intensity > 0]))
-    plt.contourf(qz.reshape(80, 80),
-                 -qy.reshape(80, 80),
+    minimum = np.min(np.log10(intensity[intensity > 0]))
+    maximum = np.max(np.log10(intensity[intensity > 0]))
+    plt.contourf(q_z.reshape(80, 80),
+                 -q_y.reshape(80, 80),
                  intensity.reshape(80, 80),
                  cmap='jet',
                  linewidths=3,
                  locator=ticker.LogLocator(),
-                 levels=10**np.linspace(MIN, MAX, 400))
+                 levels=10**np.linspace(minimum, maximum, 400))
     # ,vmax=10**(MAX-0.5))
     plt.xlabel(r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$', fontsize=22)
     plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
@@ -797,7 +796,7 @@ def plot_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
                 If not provided, default to None
             - y_max (float, optional): maximun value of y axis.
                 If not provided, default to None
-            - legend (str, optional): name of the legend.
+            - legend (list[str], optional): the legend name list.
                 If not provided, default to None
         
     Returns:
@@ -839,7 +838,7 @@ def plot_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
                 If not provided, default to None
             - y_max (float, optional): maximun value of y axis.
                 If not provided, default to None
-            - legend (str, optional): name of the legend.
+            - legend (list[str], optional): the legend name list.
                 If not provided, default to None
         
     Returns:
