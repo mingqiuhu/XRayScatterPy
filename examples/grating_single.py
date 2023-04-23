@@ -31,7 +31,10 @@ data_plotting.plot_2d_scattering(qy_array, qz_array, image_array_rel, index_list
 qx, qy, qz, qx_0, qy_0, qz_0 = gratings.calculate_q(params_dict_list, image_array, phi=PHI)
 data_plotting.plot_2d_scattering_withlines(qy_array, qz_array, image_array, qy, qz, index_list=INDEX_LIST)
 
-# data_plotting.plot_3d_grating(qx_array, qy_array, qz_array, image_array, qx, qy, qz, qx_0, qy_0, qz_0, index_list=None, crop=False)
+# data_plotting.plot_3d_grating(qx_array, qy_array, qz_array, image_array, 
+#                               qx=qx, qy=qy, qz=qz, 
+#                               qx_0=qx_0, qy_0=qy_0, qz_0=qy_0, 
+#                               index_list=None, crop=False)
 """
 xmin, xmax = np.min(qy_array), np.max(qy_array)
 ymin, ymax = np.min(qz_array), np.max(qz_array)
@@ -39,7 +42,10 @@ ymin, ymax = np.min(qz_array), np.max(qz_array)
 current_index = 0
 for PHI in np.linspace(-10, 10, 201):
     qx, qy, qz, qx_0, qy_0, qz_0 = gratings.calculate_q(params_dict_list, image_array, phi=PHI)
-    data_plotting.plot_2d_scattering_onlylines(qy, qz, 0.2, PHI, xmin, xmax, ymin, ymax, write=True, current_index=current_index)
+    data_plotting.plot_2d_scattering_onlylines(qy, qz, alpha=0.2, phi=PHI,
+                                               xmin=np.min(qy_array), xmax=np.max(qy_array),
+                                               ymin=np.min(qz_array), ymax=np.max(qz_array),
+                                               write=True, current_index=current_index)
     current_index += 1
 """
 
@@ -57,5 +63,9 @@ ymin, ymax = np.min(qz_array), np.max(qz_array)
 print('obtained params_dict_list, image_array')
 qx, qy, qz, qx_0, qy_0, qz_0 = gratings.calculate_q(params_dict_list, image_array, phi=0)
 for current_index in range(101, image_array.shape[0]):
-    data_plotting.plot_2d_scattering_onlylines(qy[current_index], qz[current_index], float(params_dict_list[current_index]['sample_angle1']), 0, xmin, xmax, ymin, ymax, write=True, current_index=current_index)
+    data_plotting.plot_2d_scattering_onlylines(qy[current_index], qz[current_index],
+                                               alpha=float(params_dict_list[current_index]['sample_angle1']), phi=0,
+                                               xmin=np.min(qy_array), xmax=np.max(qy_array),
+                                               ymin=np.min(qz_array), ymax=np.max(qz_array),
+                                               write=True, current_index=current_index)
 """
