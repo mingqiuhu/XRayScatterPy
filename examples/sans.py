@@ -25,5 +25,5 @@ qx_array, qy_array, qz_array = calibration.calculate_q(DETX0, params_dict_list, 
 omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
 image_array_rel = calibration.calibrate_rel_intensity(params_dict_list, image_array, omega)
 
-data_plotting.plot_2d_scattering(qy_array, qz_array, image_array_rel, index_list=INDEX_LIST, XTICKS=[-0.1,0,0.1,0.2],YTICKS=[0,0.05,0.1,0.15,0.2,0.25])
+data_plotting.plot_2d_scattering(qy_array, qz_array, image_array_rel, index_list=INDEX_LIST, xticks=[-0.1,0,0.1,0.2],yticks=[0,0.05,0.1,0.15,0.2,0.25])
 data_plotting.plot_2d_paralell(qx_array, qy_array, qz_array, image_array_rel, index_list=INDEX_LIST)
