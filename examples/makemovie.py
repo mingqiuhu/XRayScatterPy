@@ -2,10 +2,15 @@ import cv2
 import os
 
 # Parameters
-image_folder = os.path.join(os.path.dirname(__file__), '..', 'data', 'movie', 'real_space')
+image_folder = os.path.join(
+    os.path.dirname(__file__),
+    '..',
+    'data',
+    'movie',
+    'real_space')
 output_video = 'output_video.mp4'
-fps = 1 # 20
-compression_ratio = 1 # 0.5
+fps = 1  # 20
+compression_ratio = 1  # 0.5
 
 # Get the image file names
 # images = [f'{i}.png' for i in range(200, -1, -1)] + [f'{i}.png' for i in range(201)]

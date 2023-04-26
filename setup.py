@@ -36,6 +36,5 @@ setup(
         "tifffile",
         "bornagain",
         "xmltodict",
-        "requests"
-    ],
+        "requests"],
 )

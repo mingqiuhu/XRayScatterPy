@@ -9,7 +9,7 @@ from bornagain import angstrom, ba_plot as bp, deg, micrometer, nm
 from matplotlib import pyplot as plt
 
 
-def get_sample(lattice_rotation_angle=0*deg):
+def get_sample(lattice_rotation_angle=0 * deg):
     """
     Returns a sample with a grating on a substrate.
     lattice_rotation_angle = 0 - beam parallel to grating lines
@@ -19,12 +19,12 @@ def get_sample(lattice_rotation_angle=0*deg):
     m_vacuum = ba.RefractiveMaterial("Vacuum", 0, 0)
     m_si = ba.RefractiveMaterial("Si", 5.7816e-6, 1.0229e-7)
 
-    box_length, box_width, box_height = 50*micrometer, 70*nm, 50*nm
-    lattice_length = 150*nm
+    box_length, box_width, box_height = 50 * micrometer, 70 * nm, 50 * nm
+    lattice_length = 150 * nm
 
     # collection of particles
     interference = ba.Interference1DLattice(
-        lattice_length, 90*deg - lattice_rotation_angle)
+        lattice_length, 90 * deg - lattice_rotation_angle)
 
     pdf = ba.Profile1DGauss(450)
     interference.setDecayFunction(pdf)
@@ -42,7 +42,7 @@ def get_sample(lattice_rotation_angle=0*deg):
     vacuum_layer.addLayout(particle_layout)
     substrate_layer = ba.Layer(m_si)
 
-    sigma, hurst, corrLength = 5*nm, 0.5, 10*nm
+    sigma, hurst, corrLength = 5 * nm, 0.5, 10 * nm
     roughness = ba.LayerRoughness(sigma, hurst, corrLength)
 
     sample = ba.MultiLayer()
@@ -52,9 +52,9 @@ def get_sample(lattice_rotation_angle=0*deg):
 
 
 def get_simulation(sample):
-    beam = ba.Beam(1e8, 1.34*angstrom, 0.4*deg)
+    beam = ba.Beam(1e8, 1.34 * angstrom, 0.4 * deg)
     n = bp.simargs['n']
-    det = ba.SphericalDetector(n, -0.5*deg, 0.5*deg, n, 0, 0.6*deg)
+    det = ba.SphericalDetector(n, -0.5 * deg, 0.5 * deg, n, 0, 0.6 * deg)
     simulation = ba.ScatteringSimulation(beam, sample, det)
     simulation.options().setMonteCarloIntegration(True, 100)
     return simulation
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     bp.parse_args(sim_n=401)
     sample = get_sample()
     simulation = get_simulation(sample)
-    if not "__no_terminal__" in globals():
+    if "__no_terminal__" not in globals():
         simulation.setTerminalProgressMonitor()
     result = simulation.simulate()
 

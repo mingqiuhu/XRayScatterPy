@@ -67,8 +67,8 @@ class Model:
         if self.sldr[0] != 0 or self.sldi[0] != 0:
             sys.exit('input error: sld of top layer must be 0')
 
-        self.thick[0] = 5*self.msr[1]
-        self.thick[-1] = 5*self.msr[-1]
+        self.thick[0] = 5 * self.msr[1]
+        self.thick[-1] = 5 * self.msr[-1]
         # Thickness of bottom and top layer doesn't matter for the calculation.
         # This value is chosen to fully display the broadening.
 
@@ -128,7 +128,8 @@ class Model:
         n_msr = self.msr[1:] / self.sum_thick * self.layer_pts
         # This converts the unit of msr from real space A to pts.
 
-        i_splt_inter = self._func_i_splt(np.cumsum(self.thick)-self.thick / 2)
+        i_splt_inter = self._func_i_splt(
+            np.cumsum(self.thick) - self.thick / 2)
         # index for splitting in the middle of each layer. The first and last
         # layer need not to be broadened.
 
@@ -152,26 +153,26 @@ class Model:
         '''plot ideal SLD as a function of distance from the surface'''
 
         reflectivity_pltlib.plt_set_params_before()
-        plt.plot(self.prof_thick, self._prof_sldr_ideal*1e+6, label='SLD')
-        plt.plot(self.prof_thick, self._prof_sldi_ideal*1e+6, label='SLDi')
+        plt.plot(self.prof_thick, self._prof_sldr_ideal * 1e+6, label='SLD')
+        plt.plot(self.prof_thick, self._prof_sldi_ideal * 1e+6, label='SLDi')
         reflectivity_pltlib.plt_set_params_after_sld()
 
     def plt_broadened(self):
         '''plot broadened SLD as a function of distance from the surface'''
 
         reflectivity_pltlib.plt_set_params_before()
-        plt.plot(self.prof_thick, self.prof_sldr*1e+6, label='Diffused SLD')
-        plt.plot(self.prof_thick, self.prof_sldi*1e+6, label='Diffused SLDi')
+        plt.plot(self.prof_thick, self.prof_sldr * 1e+6, label='Diffused SLD')
+        plt.plot(self.prof_thick, self.prof_sldi * 1e+6, label='Diffused SLDi')
         reflectivity_pltlib.plt_set_params_after_sld()
 
     def plt_all(self):
         '''plot all SLD as a function of distance from the surface'''
 
         reflectivity_pltlib.plt_set_params_before()
-        plt.plot(self.prof_thick, self._prof_sldr_ideal*1e+6, label='SLD')
-        plt.plot(self.prof_thick, self._prof_sldi_ideal*1e+6, label='SLDi')
-        plt.plot(self.prof_thick, self.prof_sldr*1e+6, label='Diffused SLD')
-        plt.plot(self.prof_thick, self.prof_sldi*1e+6, label='Diffused SLDi')
+        plt.plot(self.prof_thick, self._prof_sldr_ideal * 1e+6, label='SLD')
+        plt.plot(self.prof_thick, self._prof_sldi_ideal * 1e+6, label='SLDi')
+        plt.plot(self.prof_thick, self.prof_sldr * 1e+6, label='Diffused SLD')
+        plt.plot(self.prof_thick, self.prof_sldi * 1e+6, label='Diffused SLDi')
         reflectivity_pltlib.plt_set_params_after_sld()
 
     def discretize(self):

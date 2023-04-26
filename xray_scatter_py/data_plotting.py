@@ -1,24 +1,25 @@
-"""
-This module provides functions to plot the processed scattering data. 
+"""This module provides functions to plot the processed scattering data.
+
 The main functions in this module are used to:
 
-1. Set the global matplotlib settings with certain parameters (plot_set, plot_set_small).
-2. Plot different types of 2D scattering plots with or without pidiction lines in cartesian
-   and polar coordinates (plot_2d_scattering, plot_2d_scattering_withlines, 
-   plot_2d_scattering_onlylines, plot_2d_polar).
-3. Plot 2D scattering plots in q_parallel axis and q_z axis with intensity colormap 
-   (plot_2d_paralell).
-4. Plot specular reflectivity plots (plot_specular_reflectivity).
-5. Plot and compare 1D scattering plots (plot_1d, plot_1d_compare)
-6. plot 3D scattering plots in real space with x, y, z axis and intensity colormap
-   (plot_3D, plot_3D_mm, plot_3D_grating)
-7. plot 2D Small Angle Neutron Scattering plot (plot_sans)
-8. plot 1D penentration plot (plot_penetration, plot_penetration_compare)
-0. plot 2D penentration plot (plot_penetration_2D)
+Set the global matplotlib settings (plot_set, plot_set_small).
+Plot 2D scattering colormaps with various projections. (plot_2d,
+    plot_2d_withmarkers, plot_2d_onlymarkers, plot_2d_polar).
+Plot 2D grazing incidence scattering colormaps in q_parallel axis
+    (plot_2d_paralell).
+Plot and compare 1D scattering and reflectivity data (plot_1d, plot_1d_compare)
+plot scattering colormaps in 3d real space or on the an Ewald sphere
+    (plot_3d, plot_3d_mm, plot_3d_grating)
+Plot scattering data given in columns instead of meshes, for example,
+    neutron scattering data from ORNL, into colormap (plot_2d_columns).
+Plot 1D penentration depth in a grazing incidence experiment
+    (plot_1d_penetration, plot_1d_penetration_compare).
+Plot 2D penentration colormaps in a grazig incidence experiment
+    (plot_2d_penetration).
 
-These functions take in various q arraies and intensity arries calculated and processed by 
-other modules like calibrations.py and dataprocessing.py
-These function don't have typical return values, they create plots
+These functions take in various q arrays and intensity arrays calculated and
+processed by other modules like calibrations.py and dataprocessing.py.
+These functions don't have typical return values. They create plots.
 """
 
 import numpy as np
@@ -28,15 +29,35 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
 
-def plot_set():
+from xray_scatter_py import utils
+
+XLABEL_DICT = {
+    'q': r'$q\ \mathrm{(Å^{-1})}$',
+    'qx': r'$q_\mathrm{x}\ \mathrm{(Å^{-1})}$',
+    'qy': r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$',
+    'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
+    'q_parallel': r'$q_\Vert\ \mathrm{(Å^{-1})}$',
+    'theta sample': r'${\theta}_\mathrm{sample}\ (°)$'
+}
+YLABEL_DICT = {
+    'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
+    'azimuth': r'$\mathrm{azimuth}\ (°)$',
+    'abs': r'$I\ \mathrm{(cm^{-1}sr^{-1})}$',
+    'a.u.': r'$I\ \mathrm{(a.u.)}$',
+    'reflectivity': r'$R$',
+    'total': r'$I_\mathrm{total}\ \mathrm{(a.u.)}$'
+}
+
+
+def plot_set() -> None:
     """Update the global matplotlib settings with following parameters for
     higher figure resolution, larger tick labels, and thicker lines
 
     Args:
-        None
+        - None
 
     Returns:
-        None
+        - None
     """
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
     matplotlib.rcParams['figure.dpi'] = 600
@@ -51,15 +72,15 @@ def plot_set():
     matplotlib.rcParams['ytick.minor.width'] = 3
 
 
-def plot_set_small():
+def plot_set_small() -> None:
     """Update the global matplotlib settings with following parameters for
     higher figure resolution, medium tick labels, and thicker lines
 
     Args:
-        None
+        - None
 
     Returns:
-        None
+        - None
     """
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
     matplotlib.rcParams['figure.dpi'] = 600
@@ -74,54 +95,64 @@ def plot_set_small():
     matplotlib.rcParams['ytick.minor.width'] = 3
 
 
-def plot_2d_scattering(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np.ndarray,
-                       **kwargs):
-    """This function takes qy_array, qz_array, and image_array as inputs and
+def plot_2d(
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs) -> None:
+    """This function takes qy_array, qz_array, and images as inputs and
     creates a 2D colormap plot for each index in index_list using the
-    provided arrays.
+    provided arrays. qx is ignored when scatering data is plotted in this way.
 
     Args:
-        - qy_array (np.ndarray): 1D array of qy values (in A^-1 units).
-        - qz_array (np.ndarray): 1D array of qz values (in A^-1 units).
-        - image_array (np.ndarray): 2D array of scattering intensities.
+        - qy_array (np.ndarray): 3D array of qy values (in Å^-1 units).
+        - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
+        - images (np.ndarray): 3D array of the original detector images.
+            The first index is the serial number of measurement.
         - kwargs:
-            - index_list (list[int], optional): list of indices for which to create plots.
-                If not provided, defaults to None.
-            - crop (bool, optional): decide whether the plot would be cropped.
-                If not providded, default to False
+            - index_list (list[int], optional): list of indexes of the
+                measurements to plot. If not provided, defaults to [0].
+            - crop (bool, optional): decide whether the plot would be cropped
+                after correcting the chi rotation in a grazing incidence
+                measurement. If not providded, default to False.
             - xticks (list[float], optional): set the xtick locations.
                 If not provided, default to None
             - yticks (list[float], optional): set the ytick locations.
                 If not provided, default to None
-            - video (bool, optional): decide if the images would be used to generate videos
-                If not provided, default to False
+            - video (bool, optional): decide if the images would be used to
+                generate videos. If not provided, default to False.
     Returns:
-        None
+        - None
     """
-    index_list = kwargs.get('index_list', None)
+
+    utils.validate_array_dimension(images, 3)
+    utils.validate_array_shape(images, qy_array, qz_array)
+    utils.validate_kwargs(
+        {'index_list', 'crop', 'xticks', 'yticks', 'video'}, kwargs)
+
+    index_list = kwargs.get('index_list', [0])
     crop = kwargs.get('crop', False)
     xticks = kwargs.get('xticks', None)
     yticks = kwargs.get('yticks', None)
     video = kwargs.get('video', False)
-    if index_list is None:
-        index_list = [0]
 
     plot_set()
     for i in index_list:
         plt.figure()
-        zmax = np.max(image_array[i])
-        zmin = np.min(image_array[i][image_array[i] > 0])
-        # zmin = max(zmax*1e-6, np.min(image_array[i][image_array[i] > 0]))
+        zmax = np.max(images[i])
+        zmin = np.min(images[i][images[i] > 0])
+        # zmin = max(zmax*1e-6, np.min(images[i][images[i] > 0]))
         norm = matplotlib.colors.LogNorm(zmin, zmax)
-        plt.pcolormesh(qy_array[i],
-                       qz_array[i],
-                       image_array[i],
-                       cmap='jet',
-                       linewidths=3,
-                       norm=norm,
-                       shading='nearest')
-        plt.xlabel(r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$', fontsize=22)
-        plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
+        plt.pcolormesh(
+            qy_array[i],
+            qz_array[i],
+            images[i],
+            cmap='jet',
+            linewidths=3,
+            norm=norm,
+            shading='nearest')
+        plt.xlabel(XLABEL_DICT['qy'])
+        plt.ylabel(YLABEL_DICT['qz'])
         if not video:
             plt.colorbar(label='I (a.u.)')
         plt.gca().set_aspect('equal', adjustable='box')
@@ -130,114 +161,151 @@ def plot_2d_scattering(qy_array: np.ndarray, qz_array: np.ndarray, image_array: 
         if yticks is not None:
             plt.yticks(yticks)
         if crop:
-            plt.xlim(-qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))
-                                  ], -qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))])
-            plt.ylim(-qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))
-                                  ], -qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))])
+            plt.xlim(
+                -qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))],
+                -qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))])
+            plt.ylim(
+                -qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))],
+                -qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))])
         if video:
             plt.xlim(np.min(qy_array), np.max(qy_array))
             plt.ylim(np.min(qz_array), np.max(qz_array))
         plt.show()
 
 
-def plot_2d_scattering_withlines(qy_array: np.ndarray, qz_array: np.ndarray,
-                                 image_array: np.ndarray,
-                                 qy_lines_array: np.ndarray, qz_lines_array: np.ndarray,
-                                 **kwargs):
-    """This function takes qy_array, qz_array, and image_array as inputs and
-    creates a 2D colormap plot with lines for each index in index_list using the
-    provided arrays.
+def plot_2d_withmarkers(
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        qy_markers_array: np.ndarray,
+        qz_markers_array: np.ndarray,
+        **kwargs) -> None:
+    """This function takes qy_array, qz_array, and images as inputs and
+    creates a 2D colormap plot with markers, for each index in index_list using
+    provided qy_markers_array and qz_markers_array.
 
     Args:
-        - qy_array (np.ndarray): 1D array of qy values (in A^-1 units).
-        - qz_array (np.ndarray): 1D array of qz values (in A^-1 units).
-        - image_array (np.ndarray): 2D array of scattering intensities.
-        - qy_lines_array (np.ndarray): 1D array of qy lines values.
-        - qz_lines_array (np.ndarray): 1D array of qz lines values
+        - qy_array (np.ndarray): 3D array of qy values (in Å^-1 units).
+        - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
+        - images (np.ndarray): 3D array of scattering intensities.
+            The first index is the serial number of measurement.
+        - qy_markers_array (np.ndarray): 1D array of qy of the markers.
+        - qz_markers_array (np.ndarray): 1D array of qz of the markers.
         - kwargs:
-            - index_list (list[int], optional): list of indices for which to create plots.
-                If not provided, defaults to None.
-            - crop (bool, optional): decide whether the plot would be cropped.
-                If not providded, default to False
+            - index_list (list[int], optional): list of indexes to plot.
+                If not provided, defaults to [0].
+            - crop (bool, optional): decide whether the plot would be cropped
+                after correcting the chi rotation in a grazing incidence
+                measurement. If not providded, default to False.
 
     Returns:
-        None
+        - None
     """
-    index_list = kwargs.get('index_list', None)
+    utils.validate_array_dimension(images, 3)
+    utils.validate_array_dimension(qy_markers_array, 1)
+    utils.validate_array_shape(images, qy_array, qz_array)
+    utils.validate_array_shape(qy_markers_array, qz_markers_array)
+    utils.validate_kwargs({'index_list', 'crop'}, kwargs)
+
+    index_list = kwargs.get('index_list', [0])
     crop = kwargs.get('crop', False)
-    if index_list is None:
-        index_list = [0]
 
     plot_set()
     for i in index_list:
         plt.figure()
-        plt.pcolormesh(qy_array[i],
-                       qz_array[i],
-                       image_array[i],
-                       cmap='jet',
-                       linewidths=3,
-                       norm=matplotlib.colors.LogNorm(),
-                       shading='nearest')
-        plt.plot(qy_lines_array, qz_lines_array, marker='o', linestyle='', markersize=8,
-                 markerfacecolor='none', markeredgecolor='r', markeredgewidth=1, label='Open dots')
-        plt.xlabel(r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$', fontsize=22)
-        plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
+        plt.pcolormesh(
+            qy_array[i],
+            qz_array[i],
+            images[i],
+            cmap='jet',
+            linewidths=3,
+            norm=matplotlib.colors.LogNorm(),
+            shading='nearest')
+        plt.plot(
+            qy_markers_array,
+            qz_markers_array,
+            marker='o',
+            linestyle='',
+            markersize=8,
+            markerfacecolor='none',
+            markeredgecolor='r',
+            markeredgewidth=1,
+            label='Open dots')
+        plt.xlabel(XLABEL_DICT['qy'])
+        plt.ylabel(YLABEL_DICT['qz'])
         plt.xlim(np.min(qy_array[i]), np.max(qy_array[i]))
         plt.ylim(np.min(qz_array[i]), np.max(qz_array[i]))
         plt.colorbar(label='I (a.u.)')
         plt.gca().set_aspect('equal', adjustable='box')
 
         if crop:
-            plt.xlim(-qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))
-                                  ], -qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))])
-            plt.ylim(-qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))
-                                  ], -qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))])
+            plt.xlim(
+                -qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))],
+                -qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))])
+            plt.ylim(
+                -qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))],
+                -qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))])
         plt.show()
 
 
-def plot_2d_scattering_onlylines(qy_lines_array: np.ndarray, qz_lines_array: np.ndarray,
-                                 **kwargs):
-    """Plot 2D scattering data as a colormap.
+def plot_2d_onlymarkers(
+        qy_markers_array: np.ndarray,
+        qz_markers_array: np.ndarray,
+        **kwargs) -> None:
+    """Plot 2D map with only marker positions.
 
-    This function takes qy_array, qz_array, and image_array as inputs and
-    creates a 2D colormap plot for each index in index_list using the
-    provided arrays.
+    This function takes qy_markers_array and qz_markers_array as inputs and
+    creates a 2D plot only showing the markers .
 
     Args:
-        - qy_lines_array (np.ndarray): 1D array of qy lines values.
-        - qz_lines_array (np.ndarray): 1D array of qz lines values.
+        - qy_markers_array (np.ndarray): 1D array of qy marker positions.
+        - qz_markers_array (np.ndarray): 1D array of qz marker positions.
         - kwargs:
             - xmin (float): the minimum value of horizontal axis.
             - xmax (float): the maximum value of horizontal axis.
             - ymin (float): the minimum value of vertical axis.
             - ymax (float): the maximum value of vertical axis.
-            - alpha (float, optional): the transparancy of the lines.
-                If not provided, default to 0.2
-            - phi (float, optional): 
-                If not provided, default to -0.04
+            - alpha (float): the incidence angle in the unit of degrees.
+            - phi (float): the in-plane rotation angle in the unit of degrees.
             - write (bool, optional): decide if the plot should be saved
                 If not provided, default to False
-            - current_index (int): the index of the plot to be saved
+            - current_index (int): the serial number of the plot to be saved
                 If not provided, default to None
-            
+
     Returns:
-        None
+        - None
     """
+
+    utils.validate_array_dimension(qy_markers_array, 1)
+    utils.validate_array_shape(qz_markers_array, qy_markers_array)
+    utils.validate_kwargs(
+        {'xmin', 'xmax', 'ymin', 'ymax', 'alpha', 'phi', 'write',
+         'current_index'},
+        kwargs)
+
     xmin = kwargs.get('xmin')
     xmax = kwargs.get('xmax')
     ymin = kwargs.get('ymin')
     ymax = kwargs.get('ymax')
-    alpha = kwargs.get('alpha', 0.2)
-    phi = kwargs.get('phi', -0.04)
-    write = kwargs.get('write',  False)
+    alpha = kwargs.get('alpha')
+    phi = kwargs.get('phi')
+    write = kwargs.get('write', False)
     current_index = kwargs.get('current_index', None)
 
     plot_set()
     plt.figure()
-    plt.plot(qy_lines_array, qz_lines_array, marker='o', linestyle='', markersize=8,
-             markerfacecolor='none', markeredgecolor='r', markeredgewidth=1, label='Open dots')
-    plt.xlabel(r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$', fontsize=22)
-    plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
+    plt.plot(
+        qy_markers_array,
+        qz_markers_array,
+        marker='o',
+        linestyle='',
+        markersize=8,
+        markerfacecolor='none',
+        markeredgecolor='r',
+        markeredgewidth=1,
+        label='Open dots')
+    plt.xlabel(XLABEL_DICT['qy'])
+    plt.ylabel(YLABEL_DICT['qz'])
     plt.xlim(xmin, xmax)
     plt.ylim(ymin, ymax)
     plt.gca().set_aspect('equal', adjustable='box')
@@ -249,199 +317,194 @@ def plot_2d_scattering_onlylines(qy_lines_array: np.ndarray, qz_lines_array: np.
         plt.savefig(f'{current_index:d}.png')
 
 
-def plot_2d_polar(azimuth_array: np.ndarray, qx_array: np.ndarray, qy_array: np.ndarray,
-                  qz_array: np.ndarray, image_array:np.ndarray, **kwargs):
+def plot_2d_polar(
+        azimuth_array: np.ndarray,
+        qx_array: np.ndarray,
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs) -> None:
     """
-    Plot 2D polar scattering data.
+    Plot 2D scattering data after polar transformation.
 
     Args:
-        - azimuth_array (np.ndarray): 1D array of azimuthal angles.
-        - qx_array (np.ndarray): 1D array of q values in the x direction.
-        - qy_array (np.ndarray): 1D array of q values in the y direction.
-        - qz_array (np.ndarray): 1D array of q values in the z direction.
-        - image_array (np.ndarray): 1D array of scattering images.
+        - azimuth_array (np.ndarray): 3D array of azimuthal angles.
+        - qx_array (np.ndarray): 3D array of qx values (in Å^-1 units).
+        - qy_array (np.ndarray): 3D array of qy values (in Å^-1 units).
+        - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
+        - images (np.ndarray): 3D array of scattering intensities.
+            The first index is the serial number of measurement.
         - kwargs:
-            - index_list (list[int], optional): list of indices to plot. 
-                If not provided, defaults to None.
-    
+            - index_list (list[int], optional): list of indexes to plot.
+                If not provided, defaults to [0].
+
     Returns:
-        None
+        - None
     """
-    index_list = kwargs.get('index_list', None)
-    if index_list is None:
-        index_list = [0]
+
+    utils.validate_array_dimension(images, 3)
+    utils.validate_array_shape(
+        azimuth_array, qx_array, qy_array, qz_array, images)
+    utils.validate_kwargs({'index_list'}, kwargs)
+
+    index_list = kwargs.get('index_list', [0])
+    q_array = np.sqrt(qx_array**2 + qy_array**2 + qz_array**2)
 
     plot_set()
     for i in index_list:
-        q = np.sqrt(qx_array[i]**2 + qy_array[i]**2 + qz_array[i]**2)
         azimuth = np.degrees(azimuth_array[i])
-        image = image_array[i]
         plt.figure()
-        plt.pcolormesh(q[0:351, 0:214],
+        # The polar transformation is plotted by four quadrants individually
+        # to avoid the discontinuity at the boundary of the quadrants creating
+        # fake lines in pcolormesh.
+        plt.pcolormesh(q_array[i, 0:351, 0:214],
                        azimuth[0:351, 0:214],
-                       image[0:351, 0:214],
+                       images[i, 0:351, 0:214],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q[0:351, 214:],
+        plt.pcolormesh(q_array[i, 0:351, 214:],
                        azimuth[0:351, 214:],
-                       image[0:351, 214:],
+                       images[i, 0:351, 214:],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q[351:, 0:214],
+        plt.pcolormesh(q_array[i, 351:, 0:214],
                        azimuth[351:, 0:214],
-                       image[351:, 0:214],
+                       images[i, 351:, 0:214],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q[351:, 214:],
+        plt.pcolormesh(q_array[i, 351:, 214:],
                        azimuth[351:, 214:],
-                       image[351:, 214:],
+                       images[i, 351:, 214:],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.xlabel(r'$q\ \mathrm{(Å^{-1})}$')
-        plt.ylabel(r'$\mathrm{azimuth}\ (°)$')
+        plt.xlabel(XLABEL_DICT['q'])
+        plt.ylabel(YLABEL_DICT['azimuth'])
         plt.colorbar(label='I (a.u.)')
-        plt.xlim(np.min(q), np.max(q))
+        plt.xlim(np.min(q_array[i]), np.max(q_array[i]))
         plt.ylim(np.min(azimuth), np.max(azimuth))
-        yticks = [0, 60, 120, 180, 240, 300, 360]
-        plt.yticks(yticks)
+        plt.yticks([0, 60, 120, 180, 240, 300, 360])
         plt.gca().set_aspect('auto', adjustable='box')
         plt.show()
 
 
-def plot_2d_paralell(qx_array: np.ndarray, qy_array:np.ndarray, qz_array: np.ndarray,
-                    image_array: np.ndarray, **kwargs):
+def plot_2d_paralell(
+        qx_array: np.ndarray,
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs) -> None:
     """
-    Plot 2D plot in q_parallel and q_z axis with input qx, qy, qz array and image array.
+    Plot 2D scattering date with q_parallel and q_z as the axis with input qx,
+    qy, qz, and images array.
 
     Args:
-        - qx_array (np.ndarray): Array of q values in the x direction.
-        - qy_array (np.ndarray): Array of q values in the y direction.
-        - qz_array (np.ndarray): Array of q values in the z direction.
-        - image_array (np.ndarray): Array of scattering images.
+        - qx_array (np.ndarray): 3D array of qx values (in Å^-1 units).
+        - qy_array (np.ndarray): 3D array of qy values (in Å^-1 units).
+        - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
+        - images (np.ndarray): 3D array of scattering intensities.
+            The first index is the serial number of measurement.
         - kwargs:
-            - index_list (list[int], optional): List of indices to plot. 
-                If not provided, defaults to None.
-    
+            - index_list (list[int], optional): List of indexes to plot.
+                If not provided, defaults to [0].
+
     Returns:
-        None
+        - None
     """
-    index_list = kwargs.get('index_list', None)
-    if index_list is None:
-        index_list = [0]
+
+    utils.validate_array_dimension(images, 3)
+    utils.validate_array_shape(qx_array, qy_array, qz_array, images)
+    utils.validate_kwargs({'index_list'}, kwargs)
+
+    index_list = kwargs.get('index_list', [0])
 
     q_paralell = np.sqrt(qx_array**2 + qy_array**2)
     plot_set()
     for i in index_list:
-
         plt.figure()
         plt.pcolormesh(q_paralell[i] * (qy_array[i] > 0),
                        qz_array[i] * (qy_array[i] > 0),
-                       image_array[i] * (qy_array[i] > 0),
+                       images[i] * (qy_array[i] > 0),
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
         plt.pcolormesh(-q_paralell[i] * (qy_array[i] <= 0),
                        qz_array[i] * (qy_array[i] <= 0),
-                       image_array[i] * (qy_array[i] <= 0),
+                       images[i] * (qy_array[i] <= 0),
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.xlabel(r'$q_\Vert\ \mathrm{(Å^{-1})}$', fontsize=22)
-        plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
+        plt.xlabel(XLABEL_DICT['q_parallel'])
+        plt.ylabel(YLABEL_DICT['qz'])
         plt.colorbar(label='I (a.u.)')
         plt.gca().set_aspect('equal', adjustable='box')
         plt.show()
 
 
-def plot_specular_reflectivity(data: np.ndarray, **kwargs):
+def plot_1d(
+        scattering_vec: np.ndarray,
+        intensity: np.ndarray,
+        **kwargs) -> None:
     """
-    Plot specular reflectivity data.
+    Plot 1D plot of intensity as a function of scatterin vector q.
 
     Args:
-        - data (np.ndarray): The specular reflectivity data array.
-        - kwargs:
-            - title (str, optional): The title for the plot. 
-                If not provided, defaults to 'Specular Reflectivity'.
-    
-    Returns:
-        None
-    """
-    title = kwargs.get('title', 'Specular Reflectivity')
-    plt.figure()
-    plt.plot(data)
-    plt.xlabel('Incidence Angle')
-    plt.ylabel('Reflectivity')
-    plt.title(title)
-    plt.show()
-
-
-def plot_1d(q: np.ndarray, i: np.ndarray, **kwargs):
-    """
-    Plot 1D plot of intensity to q.
-
-    Args:
-        - q (np.ndarray): 1D Array of q values.
-        - i (np.ndarray): 1D Array of intensity values.
+        - scattering_vec (np.ndarray): 1D Array of q values.
+        - intensity (np.ndarray): 1D Array of intensity values.
         - kwargs:
             - xscale (str, optional): the type of x axis scale.
                 If not provided, default to 'linear'
             - yscale (str, optional): the type of y axis scale.
                 If not provided, default to 'log'
             - xlabel (str, optional): the label of x axis.
-                If not provided, default to 'qz'
+                If not provided, default to 'q'
             - ylabel (str, optional): the label of y axis.
-                If not provided, default to None
-            - yunit (str, optional): the unit of y axis.
-                If not provided, default to 'a.u.'
+                If not provided, default to 'a.u.'.
             - yticks (list[float], optional): the y label ticks.
                 If not provided, default to None
 
     Returns:
-        None
+        - None
     """
+
+    utils.validate_array_dimension(scattering_vec, 1)
+    utils.validate_array_shape(intensity, scattering_vec)
+    utils.validate_kwargs(
+        {'xscale', 'yscale', 'xlabel', 'ylabel', 'yticks'}, kwargs)
+
     xscale = kwargs.get('xscale', 'linear')
     yscale = kwargs.get('yscale', 'log')
-    xlabel = kwargs.get('xlabel', 'qz')
-    ylabel = kwargs.get('ylabel', None)
-    yunit = kwargs.get('yunit', 'a.u.')
+    xlabel = kwargs.get('xlabel', 'q')
+    ylabel = kwargs.get('ylabel', 'a.u.')
     yticks = kwargs.get('yticks', None)
+
     plot_set()
     plt.figure()
-    plt.plot(q, i)
-    if xlabel == 'q':
-        plt.xlabel(r'$q\ \mathrm{(Å^{-1})}$', fontsize=22)
-    elif xlabel == 'qz':
-        plt.xlabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
-    elif xlabel == 'theta sample':
-        plt.xlabel(r'${\theta}_\mathrm{sample}\ (°)$', fontsize=22)
-    if yunit == 'abs':
-        plt.ylabel(r'$I\ \mathrm{(cm^{-1}sr^{-1})}$', fontsize=22)
-    elif yunit == 'a.u.':
-        plt.ylabel(r'$I\ \mathrm{(a.u.)}$', fontsize=22)
-    elif yunit == 'normalized reflectivity':
-        plt.ylabel(r'$R$', fontsize=22)
-    if ylabel == 'total':
-        plt.ylabel(r'$I_\mathrm{total}\ \mathrm{(a.u.)}$', fontsize=22)
+    plt.plot(scattering_vec, intensity)
+    plt.xlabel(XLABEL_DICT[xlabel])
+    plt.ylabel(YLABEL_DICT[ylabel])
     plt.xscale(xscale)
     plt.yscale(yscale)
     if yticks is not None:
         plt.yticks(yticks)
     plt.show()
 
-
-def plot_1d_compare(q_1: np.ndarray, i_1: np.ndarray,
-                    q_2: np.ndarray, i_2: np.ndarray,
-                    **kwargs):
+# following not optimized yet.
+def plot_1d_compare(
+        scattering_vec_1: np.ndarray,
+        intnesity_1: np.ndarray,
+        scattering_vec_2: np.ndarray,
+        intensity_2: np.ndarray,
+        **kwargs):
     """
     Plot 1D plot comparing datasets 1 and datasets 2.
 
@@ -458,8 +521,6 @@ def plot_1d_compare(q_1: np.ndarray, i_1: np.ndarray,
             - xlabel (str, optional): the label of x axis.
                 If not provided, default to 'q'
             - ylabel (str, optional): the label of y axis.
-                If not provided, default to None
-            - yunit (str, optional): the unit of y axis.
                 If not provided, default to 'abs'
             - legend (list[str], optional): the legend name list.
                 If not provided, default to None
@@ -470,8 +531,7 @@ def plot_1d_compare(q_1: np.ndarray, i_1: np.ndarray,
     """
     xscale = kwargs.get('xscale', 'log')
     xlabel = kwargs.get('xlabel', 'q')
-    ylabel = kwargs.get('ylabel', 'spill over')
-    yunit = kwargs.get('yunit', 'abs')
+    ylabel = kwargs.get('ylabel', 'abs')
     yscale = kwargs.get('yscale', 'log')
     legend = kwargs.get('legend', None)
     legend_fontsize = kwargs.get('legend_fontsize', 20)
@@ -502,29 +562,29 @@ def plot_1d_compare(q_1: np.ndarray, i_1: np.ndarray,
 
 
 def plot_3d(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
-            image_array: np.ndarray, **kwargs):
+            images: np.ndarray, **kwargs):
     """
-    Plot 3D plot with qx, qy, qz array and image array.
+    Plot 3d plot with qx, qy, qz array and image array.
 
     Args:
         - qx_array (np.ndarray): Array of q values in the x direction.
         - qy_array (np.ndarray): Array of q values in the y direction.
         - qz_array (np.ndarray): Array of q values in the z direction.
-        - image_array (np.ndarray): Array of scattering images.
+        - images (np.ndarray): Array of scattering images.
         - kwargs:
-            - index_list (list[int], optional): List of indices to plot. 
+            - index_list (list[int], optional): List of indices to plot.
                 If not provided, defaults to None.
-    
+
     Returns:
         None
     """
-    index_list = kwargs.get('index_list',None)
+    index_list = kwargs.get('index_list', None)
     if index_list is None:
         index_list = [0]
 
     plot_set_small()
     for i in index_list:
-        color_dimension = image_array[i]  # change to desired fourth dimension
+        color_dimension = images[i]  # change to desired fourth dimension
         minn, maxx = np.min(
             color_dimension[color_dimension > 0]), np.max(color_dimension)
         norm = LogNorm(vmin=minn, vmax=maxx)
@@ -564,13 +624,21 @@ def plot_3d(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
         ax.set_yticks([-1, 0, 1, 2])
         ax.set_zticks([-1, 0, 1])
 
-        ax.plot_surface(qx_array[i], qy_array[i], qz_array[i], rstride=1,
-                        cstride=1, facecolors=fcolors, vmin=minn, vmax=maxx, shade=False)
-        ax.quiver(4*np.pi/1.542, 0, 0, -2*np.pi/1.542, 0, 0,
+        ax.plot_surface(
+            qx_array[i],
+            qy_array[i],
+            qz_array[i],
+            rstride=1,
+            cstride=1,
+            facecolors=fcolors,
+            vmin=minn,
+            vmax=maxx,
+            shade=False)
+        ax.quiver(4 * np.pi / 1.542, 0, 0, -2 * np.pi / 1.542, 0, 0,
                   length=1.0, color='k', arrow_length_ratio=0.1)
         ax.text(5.5, 0, -0.5, r'$k_i$', color='k')
-        ax.scatter(2*np.pi/1.542, 0, 0, color='r', s=50)
-        ax.text(2*np.pi/1.542, 0, 0.2, 'sample', color='r')
+        ax.scatter(2 * np.pi / 1.542, 0, 0, color='r', s=50)
+        ax.text(2 * np.pi / 1.542, 0, 0.2, 'sample', color='r')
 
         ax.set_xlabel(r'$q_\mathrm{x}\ \mathrm{(Å^{-1})}$')
         ax.xaxis.labelpad = 15
@@ -583,19 +651,19 @@ def plot_3d(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
 
 
 def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
-               image_array: np.ndarray, **kwargs):
+               images: np.ndarray, **kwargs):
     """
-    Plot 3D plot with input qx, qy, qz array and image array in smaller tick size.
+    Plot 3d plot with input qx, qy, qz array and image array in smaller tick size.
 
     Args:
         - qx_array (np.ndarray): Array of q values in the x direction.
         - qy_array (np.ndarray): Array of q values in the y direction.
         - qz_array (np.ndarray): Array of q values in the z direction.
-        - image_array (np.ndarray): Array of scattering images.
+        - images (np.ndarray): Array of scattering images.
         - kwargs:
-            - index_list (list[int], optional): List of indices to plot. 
+            - index_list (list[int], optional): List of indices to plot.
                 If not provided, defaults to None.
-    
+
     Returns:
         None
     """
@@ -605,7 +673,7 @@ def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
 
     plot_set_small()
     for i in index_list:
-        color_dimension = image_array[i]  # change to desired fourth dimension
+        color_dimension = images[i]  # change to desired fourth dimension
         minn, maxx = np.min(
             color_dimension[color_dimension > 0]), np.max(color_dimension)
         norm = LogNorm(vmin=minn, vmax=maxx)
@@ -645,8 +713,16 @@ def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
         ax.set_yticks([-30, 0, 30])
         ax.set_zticks([-30, 0, 30])
         ax.invert_xaxis()
-        ax.plot_surface(x_array[i], y_array[i], z_array[i], rstride=1,
-                        cstride=1, facecolors=fcolors, vmin=minn, vmax=maxx, shade=False)
+        ax.plot_surface(
+            x_array[i],
+            y_array[i],
+            z_array[i],
+            rstride=1,
+            cstride=1,
+            facecolors=fcolors,
+            vmin=minn,
+            vmax=maxx,
+            shade=False)
         # ax.quiver(-100, 0, 0, 100, 0, 0,
         #           length=1.0, color='k', arrow_length_ratio=0.1)
         # ax.text(-50, 0, 10, r'$x-ray$', color='k')
@@ -663,26 +739,31 @@ def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
         ax.grid(False)
         plt.show()
 
-def plot_3d_grating(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
-                    image_array: np.ndarray, **kwargs):
+
+def plot_3d_grating(
+        qx_array: np.ndarray,
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs):
     """
-    Plot 3D grating plot with input qx, qy, qz array and image array.
+    Plot 3d grating plot with input qx, qy, qz array and image array.
 
     Args:
         - qx_array (np.ndarray): Array of q values in the x direction.
         - qy_array (np.ndarray): Array of q values in the y direction.
         - qz_array (np.ndarray): Array of q values in the z direction.
-        - image_array (np.ndarray): Array of scattering images.
+        - images (np.ndarray): Array of scattering images.
         - kwargs:
-            - qx (np.ndarray): List of qx values. 
-            - qy (np.ndarray): List of qy values. 
-            - qz (np.ndarray): List of qz values. 
-            - qx_0 (np.ndarray): List of qx_0 values. 
-            - qy_0 (np.ndarray): List of qy_0 values. 
-            - qz_0 (np.ndarray): List of qz_0 values. 
-            - index_list (list[int], optional): List of indices to plot. 
+            - qx (np.ndarray): List of qx values.
+            - qy (np.ndarray): List of qy values.
+            - qz (np.ndarray): List of qz values.
+            - qx_0 (np.ndarray): List of qx_0 values.
+            - qy_0 (np.ndarray): List of qy_0 values.
+            - qz_0 (np.ndarray): List of qz_0 values.
+            - index_list (list[int], optional): List of indices to plot.
                 If not provided, defaults to None.
-    
+
     Returns:
         None
     """
@@ -710,7 +791,7 @@ def plot_3d_grating(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.nda
 
     plot_set_small()
     for i in index_list:
-        color_dimension = image_array[i]  # change to desired fourth dimension
+        color_dimension = images[i]  # change to desired fourth dimension
         minn, maxx = color_dimension[color_dimension >
                                      0].min(), color_dimension.max()
         norm = LogNorm(vmin=minn, vmax=maxx)
@@ -745,12 +826,20 @@ def plot_3d_grating(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.nda
         for j in range(qx.shape[1]):
             ax.plot((qx_0[i][j], qx[i][j]), (qy_0[i][j], qy[i][j]),
                     (qz_0[i][j], qz[i][j]), color='k')
-        ax.plot_surface(qx_array[i], qy_array[i], qz_array[i], rstride=1,
-                        cstride=1, facecolors=fcolors, vmin=minn, vmax=maxx, shade=False)
+        ax.plot_surface(
+            qx_array[i],
+            qy_array[i],
+            qz_array[i],
+            rstride=1,
+            cstride=1,
+            facecolors=fcolors,
+            vmin=minn,
+            vmax=maxx,
+            shade=False)
         plt.show()
 
 
-def plot_sans(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
+def plot_2d_columns(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
     """
     Plot 2D SANS contour plot with input qy, qz array and intensity array.
 
@@ -758,7 +847,7 @@ def plot_sans(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
         - q_y (np.ndarray): 1D array of q values in the y direction.
         - q_z (np.ndarray): 1D array of q values in the z direction.
         - intensity (np.ndarray): 2D array of scattering intensity.
-        
+
     Returns:
         None
     """
@@ -766,9 +855,9 @@ def plot_sans(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
     plt.figure()
     minimum = np.min(np.log10(intensity[intensity > 0]))
     maximum = np.max(np.log10(intensity[intensity > 0]))
-    plt.contourf(q_z.reshape(80, 80),
-                 -q_y.reshape(80, 80),
-                 intensity.reshape(80, 80),
+    plt.contourf(q_z.reshape(200, 200),
+                 -q_y.reshape(200, 200),
+                 intensity.reshape(200, 200),
                  cmap='jet',
                  linewidths=3,
                  locator=ticker.LogLocator(),
@@ -777,12 +866,12 @@ def plot_sans(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
     plt.xlabel(r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$', fontsize=22)
     plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
     plt.colorbar(label='I (a.u.)', ticks=[
-                 1e-3, 1e-2, 1e-1, 1, 1e+1, 1e+2, 1e+3, 1e+4])
+                 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e+1, 1e+2, 1e+3, 1e+4])
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
 
-def plot_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
+def plot_1d_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
     """
     Plot 1D penetration plot with input 1D qz array and 1D depth array.
 
@@ -798,13 +887,13 @@ def plot_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
                 If not provided, default to None
             - legend (list[str], optional): the legend name list.
                 If not provided, default to None
-        
+
     Returns:
         None
     """
-    x_max=kwargs.get('x_max', None)
-    y_min=kwargs.get('y_min', None)
-    y_max=kwargs.get('y_max', None)
+    x_max = kwargs.get('x_max', None)
+    y_min = kwargs.get('y_min', None)
+    y_max = kwargs.get('y_max', None)
     legend = kwargs.get('legend', None)
     plot_set()
     plt.plot(qz_1d, depth_1d)
@@ -820,7 +909,7 @@ def plot_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
     plt.show()
 
 
-def plot_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
+def plot_1d_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
                              qz2_1d: np.ndarray, depth2_1d: np.ndarray,
                              **kwargs):
     """
@@ -840,13 +929,13 @@ def plot_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
                 If not provided, default to None
             - legend (list[str], optional): the legend name list.
                 If not provided, default to None
-        
+
     Returns:
         None
     """
-    x_max=kwargs.get('x_max', None)
-    y_min=kwargs.get('y_min', None)
-    y_max=kwargs.get('y_max', None)
+    x_max = kwargs.get('x_max', None)
+    y_min = kwargs.get('y_min', None)
+    y_max = kwargs.get('y_max', None)
     legend = kwargs.get('legend', None)
     plot_set()
     plt.plot(qz1_1d, depth1_1d)
@@ -862,7 +951,7 @@ def plot_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
     plt.show()
 
 
-def plot_penetration_2d(ki_mesh: np.ndarray, kf_mesh: np.ndarray,
+def plot_2d_penetration(ki_mesh: np.ndarray, kf_mesh: np.ndarray,
                         depth_mesh: np.ndarray, **kwargs):
     """
     plot 2D penetration plot ki, kf and depth mesh array.
@@ -876,12 +965,12 @@ def plot_penetration_2d(ki_mesh: np.ndarray, kf_mesh: np.ndarray,
                 If not provided, default to None
             - y_max (float, optional): maximun value of y axis.
                 If not provided, default to None
-        
+
     Returns:
         None
     """
-    x_max=kwargs.get('x_max', None)
-    y_max=kwargs.get('y_max', None)
+    x_max = kwargs.get('x_max', None)
+    y_max = kwargs.get('y_max', None)
     plot_set()
     plt.pcolormesh(ki_mesh,
                    kf_mesh,

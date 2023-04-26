@@ -82,7 +82,7 @@ class ReflectivityCalculator(Calculator):
         wave_length = 1.5406  # unit: A
         delta = wave_length ** 2 / 2 / np.pi * sldr  # n_layers
         theta_c = np.sqrt(2 * delta)  # n_layers
-        kc = 2*np.pi*np.sin(theta_c)/wave_length  # n_layers
+        kc = 2 * np.pi * np.sin(theta_c) / wave_length  # n_layers
 
         kz_sq = kz_0.reshape(-1, 1) ** 2 - kc ** 2  # n_theta, n_layers
         for i in range(kz_sq.shape[-1]):
@@ -140,7 +140,7 @@ class ReflectivityCalculator(Calculator):
         # Assign the fresnell reflectivity coefficient of the bottom layer as
         # the beginning point of the recursion.
 
-        for i in range(kz.shape[-1]-2):  # loops for n_layers - 2 times
+        for i in range(kz.shape[-1] - 2):  # loops for n_layers - 2 times
             # Bottom-up interate through all interfaces beginning at the second
             # bottom layer because the real reflectivity coefficient at  first
             # bottom layer is the same as its fresnell reflectiviy coefficient.
@@ -162,7 +162,7 @@ class ReflectivityCalculator(Calculator):
             # matrix, thus represent the total reflection. The index of nan in
             # dividend and divisor matrix is always the same.
 
-        refl = (refl_coef_final*refl_coef_final.conj()).real
+        refl = (refl_coef_final * refl_coef_final.conj()).real
 
         return refl
 
@@ -233,7 +233,7 @@ class ReflectivityCalculator(Calculator):
 
         middle_params = np.hstack((params[:-2].reshape(-1, 3),
                                    np.zeros(params[:-2].reshape(-1, 3).shape[0]).reshape(-1, 1)))
-        params_for_model = np.hstack((0, 0,          0,          0,
+        params_for_model = np.hstack((0, 0, 0, 0,
                                       middle_params.flatten(),
                                       0, params[-2], params[-1], 0))
 
@@ -259,4 +259,4 @@ class ReflectivityCalculator(Calculator):
         log10_refl = np.log10(data.rfl)
         params = self.flatten_params(instr_broad, model)
         return curve_fit(calculator, qz, log10_refl, p0=params,
-                         bounds=(0.8*params, 1.2*params))
+                         bounds=(0.8 * params, 1.2 * params))

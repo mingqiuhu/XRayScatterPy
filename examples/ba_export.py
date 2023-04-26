@@ -17,9 +17,9 @@ def get_simulation(sample):
     """
     Returns a GISAXS simulation with beam and detector defined.
     """
-    beam = ba.Beam(1e5, 1*angstrom, 0.2*deg)
+    beam = ba.Beam(1e5, 1 * angstrom, 0.2 * deg)
     n = bp.simargs['n']
-    det = ba.SphericalDetector(n, -2*deg, 2*deg, n, 0, 2*deg)
+    det = ba.SphericalDetector(n, -2 * deg, 2 * deg, n, 0, 2 * deg)
     simulation = ba.ScatteringSimulation(beam, sample, det)
     return simulation
 
@@ -32,7 +32,7 @@ def get_noisy_image(field):
     noise_factor = 2.0
     for i in range(0, result.size()):
         amplitude = field.valAt(i)
-        sigma = noise_factor*math.sqrt(amplitude)
+        sigma = noise_factor * math.sqrt(amplitude)
         noisy_amplitude = random.gauss(amplitude, sigma)
         result.setAt(i, noisy_amplitude)
     return result
@@ -73,7 +73,7 @@ def plot_slices(field):
              label=r'$<\varphi>=0.5^{\circ}$')
 
     plt.xlim(proj1.axis(0).min(), proj1.axis(0).max())
-    plt.ylim(proj2.minVal(), proj1.maxVal()*10)
+    plt.ylim(proj2.minVal(), proj1.maxVal() * 10)
     plt.xlabel(r'$\alpha_{\rm f} ^{\circ}$', fontsize=16)
     plt.legend(loc='upper right')
     plt.tight_layout()
@@ -111,13 +111,15 @@ def plot(field):
     print("Layout")
     plt.tight_layout()
 
+
 if __name__ == '__main__':
     bp.parse_args(sim_n=200)
     sample = get_sample()
     simulation = get_simulation(sample)
     print("Simulate")
     result = simulation.simulate()
-    arr = result.array() # this is the numpy array containing the simulation results. 
+    # this is the numpy array containing the simulation results.
+    arr = result.array()
 
     if bp.datfile:
         print("Save results")

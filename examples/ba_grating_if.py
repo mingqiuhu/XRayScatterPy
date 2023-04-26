@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 """
 Long boxes at 1D lattice, ba.Offspec simulation
 """
@@ -18,16 +18,16 @@ def get_sample():
     material_Vacuum = ba.RefractiveMaterial("Vacuum", 0, 0)
 
     # Define form factors
-    ff = ba.Box(1000*nm, 20*nm, 10*nm)
+    ff = ba.Box(1000 * nm, 20 * nm, 10 * nm)
 
     # Define particles
     particle = ba.Particle(material_Particle, ff)
-    particle_rotation = ba.RotationZ(90*deg)
+    particle_rotation = ba.RotationZ(90 * deg)
     particle.rotate(particle_rotation)
 
     # Define interference functions
-    iff = ba.Interference1DLattice(100*nm, 0)
-    iff_pdf = ba.Profile1DCauchy(1e6*nm)
+    iff = ba.Interference1DLattice(100 * nm, 0)
+    iff_pdf = ba.Profile1DCauchy(1e6 * nm)
     iff.setDecayFunction(iff_pdf)
 
     # Define particle layouts
@@ -54,10 +54,11 @@ def get_simulation(sample):
     Returns an off-specular simulation with beam and detector defined.
     """
     n = bp.simargs['n']
-    scan = ba.AlphaScan(n, 0.1*deg, 10*deg)
+    scan = ba.AlphaScan(n, 0.1 * deg, 10 * deg)
     scan.setIntensity(1e9)
-    scan.setWavelength(0.1*nm)
-    detector = ba.OffspecDetector(n, -1*deg, +1*deg, n, 0.1*deg, 10*deg)
+    scan.setWavelength(0.1 * nm)
+    detector = ba.OffspecDetector(
+        n, -1 * deg, +1 * deg, n, 0.1 * deg, 10 * deg)
     return ba.OffspecSimulation(scan, sample, detector)
 
 

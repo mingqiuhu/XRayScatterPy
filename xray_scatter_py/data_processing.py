@@ -23,8 +23,11 @@ import numpy as np
 from xray_scatter_py import utils
 
 
-def calculate_1d(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndarray,
-                 **kwargs) -> np.ndarray:
+def calculate_1d(
+        q_array: np.ndarray,
+        image_array: np.ndarray,
+        sr_array: np.ndarray,
+        **kwargs) -> np.ndarray:
     """
     Calculate the 1D scattering intensity from a 2D image array, with I as a function of q (Å**-1).
 
@@ -60,29 +63,35 @@ def calculate_1d(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndar
 
     # calculate the q values to be used in the 1D intensity profile
     q_1d = np.linspace(q_min, q_max, q_num)
-    # for each q value, the range used to calculate the intensity is q-q_fwhm to q+q_fwhm
-    q_fwhm = (q_max - q_min) / (q_num-1) / 2
+    # for each q value, the range used to calculate the intensity is q-q_fwhm
+    # to q+q_fwhm
+    q_fwhm = (q_max - q_min) / (q_num - 1) / 2
 
     # initialize the 1D intensity array
-    # the first index is the serial number of measurement, the second index relates to the q value
+    # the first index is the serial number of measurement, the second index
+    # relates to the q value
     i_1d = np.empty((image_array.shape[0], q_num))
 
     # loop over all the serial numbers of measurements to be processed
     for i in index_list:
         # broadcast the 2D q array to 3D and generate a boolean mask for 1D intensity averaging
-        # the third dimension is the same as the 1D q array for the 1D intensity profile
-        q_bool = np.abs(q_array[i][:, :, np.newaxis] - q_1d[np.newaxis, np.newaxis, :]) <= q_fwhm
-        # generate a boolean mask for the image array excluding the pixels with -1 values
+        # the third dimension is the same as the 1D q array for the 1D
+        # intensity profile
+        q_bool = np.abs(q_array[i][:, :, np.newaxis] -
+                        q_1d[np.newaxis, np.newaxis, :]) <= q_fwhm
+        # generate a boolean mask for the image array excluding the pixels with
+        # -1 values
         image_bool = image_array[i] != -1
         # Since the relative or absolute intensity image is normalized by the solid angle,
         # the sum of the intensity image needs to be weighted by the solid angle.
-        # after sum, the output is a 1D array with the same length as the 1D q array
+        # after sum, the output is a 1D array with the same length as the 1D q
+        # array
         sum_intensity = np.sum(image_array[i][:, :, np.newaxis] *
                                sr_array[i][:, :, np.newaxis] *
                                q_bool *
                                image_bool[:, :, np.newaxis],
                                axis=(0, 1))
-        # assign the 1D intensity profile to the 1D intensity array after normalization with 
+        # assign the 1D intensity profile to the 1D intensity array after normalization with
         # the total solid angle of the pixels used in the sum
         i_1d[i] = sum_intensity / np.sum(sr_array[i][:, :, np.newaxis] *
                                          q_bool * image_bool[:, :, np.newaxis],
@@ -90,8 +99,11 @@ def calculate_1d(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndar
     return i_1d
 
 
-def calculate_1d_lowmemo(q_array: np.ndarray, image_array: np.ndarray, sr_array: np.ndarray,
-                         **kwargs) -> np.ndarray:
+def calculate_1d_lowmemo(
+        q_array: np.ndarray,
+        image_array: np.ndarray,
+        sr_array: np.ndarray,
+        **kwargs) -> np.ndarray:
     """
     Calculate the 1D scattering intensity from a 2D image array, with I as a function of q (Å**-1).
     This function is designed to be used when the memory is limited.
@@ -128,23 +140,29 @@ def calculate_1d_lowmemo(q_array: np.ndarray, image_array: np.ndarray, sr_array:
 
     # calculate the q values to be used in the 1D intensity profile
     q_1d = np.linspace(q_min, q_max, q_num)
-    # for each q value, the range used to calculate the intensity is q-q_fwhm to q+q_fwhm
-    q_fwhm = (q_max - q_min) / (q_num-1) / 2
+    # for each q value, the range used to calculate the intensity is q-q_fwhm
+    # to q+q_fwhm
+    q_fwhm = (q_max - q_min) / (q_num - 1) / 2
 
     # initialize the 1D intensity array
-    # the first index is the serial number of measurement, the second index relates to the q value
+    # the first index is the serial number of measurement, the second index
+    # relates to the q value
     i_1d = np.empty((image_array.shape[0], q_num))
 
     # loop over all the serial numbers of measurements to be processed
     for i in index_list:
-        # generate a boolean mask for the image array excluding the pixels with -1 values
-        image_bool = image_array[i]!=-1
-        # loop through all the q values in the 1D q array for calculating the 1D intensity array
+        # generate a boolean mask for the image array excluding the pixels with
+        # -1 values
+        image_bool = image_array[i] != -1
+        # loop through all the q values in the 1D q array for calculating the
+        # 1D intensity array
         for i_q_curr, q_curr in enumerate(q_1d):
-            # generate a boolean mask for 1D intensity averaging with same shape of the 2D q_array
+            # generate a boolean mask for 1D intensity averaging with same
+            # shape of the 2D q_array
             q_bool = np.abs(q_array[i] - q_curr) <= q_fwhm
             # calculate the integrated 1D intensity at one q value for one measurement
-            # the sum of the intensity image needs to be weighted by the solid angle.
+            # the sum of the intensity image needs to be weighted by the solid
+            # angle.
             sum_intensity = np.sum(image_array[i] *
                                    sr_array[i] *
                                    q_bool *
@@ -159,8 +177,12 @@ def calculate_1d_lowmemo(q_array: np.ndarray, image_array: np.ndarray, sr_array:
     return i_1d
 
 
-def calculate_1d_oop(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np.ndarray,
-                     sr_array: np.ndarray, **kwargs) -> np.ndarray:
+def calculate_1d_oop(
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        image_array: np.ndarray,
+        sr_array: np.ndarray,
+        **kwargs) -> np.ndarray:
     """
     Calculate the 1D scattering intensity in the out-of-plane direction at qy=0.
     I is a function of qz (Å**-1).
@@ -189,7 +211,8 @@ def calculate_1d_oop(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np
 
     utils.validate_array_dimension(image_array, 3)
     utils.validate_array_shape(qy_array, qz_array, image_array, sr_array)
-    utils.validate_kwargs({'qy_fwhm', 'qz_min', 'qz_max', 'qz_num', 'index_list'}, kwargs)
+    utils.validate_kwargs({'qy_fwhm', 'qz_min', 'qz_max',
+                          'qz_num', 'index_list'}, kwargs)
 
     qy_fwhm = kwargs.get('qy_fwhm', 0.002)
     qz_min = kwargs.get('qz_min', 0)
@@ -199,10 +222,12 @@ def calculate_1d_oop(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np
 
     # calculate the qz values to be used in the 1D intensity profile
     qz_1d = np.linspace(qz_min, qz_max, qz_num)
-    # for each qz value, the range used to calculate the intensity is qz-q_fwhm to qz+q_fwhm
-    qz_fwhm = (qz_max - qz_min) / (qz_num-1) / 2
+    # for each qz value, the range used to calculate the intensity is
+    # qz-q_fwhm to qz+q_fwhm
+    qz_fwhm = (qz_max - qz_min) / (qz_num - 1) / 2
     # initialize the 1D intensity array
-    # the first index is the serial number of measurement, the second index relates to the qz value
+    # the first index is the serial number of measurement, the second index
+    # relates to the qz value
     i_1d = np.empty((image_array.shape[0], qz_num))
 
     # loop over all the serial numbers of measurements to be processed
@@ -211,20 +236,23 @@ def calculate_1d_oop(qy_array: np.ndarray, qz_array: np.ndarray, image_array: np
         # representing the qy range used to calculate the 1D intensity profile
         qy_bool = np.abs(qy_array[i]) <= qy_fwhm
         # broadcast the 2D q array to 3D and generate a boolean mask for 1D intensity averaging
-        # the third dimension is the same as the 1D qz array for the 1D intensity profile
+        # the third dimension is the same as the 1D qz array for the 1D
+        # intensity profile
         qz_bool = np.abs(qz_array[i][:, :, np.newaxis] -
                          qz_1d[np.newaxis, np.newaxis, :]) <= qz_fwhm
-        # generate a boolean mask for the image array excluding the pixels with -1 values
-        image_bool = image_array[i]!=-1
+        # generate a boolean mask for the image array excluding the pixels with
+        # -1 values
+        image_bool = image_array[i] != -1
         # Since the relative or absolute intensity image is normalized by the solid angle,
         # the sum of the intensity image needs to be weighted by the solid angle.
-        # after sum, the output is a 1D array with the same length as the 1D q array
+        # after sum, the output is a 1D array with the same length as the 1D q
+        # array
         sum_intensity = np.sum(image_array[i][:, :, np.newaxis] *
                                sr_array[i][:, :, np.newaxis] *
                                qz_bool * image_bool[:, :, np.newaxis] *
                                qy_bool[:, :, np.newaxis],
                                axis=(0, 1))
-        # assign the 1D intensity profile to the 1D intensity array after normalization with 
+        # assign the 1D intensity profile to the 1D intensity array after normalization with
         # the total solid angle of the pixels used in the sum
         i_1d[i] = sum_intensity / np.sum(sr_array[i][:, :, np.newaxis] *
                                          qz_bool *

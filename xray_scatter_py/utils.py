@@ -18,7 +18,8 @@ def validate_kwargs(valid_kwargs: set, kwargs: dict):
 
     unrecognized_kwargs = set(kwargs.keys()) - valid_kwargs
     if unrecognized_kwargs:
-        raise ValueError(f"Unrecognized keyword arguments: {unrecognized_kwargs}")
+        raise ValueError(
+            f"Unrecognized keyword arguments: {unrecognized_kwargs}")
 
 
 def validate_array_dimension(ndarray: np.ndarray, dimension: int):
@@ -30,7 +31,8 @@ def validate_array_dimension(ndarray: np.ndarray, dimension: int):
     - dimension (int): The expected dimension of the array.
     """
     if len(ndarray.shape) != dimension:
-        raise ValueError(f"Array dimension {len(ndarray.shape)} does not match expected dimension {dimension}")
+        raise ValueError(
+            f"Array dimension {len(ndarray.shape)} does not match expected dimension {dimension}")
 
 
 def validate_list_len(params_dict_list: list[dict], len_: int):
@@ -42,7 +44,8 @@ def validate_list_len(params_dict_list: list[dict], len_: int):
     - len_ (int): The expected number of total measurements.
     """
     if len(params_dict_list) != len_:
-        raise ValueError(f"length of parameters dictionary list does not match expected value {len_}")
+        raise ValueError(
+            f"length of parameters dictionary list does not match expected value {len_}")
 
 
 def validate_array_shape(*args):
@@ -86,12 +89,16 @@ def read_image(directory_path: str, index: int) -> tuple:
         image = first_page.asarray()
         tags = first_page.tags
 
-        xml_tag = next(tag for tag_name, tag in tags.items() if 'xml' in str(tag.value))
+        xml_tag = next(
+            tag for tag_name,
+            tag in tags.items() if 'xml' in str(
+                tag.value))
         xml = xml_tag.value
 
     xml_dict = xmltodict.parse(xml)
     parameters = xml_dict['SAXSLABparameters']
-    params_dict = {param['@name']: param.get('#text', None) for param in parameters['param']}
+    params_dict = {
+        param['@name']: param.get('#text', None) for param in parameters['param']}
 
     return params_dict, image
 
@@ -122,11 +129,15 @@ def read_synchrotron_image(directory_path: str, file_name: str) -> tuple:
         first_page = tiff.pages[0]
         image = first_page.asarray()
     # parameters = xml_dict['SAXSLABparameters']
-    # params_dict = {param['@name']: param.get('#text', None) for param in parameters['param']}
+    # params_dict = {param['@name']: param.get('#text', None) for param in
+    # parameters['param']}
     return image
 
 
-def read_multiimage(directory_path: str, start_index: int, end_index: int = 0) -> tuple:
+def read_multiimage(
+        directory_path: str,
+        start_index: int,
+        end_index: int = 0) -> tuple:
     """
     Read multiple TIFF image files and their metadata from the given directory path and index range.
 
@@ -202,7 +213,8 @@ def read_grad_file(directory_path: str, file_name: str) -> tuple:
 
         pattern = r"(?P<x>\w+)(?=-units).*?\((?P<x_unit>[^)]+)\).*?(?P<y>\w+)(?=-units).*?\((?P<y_unit>[^)]+)\)"
         match = re.search(pattern, lines[3])
-        x, y, x_unit, y_unit = match.group("x"), match.group("y"), match.group("x_unit"), match.group("y_unit")
+        x, y, x_unit, y_unit = match.group("x"), match.group(
+            "y"), match.group("x_unit"), match.group("y_unit")
 
         header_info.update({
             "x": x,
@@ -211,7 +223,8 @@ def read_grad_file(directory_path: str, file_name: str) -> tuple:
             "y_unit": y_unit
         })
 
-        file_name, measurement_description, _ = lines[4].strip('"\n').split('","')
+        file_name, measurement_description, _ = lines[4].strip(
+            '"\n').split('","')
         header_info.update({
             "file_name": file_name,
             "measurement_description": measurement_description
@@ -230,10 +243,11 @@ def read_grad_file(directory_path: str, file_name: str) -> tuple:
 
         data_array = np.array(data_list)
 
-        xml_dict = xmltodict.parse(lines[data_end_line+2])
+        xml_dict = xmltodict.parse(lines[data_end_line + 2])
         xml_dict = xml_dict['ROOT']
 
     return header_info, data_array, xml_dict
+
 
 def read_sans(directory_path: str, file_name: str, header=1):
     if not os.path.isdir(directory_path):
