@@ -36,5 +36,7 @@ setup(
         "tifffile",
         "bornagain",
         "xmltodict",
-        "requests"],
+        "requests",
+        "opencv-python"
+        ],
 )

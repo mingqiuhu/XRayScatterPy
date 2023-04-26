@@ -1,4 +1,4 @@
-# tests/test_data_plotting.py
+# examples/grating_single.py
 
 import os
 import numpy as np
@@ -27,24 +27,23 @@ END_INDEX = START_INDEX
 
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
-theta_array, azimuth_array = calibration.calculate_angle(
+theta_array, azimuth_array = calibration.get_angle(
     DETX0, params_dict_list, image_array)
-qx_array, qy_array, qz_array = calibration.calculate_q(
+qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
-omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
-image_array_rel = calibration.calibrate_rel_intensity(
-    params_dict_list, image_array, omega)
+sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
+image_array_rel = calibration.get_rel_intensity(
+    params_dict_list, image_array, sr_array)
 
-data_plotting.plot_2d_scattering(
+data_plotting.plot_2d(
     qy_array,
     qz_array,
     image_array_rel,
     index_list=INDEX_LIST)
 qx, qy, qz, qx_0, qy_0, qz_0 = gratings.calculate_q(
     params_dict_list, image_array, phi=PHI)
-data_plotting.plot_2d_scattering_withlines(
+data_plotting.plot_2d_withmarkers(
     qy_array, qz_array, image_array, qy, qz, index_list=INDEX_LIST)
-
 # data_plotting.plot_3d_grating(qx_array, qy_array, qz_array, image_array,
 #                               qx=qx, qy=qy, qz=qz,
 #                               qx_0=qx_0, qy_0=qy_0, qz_0=qy_0,

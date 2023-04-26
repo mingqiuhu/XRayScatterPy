@@ -55,17 +55,17 @@ def analyze_symmetric_penetration(
     depth_1d, depth_mesh = calc_sym_depth(
         wavelength, sld, sldi, alpha_array)
     qz_1d = 4 * np.pi * np.sin(alpha_array) / wavelength
-    data_plotting.plot_penetration(
+    data_plotting.plot_1d_penetration(
         qz_1d,
         depth_1d,
-        legend,
         x_max=x_max_1d,
         y_min=y_min_1d,
-        y_max=y_max_1d)
+        y_max=y_max_1d,
+        legend=legend)
     alpha_i_mesh, alpha_f_mesh = np.meshgrid(alpha_array, alpha_array)
     ki_mesh = 2 * np.pi * np.sin(alpha_i_mesh) / wavelength
     kf_mesh = 2 * np.pi * np.sin(alpha_f_mesh) / wavelength
-    data_plotting.plot_penetration_2d(
+    data_plotting.plot_2d_penetration(
         ki_mesh, kf_mesh, depth_mesh, x_max=x_max_2d, y_max=y_max_2d)
 
 

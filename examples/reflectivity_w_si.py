@@ -1,4 +1,4 @@
-# tests/test_data_plotting.py
+# examples/reflectivity_w_si.py
 
 import os
 import numpy as np
@@ -18,10 +18,10 @@ QY_FWHM = 0.1
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
 print('obtained params_dict_list, image_array')
-theta_array, azimuth_array = calibration.calculate_angle(
+theta_array, azimuth_array = calibration.get_angle(
     DETX0, params_dict_list, image_array)
 print('theta_array, azimuth_array')
-qx_array, qy_array, qz_array = calibration.calculate_q(
+qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
 print('obtained qx_array, qy_array, qz_array')
 
@@ -33,7 +33,6 @@ normalized_reflectivity, fitted_spillover = reflectivity.calculate_normalized_re
 theta_1d = np.degrees(np.arcsin(qz_1d * 1.542 / 4 / np.pi))
 data_plotting.plot_1d(qz_1d[:-5],
                       normalized_reflectivity[:-5],
-                      yunit='normalized reflectivity',
                       yticks=[1,
                               1e-2,
                               1e-4,
