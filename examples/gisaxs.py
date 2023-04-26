@@ -1,4 +1,4 @@
-# tests/test_data_plotting.py
+# examples/gisaxs.py
 
 import os
 import numpy as np
@@ -19,16 +19,16 @@ QY_FWHM = 0.002
 
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
-theta_array, azimuth_array = calibration.calculate_angle(
+theta_array, azimuth_array = calibration.get_angle(
     DETX0, params_dict_list, image_array)
-rho = calibration.calculate_rho(params_dict_list, azimuth_array, image_array)
-qx_array, qy_array, qz_array = calibration.calculate_q(
-    DETX0, params_dict_list, image_array, rho)
-omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
-image_array_rel = calibration.calibrate_rel_intensity(
-    params_dict_list, image_array, omega)
+chi = calibration.get_chi(params_dict_list, azimuth_array, image_array)
+qx_array, qy_array, qz_array = calibration.get_q(
+    DETX0, params_dict_list, image_array, chi=chi)
+sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
+image_array_rel = calibration.get_rel_intensity(
+    params_dict_list, image_array, sr_array)
 
-data_plotting.plot_2d_scattering(
+data_plotting.plot_2d(
     qy_array,
     qz_array,
     image_array_rel,
@@ -42,15 +42,14 @@ data_plotting.plot_2d_paralell(
 
 q_1d_oop = np.linspace(Q_MIN, Q_MAX, Q_NUM)
 i_1d_oop = data_processing.calculate_1d_oop(
-    QY_FWHM,
-    Q_MIN,
-    Q_MAX,
-    Q_NUM,
     qy_array,
     qz_array,
-    params_dict_list,
     image_array_rel,
-    omega,
+    sr_array,
+    qy_fwhm=QY_FWHM,
+    qz_min=Q_MIN,
+    qz_max=Q_MAX,
+    qz_num=Q_NUM,
     index_list=INDEX_LIST)
 data_plotting.plot_1d_compare(
     q_1d_oop,

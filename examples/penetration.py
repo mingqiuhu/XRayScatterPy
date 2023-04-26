@@ -1,11 +1,12 @@
+# examples/penetration.py
+
 import numpy as np
 from xray_scatter_py import penetration, nist
 
 """
-Incoherent scattering is isotropic and in a small-angle scattering experiment and thus
-contributes to the background signal and degrades signal to noise
+    Incoherent scattering is isotropic and in a small-angle scattering experiment and thus
+    contributes to the background signal and degrades signal to noise
 """
-
 
 # x-ray Si (density = 2.33)
 sld_si = nist.get_scattering_parsed("Si", "2.33")

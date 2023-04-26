@@ -41,8 +41,9 @@ def rotate_vector(
     return np.dot(rotation_matrix, vec)
 
 
-def calculate_q(params_dict_list: list[dict], image_array: np.ndarray,
-                **kwargs) -> tuple(np.ndarray):
+def calculate_q(params_dict_list: list[dict],
+                image_array: np.ndarray,
+                **kwargs) -> tuple[np.ndarray]:
     """
     Calculate the reciprocal space lattice of a grating.
 
