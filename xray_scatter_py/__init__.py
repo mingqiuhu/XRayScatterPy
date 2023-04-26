@@ -5,7 +5,7 @@ from . import calibration
 from . import data_processing
 from . import data_plotting
 from . import reflectivity
-from . import gratings
+# from . import gratings
 from . import utils
 
 # Define package-level attributes, if needed

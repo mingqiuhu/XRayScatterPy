@@ -28,7 +28,7 @@ def get_sample(lattice_rotation_angle, full_pitch, pitch_width, pitch_height):
     material_si = ba.MaterialBySLD("Si", sld_si['x_real'], sld_si['x_imag'])
 
     # Define the form factor of a pitch of the grating
-    pitch_length = 1e4*micrometer
+    pitch_length = 1e4 * micrometer
     pitch_ff = ba.LongBoxLorentz(pitch_length, pitch_width, pitch_height)
 
     # Define a pitch of the grating with rotation
@@ -37,8 +37,9 @@ def get_sample(lattice_rotation_angle, full_pitch, pitch_width, pitch_height):
 
     # Define interference function of the grating
     interference = ba.Interference1DLattice(
-        full_pitch, 90*deg - lattice_rotation_angle)
-    interference_pdf = ba.Profile1DGauss(10*full_pitch) # half width of the decay of the 1D layout
+        full_pitch, 90 * deg - lattice_rotation_angle)
+    # half width of the decay of the 1D layout
+    interference_pdf = ba.Profile1DGauss(10 * full_pitch)
     interference.setDecayFunction(interference_pdf)
 
     # Define layouts
@@ -47,9 +48,9 @@ def get_sample(lattice_rotation_angle, full_pitch, pitch_width, pitch_height):
     pitch_layout.setInterference(interference)
 
     # Define top roughness of the substrate layer
-    sigma = 5*nm # rms of the roughness
-    hurst = 0.5 # describe how jagged the interface is, 0 gives more spikes and 1 gives more smoothness
-    corrLength = 2*nm  # lateral correlation length of the roughness
+    sigma = 5 * nm  # rms of the roughness
+    hurst = 0.5  # describe how jagged the interface is, 0 gives more spikes and 1 gives more smoothness
+    corrLength = 2 * nm  # lateral correlation length of the roughness
     roughness = ba.LayerRoughness(sigma, hurst, corrLength)
 
     # Define layers
@@ -85,11 +86,12 @@ def get_simulation_ganesha(sample):
     # vg1 0.899987
     # hg3 0.900000
     # vg3 0.900000
-    beam = ba.Beam(1e8, 1.542*angstrom, 0.2*deg)
+    beam = ba.Beam(1e8, 1.542 * angstrom, 0.2 * deg)
     detPos = 1472.587500  # distance from sample center to detector in mm
     detWid = 0.172  # detector width in mm
-    detector = ba.RectangularDetector(619, 619*detWid, 487, 487*detWid)
-    detector.setPerpendicularToDirectBeam(detPos, 335.3*detWid, (487-424.48)*detWid)
+    detector = ba.RectangularDetector(619, 619 * detWid, 487, 487 * detWid)
+    detector.setPerpendicularToDirectBeam(
+        detPos, 335.3 * detWid, (487 - 424.48) * detWid)
     simulation = ba.ScatteringSimulation(beam, sample, detector)
     simulation.options().setMonteCarloIntegration(True, 100)
     # simulation.options().setIncludeSpecular(True)
@@ -107,25 +109,30 @@ def create_kernel(radius):
     kernel /= np.sum(kernel)
     return kernel
 
+
 def smooth_colormap(input_array, radius):
     kernel = create_kernel(radius)
     output_array = convolve(input_array, kernel)
     return output_array
 
+
 if __name__ == '__main__':
     bp.parse_args()
-    sample = get_sample(-5.5*deg, 139*nm, 70*nm, 50*nm)
+    sample = get_sample(-5.5 * deg, 139 * nm, 70 * nm, 50 * nm)
     simulation = get_simulation_ganesha(sample)
     result = simulation.simulate()
     simulated_image_array = np.transpose(result.array())
-
 
     # 78465 - 78665 PHI = -5.5
     # 78670 - 78870 PHI = 4.8
     # 78875 - 79075 PHI = -0.04
     # 79080 - 79280 PHI = 90
 
-    DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tiff_files_grating')
+    DATA_PATH = os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        'data',
+        'tiff_files_grating')
 
     DETX0 = 100.4
     INDEX_LIST = [0]
@@ -135,12 +142,15 @@ if __name__ == '__main__':
 
     END_INDEX = START_INDEX
 
-
-    params_dict_list, image_array = utils.read_multiimage(DATA_PATH, START_INDEX, END_INDEX)
-    theta_array, azimuth_array = calibration.calculate_angle(DETX0, params_dict_list, image_array)
-    qx_array, qy_array, qz_array = calibration.calculate_q(DETX0, params_dict_list, image_array)
+    params_dict_list, image_array = utils.read_multiimage(
+        DATA_PATH, START_INDEX, END_INDEX)
+    theta_array, azimuth_array = calibration.calculate_angle(
+        DETX0, params_dict_list, image_array)
+    qx_array, qy_array, qz_array = calibration.calculate_q(
+        DETX0, params_dict_list, image_array)
     omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
-    image_array_rel = calibration.calibrate_rel_intensity(params_dict_list, image_array, omega)
+    image_array_rel = calibration.calibrate_rel_intensity(
+        params_dict_list, image_array, omega)
 
     radius = 2
     simulated_image_array = smooth_colormap(simulated_image_array, radius)
@@ -148,8 +158,12 @@ if __name__ == '__main__':
     cutoff_intensity = np.max(simulated_image_array) * 1e-7
     simulated_image_array[simulated_image_array < cutoff_intensity] = 0
 
-
-    data_plotting.plot_2d_scattering(qy_array, qz_array, image_array_rel, index_list=INDEX_LIST)
-    data_plotting.plot_2d_scattering(qy_array, qz_array, simulated_image_array[np.newaxis,:,:], index_list=INDEX_LIST)
+    data_plotting.plot_2d_scattering(
+        qy_array,
+        qz_array,
+        image_array_rel,
+        index_list=INDEX_LIST)
+    data_plotting.plot_2d_scattering(
+        qy_array, qz_array, simulated_image_array[np.newaxis, :, :], index_list=INDEX_LIST)
 
     # bp.plot_simulation_result(result)

@@ -12,7 +12,10 @@ import numpy as np
 from xray_scatter_py import utils
 
 
-def rotate_vector(vec: np.ndarray, axis: np.ndarray, theta_deg: float) -> np.ndarray:
+def rotate_vector(
+        vec: np.ndarray,
+        axis: np.ndarray,
+        theta_deg: float) -> np.ndarray:
     """
     Rotate a vector about an axis by a given angle.
 
@@ -61,9 +64,11 @@ def calculate_q(params_dict_list: list[dict], image_array: np.ndarray,
     utils.validate_list_len(params_dict_list, image_array.shape[0])
     utils.validate_kwargs({'b', 'phi'}, kwargs)
 
-    # Simple variable names are used in this function to accomodate the complicated equations.
+    # Simple variable names are used in this function to accomodate the
+    # complicated equations.
 
-    # Get full pitch of the grating. The grating used in the testing data is 1390 anstrong.
+    # Get full pitch of the grating. The grating used in the testing data is
+    # 1390 anstrong.
     b = kwargs.get('b', 1390)
 
     # Get inplane rotation angle of the grating.
@@ -75,7 +80,8 @@ def calculate_q(params_dict_list: list[dict], image_array: np.ndarray,
 
     # Initiallize the reciprocal lattice vectors. The vector points from (qx_0, qy_0, qz_0) to
     # (qx, qy, qz). Each of those six variables is a 2D array with the first index being the
-    # serial number of measurement and the second index being the reflection order.
+    # serial number of measurement and the second index being the reflection
+    # order.
     qz = np.empty((image_array.shape[0], p.shape[0]))
     qy = np.empty((image_array.shape[0], p.shape[0]))
     qx = np.empty((image_array.shape[0], p.shape[0]))
@@ -90,17 +96,20 @@ def calculate_q(params_dict_list: list[dict], image_array: np.ndarray,
 
         # calculate the end point of the reciprocal lattice vectors
         qz[i] = 2 * np.pi * np.sin(alpha) * np.cos(alpha) * np.cos(phi) / wavelength \
-        * (1 + (1 - wavelength**2 * p**2 / b**2 / np.sin(alpha)**2 / np.cos(phi)**2
-                * (1 - 2 * b * np.sin(phi) / p / wavelength))**0.5)
-        qy[i] = 2 * np.pi * p * np.cos(phi) / b - 2 * np.pi * np.sin(alpha)**2 * np.cos(phi) * np.sin(phi) / wavelength * \
-        (1 + (1 - wavelength**2 * p**2 / b**2 / np.sin(alpha)**2 / np.cos(phi)**2 * (1 - 2 * b * np.sin(phi) / p / wavelength))**0.5)
-        qx[i] = -np.sqrt((2*np.pi/wavelength)**2 - qy[i]**2 - qz[i]**2) + 2*np.pi/wavelength
+            * (1 + (1 - wavelength**2 * p**2 / b**2 / np.sin(alpha)**2 / np.cos(phi)**2
+                    * (1 - 2 * b * np.sin(phi) / p / wavelength))**0.5)
+        qy[i] = 2 * np.pi * p * np.cos(phi) / b - 2 * np.pi * np.sin(alpha)**2 * np.cos(phi) * np.sin(phi) / wavelength * (1 + (
+            1 - wavelength**2 * p**2 / b**2 / np.sin(alpha)**2 / np.cos(phi)**2 * (1 - 2 * b * np.sin(phi) / p / wavelength))**0.5)
+        qx[i] = -np.sqrt((2 * np.pi / wavelength)**2 - qy[i] **
+                         2 - qz[i]**2) + 2 * np.pi / wavelength
 
-        # calculate the beginning point of the reciprocal lattice vectors at 0 inplane rotation
+        # calculate the beginning point of the reciprocal lattice vectors at 0
+        # inplane rotation
         qx_0[i] = 0
         qy_0[i] = 2 * np.pi * p / b
         qz_0[i] = 0
-        # calculate the beginning point of the reciprocal lattice vectors at phi inplane rotation
+        # calculate the beginning point of the reciprocal lattice vectors at
+        # phi inplane rotation
         for j in range(p.shape[0]):
             vec = np.array([qx_0[i][j], qy_0[i][j], qz_0[i][j]])
             axis = np.array([np.sin(alpha), 0, np.cos(alpha)])
@@ -108,9 +117,12 @@ def calculate_q(params_dict_list: list[dict], image_array: np.ndarray,
             new_vec = rotate_vector(vec, axis, theta_deg)
             qx_0[i][j], qy_0[i][j], qz_0[i][j] = new_vec[0], new_vec[1], new_vec[2]
 
-        # mask out the invalid points with the limit of the available diffraction orders
-        p_upper_limit = b * np.sin(phi) / wavelength + b / wavelength * (np.sin(phi)**2 + np.sin(alpha)**2 * np.cos(phi)**2)**0.5
-        p_lower_limit = b * np.sin(phi) / wavelength - b / wavelength * (np.sin(phi)**2 + np.sin(alpha)**2 * np.cos(phi)**2)**0.5
+        # mask out the invalid points with the limit of the available
+        # diffraction orders
+        p_upper_limit = b * np.sin(phi) / wavelength + b / wavelength * \
+            (np.sin(phi)**2 + np.sin(alpha)**2 * np.cos(phi)**2)**0.5
+        p_lower_limit = b * np.sin(phi) / wavelength - b / wavelength * \
+            (np.sin(phi)**2 + np.sin(alpha)**2 * np.cos(phi)**2)**0.5
         mask = np.logical_and(p <= p_upper_limit, p >= p_lower_limit)
         qx[i, ~mask] = np.nan
         qy[i, ~mask] = np.nan

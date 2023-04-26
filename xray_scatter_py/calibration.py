@@ -44,26 +44,26 @@ import numpy as np
 from xray_scatter_py import utils
 
 
-def get_mm(detx0: float,
-           params: list[dict],
-           images: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Get the Cartesian coordinates (x, y, z) of each detector pixel in mm.
+def get_mm(
+        detx0: float,
+        params: list[dict],
+        images: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Get the Cartesian coordinates (x, y, z) of each detector pixel in mm.
 
     Args:
-    - detx0 (float): Zero position of detector motor.
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'detx': Relative sample-detector distance in mm.
-            - 'beamcenter_actual': Actual beam center position '[y z]' in mm.
-            - 'pixelsize': Detector pixel size '[y z]' in mm.
-    - images (np.ndarray): A 3D array of the original detector images.
-        The first index is the serial number of measurement.
+        - detx0 (float): Zero position of detector motor.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'detx': Relative sample-detector distance in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'pixelsize': Detector pixel size '[y z]' in mm.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
 
     Returns:
-    - tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple of three 3D arrays
-        representing the x, y, z coordinate of each detector pixel in mm.
-        Each array has the same shape as images.
+        - tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple of three 3D arrays
+            representing the x, y, z coordinate of each detector pixel in mm.
+            Each array has the same shape as images.
     """
 
     utils.validate_array_dimension(images, 3)
@@ -100,32 +100,32 @@ def get_mm(detx0: float,
     return x_array, y_array, z_array
 
 
-def get_angle(detx0: float,
-              params: list[dict],
-              images: np.ndarray,
-              **kwargs) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Get the theta and azimuth angles for each detector pixel in the images.
+def get_angle(
+        detx0: float,
+        params: list[dict],
+        images: np.ndarray,
+        **kwargs) -> tuple[np.ndarray, np.ndarray]:
+    """Get the theta and azimuth angles for each detector pixel in the images.
 
     Args:
-    - detx0 (float): Zero position of detector motor.
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'detx': Relative sample-detector distance in mm.
-            - 'beamcenter_actual': Actual beam center position '[y z]' in mm.
-            - 'pixelsize': Detector pixel size '[y z]' in mm.
-    - images (np.ndarray): A 3D array of the original detector images.
-        The first index is the serial number of measurement.
-    - kwargs:
-        - chi (np.ndarray, optional): sample rotation around incidence x-ray.
-            The 1D array has the same shape as the first dimension of images,
-            representing the chi angle for each measurement. If not provided,
-            default to an array of 0.5 * np.pi.
+        - detx0 (float): Zero position of detector motor.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'detx': Relative sample-detector distance in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'pixelsize': Detector pixel size '[y z]' in mm.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
+        - kwargs:
+            - chi (np.ndarray, optional): sample rotation around incident x-ray
+                The 1D array has same shape as the first dimension of images,
+                representing the chi angle for each measurement. If not
+                provided, default to an array of 0.5 * np.pi.
 
     Returns:
-    - tuple[np.ndarray, np.ndarray]: A tuple of two 3D arrays representing the
-        theta and azimuth angles of each detector pixel, with the same shape
-        images.
+        - tuple[np.ndarray, np.ndarray]: A tuple of two 3D arrays representing
+            theta and azimuth angles of each detector pixel, with the same
+            shape as images.
     """
 
     utils.validate_array_dimension(images, 3)
@@ -162,33 +162,33 @@ def get_angle(detx0: float,
     return theta_array, azimuth_array
 
 
-def get_q(detx0: float,
-          params: list[dict],
-          images: np.ndarray,
-          **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Get the q-vectors (qx, qy, qz) for each detector pixel in the images.
+def get_q(
+        detx0: float,
+        params: list[dict],
+        images: np.ndarray,
+        **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Get the q-vectors (qx, qy, qz) for each detector pixel in the images.
 
     Args:
-    - detx0 (float): Zero position of detector motor.
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'detx': Relative sample-detector distance in mm.
-            - 'beamcenter_actual': Actual beam center position '[y z]' in mm.
-            - 'pixelsize': Detector pixel size '[y z]' in mm.
-            - 'wavelength': The wavelength of the x-ray beam in angstrom.
-    - images (np.ndarray): A 3D array of the original detector images.
-        The first index is the serial number of measurement.
-    - kwargs:
-        - chi (np.ndarray, optional): sample rotation around incidence x-ray.
-            The 1D array has the same shape as the first dimension of images,
-            representing the chi angle for each measurement. If not provided,
-            default to an array of 0.5 * np.pi.
+        - detx0 (float): Zero position of detector motor.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'detx': Relative sample-detector distance in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'pixelsize': Detector pixel size '[y z]' in mm.
+                - 'wavelength': The wavelength of the x-ray beam in angstrom.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
+        - kwargs:
+            - chi (np.ndarray, optional): sample rotation around incident x-ray
+                The 1D array has same shape as the first dimension of images,
+                representing the chi angle for each measurement. If not
+                provided, default to an array of 0.5 * np.pi.
 
     Returns:
-    - tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple of three 3D arrays
-        representing the qx, qy, and qz of each detector pixel, each with the
-        same shape as images.
+        - tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple of three 3D arrays
+            representing the qx, qy, and qz of each detector pixel, each with
+            the same shape as images.
     """
 
     utils.validate_array_dimension(images, 3)
@@ -209,27 +209,28 @@ def get_q(detx0: float,
 
 
 # -1 needs to be excluded
-def get_chi(params: list[dict],
-            azimuth_array: np.ndarray,
-            images: np.ndarray,
-            **kwargs) -> np.ndarray:
-    """
-    Get chi, the azimuthal angle with the largest integrated intensity.
+def get_chi(
+        params: list[dict],
+        azimuth_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs) -> np.ndarray:
+    """Get chi, the azimuthal angle with the largest integrated intensity.
 
     Args:
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'beamcenter_actual': Actual beam center position '[y z]' in mm.
-    - azimuth_array (np.array): A 3D array of azimuth angle of each pixel.
-    - images (np.ndarray): A 3D array of the original detector images.
-        The first index is the serial number of measurement.
-    - kwargs:
-        - num_azimuth (int, optional): The number of azimuth values to screen.
-        - center_mask (int, optional): Radius of the mask to exclude the
-            spill-over incident beam.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+        - azimuth_array (np.array): A 3D array of azimuth angle of each pixel.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
+        - kwargs:
+            - num_azimuth (int, optional): The number of azimuth angles.
+                If not provided, defaults to 720.
+            - center_mask (int, optional): Radius of the mask to exclude the
+                spill-over incident beam. If not provided, defaults to 20.
 
     Returns:
-        np.ndarray: 1D array containing the chi angle for each measurement.
+        - np.ndarray: 1D array containing the chi angle for each measurement.
     """
 
     utils.validate_array_dimension(images, 3)
@@ -281,24 +282,24 @@ def get_chi(params: list[dict],
     return chi_1d
 
 
-def get_sr(detx0: float,
-           params: list[dict],
-           theta_array: np.ndarray) -> np.ndarray:
-    """
-    Get the solid angle (sr) for each pixel of the detector images.
+def get_sr(
+        detx0: float,
+        params: list[dict],
+        theta_array: np.ndarray) -> np.ndarray:
+    """Get the solid angle (sr) for each pixel of the detector images.
 
     Args:
-    - detx0 (float): Zero position of detector motor.
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'detx': Relative sample-detector distance in mm.
-            - 'pixelsize': Detector pixel size '[y z]' in mm.
-    - theta_array (np.ndarray): A 3D array of scattering angle of each pixel.
-        The first index is the serial number of measurement.
+        - detx0 (float): Zero position of detector motor.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'detx': Relative sample-detector distance in mm.
+                - 'pixelsize': Detector pixel size '[y z]' in mm.
+        - theta_array (np.ndarray): 3D array of scattering angle of each pixel.
+            The first index is the serial number of measurement.
 
     Returns:
-    - np.ndarray: A 3D array containing the solid angles for each pixel.
-        The array has the same shape as the input theta_array.
+        - np.ndarray: A 3D array containing the solid angles for each pixel.
+            The array has the same shape as the input theta_array.
     """
 
     utils.validate_array_dimension(theta_array, 3)
@@ -318,23 +319,23 @@ def get_sr(detx0: float,
     return sr_array
 
 
-def get_rel_intensity(params: list[dict],
-                      images: np.ndarray,
-                      sr_array: np.ndarray) -> np.ndarray:
-    """
-    Normalize the intensity by exposure time and solid angle.
+def get_rel_intensity(
+        params: list[dict],
+        images: np.ndarray,
+        sr_array: np.ndarray) -> np.ndarray:
+    """Normalize the intensity by exposure time and solid angle.
 
     Args:
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'det_exposure_time': The exposure time in seconds.
-    - images (np.ndarray): A 3D array of the original detector images.
-        The first index is the serial number of measurement.
-    - sr_array (np.ndarray): A 3D array of the solid angles for each pixel.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'det_exposure_time': The exposure time in seconds.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
+        - sr_array (np.ndarray): A 3D array of the solid angles for each pixel.
 
     Returns:
-    - np.ndarray: A 3D array containing the normalized relative intensities.
-        The array has the same shape as the input images.
+        - np.ndarray: 3D array containing the normalized relative intensities.
+            The array has the same shape as the input images.
     """
 
     utils.validate_array_dimension(images, 3)
@@ -353,25 +354,25 @@ def get_rel_intensity(params: list[dict],
     return images
 
 
-def get_abs_intensity(params: list[dict],
-                      images: np.ndarray) -> np.ndarray:
-    """
-    Normalize the intensity by transmission factor, sample thickness, and
+def get_abs_intensity(
+        params: list[dict],
+        images: np.ndarray) -> np.ndarray:
+    """Normalize the intensity by transmission factor, sample thickness, and
     incident intensity, assuming the intensity is already normalized by
     exposure time and solid angle.
 
     Args:
-    - params (list[dict]): Each dict contains parameters of each measurement.
-        Each dictionary should contain the following keys with string values:
-            - 'sample_transfact': The transmission factor of the sample.
-            - 'sample_thickness': The thickness of the sample in mm.
-            - 'saxsconf_Izero': The incident intensity.
-    - images (np.ndarray): A 3D array of the original detector images.
-        The first index is the serial number of measurement.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'sample_transfact': The transmission factor of the sample.
+                - 'sample_thickness': The thickness of the sample in mm.
+                - 'saxsconf_Izero': The incident intensity.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
 
     Returns:
-    - np.ndarray: A 3D array containing the absolute intensities.
-        The array has the same shape as the input images.
+        - np.ndarray: A 3D array containing the absolute intensities.
+            The array has the same shape as the input images.
     """
 
     utils.validate_array_dimension(images, 3)

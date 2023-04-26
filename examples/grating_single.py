@@ -10,7 +10,11 @@ from xray_scatter_py import data_plotting, utils, calibration, gratings
 # 78875 - 79075 PHI = -0.04
 # 79080 - 79280 PHI = 90
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tiff_files_grating')
+DATA_PATH = os.path.join(
+    os.path.dirname(__file__),
+    '..',
+    'data',
+    'tiff_files_grating')
 
 DETX0 = 100.4
 INDEX_LIST = [0]
@@ -21,19 +25,29 @@ PHI = -0.04
 END_INDEX = START_INDEX
 
 
-params_dict_list, image_array = utils.read_multiimage(DATA_PATH, START_INDEX, END_INDEX)
-theta_array, azimuth_array = calibration.calculate_angle(DETX0, params_dict_list, image_array)
-qx_array, qy_array, qz_array = calibration.calculate_q(DETX0, params_dict_list, image_array)
+params_dict_list, image_array = utils.read_multiimage(
+    DATA_PATH, START_INDEX, END_INDEX)
+theta_array, azimuth_array = calibration.calculate_angle(
+    DETX0, params_dict_list, image_array)
+qx_array, qy_array, qz_array = calibration.calculate_q(
+    DETX0, params_dict_list, image_array)
 omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
-image_array_rel = calibration.calibrate_rel_intensity(params_dict_list, image_array, omega)
+image_array_rel = calibration.calibrate_rel_intensity(
+    params_dict_list, image_array, omega)
 
-data_plotting.plot_2d_scattering(qy_array, qz_array, image_array_rel, index_list=INDEX_LIST)
-qx, qy, qz, qx_0, qy_0, qz_0 = gratings.calculate_q(params_dict_list, image_array, phi=PHI)
-data_plotting.plot_2d_scattering_withlines(qy_array, qz_array, image_array, qy, qz, index_list=INDEX_LIST)
+data_plotting.plot_2d_scattering(
+    qy_array,
+    qz_array,
+    image_array_rel,
+    index_list=INDEX_LIST)
+qx, qy, qz, qx_0, qy_0, qz_0 = gratings.calculate_q(
+    params_dict_list, image_array, phi=PHI)
+data_plotting.plot_2d_scattering_withlines(
+    qy_array, qz_array, image_array, qy, qz, index_list=INDEX_LIST)
 
-# data_plotting.plot_3d_grating(qx_array, qy_array, qz_array, image_array, 
-#                               qx=qx, qy=qy, qz=qz, 
-#                               qx_0=qx_0, qy_0=qy_0, qz_0=qy_0, 
+# data_plotting.plot_3d_grating(qx_array, qy_array, qz_array, image_array,
+#                               qx=qx, qy=qy, qz=qz,
+#                               qx_0=qx_0, qy_0=qy_0, qz_0=qy_0,
 #                               index_list=None, crop=False)
 """
 xmin, xmax = np.min(qy_array), np.max(qy_array)

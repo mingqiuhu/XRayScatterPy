@@ -7,7 +7,8 @@ In this example we utilize the scalar reflectometry  engine to fit polarized
 data without spin-flip for performance reasons.
 """
 
-import os, sys
+import os
+import sys
 import numpy
 import matplotlib.pyplot as plt
 from scipy.optimize import differential_evolution
@@ -31,35 +32,35 @@ datadir = os.getenv('honeycomb', '')
 def get_sample(parameters, sign, ms150=1):
 
     m_Air = ba.MaterialBySLD("Air", 0, 0)
-    m_PyOx  = ba.MaterialBySLD("PyOx",
-                               (parameters["sld_PyOx_real"] + \
-                                 sign * ms150 * parameters["msld_PyOx"] )* 1e-6,
-                               parameters["sld_PyOx_imag"] * 1e-6)
-    m_Py2   = ba.MaterialBySLD("Py2",
-                               ( parameters["sld_Py2_real"] + \
-                                 sign * ms150 * parameters["msld_Py2"] ) * 1e-6,
-                               parameters["sld_Py2_imag"] * 1e-6)
-    m_Py1   = ba.MaterialBySLD("Py1",
-                               ( parameters["sld_Py1_real"] + \
-                                 sign * ms150 * parameters["msld_Py1"] ) * 1e-6,
-                               parameters["sld_Py1_imag"] * 1e-6)
-    m_SiO2 = ba.MaterialBySLD("SiO2", parameters["sld_SiO2_real"]*1e-6,
-                              parameters["sld_SiO2_imag"]*1e-6)
-    m_Si = ba.MaterialBySLD("Substrate", parameters["sld_Si_real"]*1e-6,
-                            parameters["sld_Si_imag"]*1e-6)
+    m_PyOx = ba.MaterialBySLD("PyOx",
+                              (parameters["sld_PyOx_real"] +
+                               sign * ms150 * parameters["msld_PyOx"]) * 1e-6,
+                              parameters["sld_PyOx_imag"] * 1e-6)
+    m_Py2 = ba.MaterialBySLD("Py2",
+                             (parameters["sld_Py2_real"] +
+                              sign * ms150 * parameters["msld_Py2"]) * 1e-6,
+                             parameters["sld_Py2_imag"] * 1e-6)
+    m_Py1 = ba.MaterialBySLD("Py1",
+                             (parameters["sld_Py1_real"] +
+                              sign * ms150 * parameters["msld_Py1"]) * 1e-6,
+                             parameters["sld_Py1_imag"] * 1e-6)
+    m_SiO2 = ba.MaterialBySLD("SiO2", parameters["sld_SiO2_real"] * 1e-6,
+                              parameters["sld_SiO2_imag"] * 1e-6)
+    m_Si = ba.MaterialBySLD("Substrate", parameters["sld_Si_real"] * 1e-6,
+                            parameters["sld_Si_imag"] * 1e-6)
 
     l_Air = ba.Layer(m_Air)
-    l_PyOx = ba.Layer(m_PyOx, parameters["t_PyOx"]*angstrom)
-    l_Py2 = ba.Layer(m_Py2, parameters["t_Py2"]*angstrom)
-    l_Py1 = ba.Layer(m_Py1, parameters["t_Py1"]*angstrom)
-    l_SiO2 = ba.Layer(m_SiO2, parameters["t_SiO2"]*angstrom)
+    l_PyOx = ba.Layer(m_PyOx, parameters["t_PyOx"] * angstrom)
+    l_Py2 = ba.Layer(m_Py2, parameters["t_Py2"] * angstrom)
+    l_Py1 = ba.Layer(m_Py1, parameters["t_Py1"] * angstrom)
+    l_SiO2 = ba.Layer(m_SiO2, parameters["t_SiO2"] * angstrom)
     l_Si = ba.Layer(m_Si)
 
-    r_PyOx = ba.LayerRoughness(parameters["r_PyOx"]*angstrom)
-    r_Py2 = ba.LayerRoughness(parameters["r_Py2"]*angstrom)
-    r_Py1 = ba.LayerRoughness(parameters["r_Py1"]*angstrom)
-    r_SiO2 = ba.LayerRoughness(parameters["r_SiO2"]*angstrom)
-    r_Si = ba.LayerRoughness(parameters["r_Si"]*angstrom)
+    r_PyOx = ba.LayerRoughness(parameters["r_PyOx"] * angstrom)
+    r_Py2 = ba.LayerRoughness(parameters["r_Py2"] * angstrom)
+    r_Py1 = ba.LayerRoughness(parameters["r_Py1"] * angstrom)
+    r_SiO2 = ba.LayerRoughness(parameters["r_SiO2"] * angstrom)
+    r_Si = ba.LayerRoughness(parameters["r_Si"] * angstrom)
 
     sample = ba.MultiLayer()
 
@@ -79,10 +80,9 @@ def get_simulation(q_axis, parameters, sign, ms150=False):
 
     q_distr = ba.DistributionGaussian(0., 1., 25, 3.)
 
-    dq = parameters["dq"]*q_axis
+    dq = parameters["dq"] * q_axis
     scan = ba.QzScan(q_axis)
     scan.setVectorResolution(q_distr, dq)
-
 
     if ms150:
         sample = get_sample(parameters=parameters,
@@ -131,13 +131,13 @@ def plot(qs, rs, exps, shifts, labels, filename):
     for q, r, exp, shift, l in zip(qs, rs, exps, shifts, labels):
 
         ax.errorbar(exp[0],
-                    exp[1]/shift,
-                    yerr=exp[2]/shift,
+                    exp[1] / shift,
+                    yerr=exp[2] / shift,
                     fmt='.',
                     markersize=0.75,
                     linewidth=0.5)
 
-        ax.plot(q, r/shift, label=l)
+        ax.plot(q, r / shift, label=l)
 
     ax.set_yscale('log')
     plt.legend()
@@ -163,11 +163,11 @@ def plot_sld_profile(fitParams, filename):
         get_sample(parameters, -1, ms150=parameters["ms150"]))
 
     plt.figure()
-    plt.plot(z_300_p, numpy.real(sld_300_p)*1e6, label=r"300K $+$")
-    plt.plot(z_300_m, numpy.real(sld_300_m)*1e6, label=r"300K $-$")
+    plt.plot(z_300_p, numpy.real(sld_300_p) * 1e6, label=r"300K $+$")
+    plt.plot(z_300_m, numpy.real(sld_300_m) * 1e6, label=r"300K $-$")
 
-    plt.plot(z_150_p, numpy.real(sld_150_p)*1e6, label=r"150K $+$")
-    plt.plot(z_150_m, numpy.real(sld_150_m)*1e6, label=r"150K $-$")
+    plt.plot(z_150_p, numpy.real(sld_150_p) * 1e6, label=r"150K $+$")
+    plt.plot(z_150_m, numpy.real(sld_150_m) * 1e6, label=r"150K $-$")
 
     plt.xlabel(r"$z$ [A]")
     plt.ylabel(r"$\delta(z) \cdot 10^6$")
@@ -193,10 +193,10 @@ def normalizeData(data):
     r0 = numpy.where(data[0] - numpy.roll(data[0], 1) == 0)
     data = numpy.delete(data, r0, 1)
 
-    data[0] = data[0]/angstrom
+    data[0] = data[0] / angstrom
     norm = numpy.max(data[1])
-    data[1] = data[1]/norm
-    data[2] = data[2]/norm
+    data[1] = data[1] / norm
+    data[2] = data[2] / norm
 
     # sort by q axis
     so = numpy.argsort(data[0])
@@ -224,8 +224,8 @@ def get_Experimental_data(filename, qmin, qmax):
 
 
 def relative_difference(sim, exp):
-    result = (exp - sim)/(exp + sim)
-    return numpy.sum(result*result)/len(sim)
+    result = (exp - sim) / (exp + sim)
+    return numpy.sum(result * result) / len(sim)
 
 
 def create_Parameter_dictionary(parameterNames, *args):
@@ -236,13 +236,13 @@ class FitObjective:
 
     def __init__(self, q_axis, rdata, simulationFactory, parameterNames):
         if isinstance(q_axis, list) and isinstance(rdata, list) and \
-                                    isinstance(simulationFactory, list):
+                isinstance(simulationFactory, list):
             self._q = q_axis
             self._r = rdata
             self._simulationFactory = simulationFactory
 
         elif not isinstance(q_axis, list) and not isinstance(rdata, list) \
-                              and not isinstance(simulationFactory, list):
+                and not isinstance(simulationFactory, list):
             self._q = [q_axis]
             self._r = [rdata]
             self._simulationFactory = [simulationFactory]
@@ -282,7 +282,7 @@ def run_fit_differential_evolution(q_axis, rdata, simulationFactory,
     result = differential_evolution(objective,
                                     bounds,
                                     maxiter=200,
-                                    popsize=len(bounds)*10,
+                                    popsize=len(bounds) * 10,
                                     mutation=(0.5, 1.5),
                                     disp=True,
                                     tol=1e-2)
@@ -404,10 +404,10 @@ if __name__ == '__main__':
         dataSimTuple = [[
             data_300_p[0], data_300_m[0], data_150_p[0], data_150_m[0]
         ], [data_300_p[1], data_300_m[1], data_150_p[1], data_150_m[1]],
-                        [
-                            run_Simulation_300_p, run_Simulation_300_m,
-                            run_Simulation_150_p, run_Simulation_150_m
-                        ]]
+            [
+            run_Simulation_300_p, run_Simulation_300_m,
+            run_Simulation_150_p, run_Simulation_150_m
+        ]]
 
         fitResult = run_fit_differential_evolution(*dataSimTuple,
                                                    startParams)

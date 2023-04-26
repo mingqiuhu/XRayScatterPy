@@ -30,9 +30,10 @@ def plt_set_params_after_refl():
     plt.ylim(10**-7, 10)
     plt.xlim(0.02, 0.4)
     plt.yticks(R_ticks)
-    plt.xlabel('q'+'$_{z}$'+' (A'+'$^{-1}$'+')')
+    plt.xlabel('q' + '$_{z}$' + ' (A' + '$^{-1}$' + ')')
     plt.ylabel('R')
     plt.show()
+
 
 def plt_set_params_after_off_specular():
     '''This function sets the parameters afer plotting reflectivity as a
@@ -46,7 +47,8 @@ def plt_set_params_after_off_specular():
     plt.xlabel(r'$\alpha_f\ (^{\circ})$')
     plt.ylabel('I (a.u.)')
     plt.show()
-    
+
+
 def plt_set_params_after_rock():
     '''This function sets the parameters afer plotting reflectivity as a
     function of qz.'''
@@ -59,7 +61,8 @@ def plt_set_params_after_rock():
     plt.xlabel(r'$\alpha_i-\phi/2\ (^{\circ})$')
     plt.ylabel('I (a.u.)')
     plt.show()
-    
+
+
 def plt_set_params_after_R():
     '''This function sets the parameters afer plotting reflectivity as a
     function of qz.'''
