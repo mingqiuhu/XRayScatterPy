@@ -34,7 +34,6 @@ setup(
         "scikit-image",
         "pandas",
         "tifffile",
-        "bornagain",
         "xmltodict",
         "requests",
         "opencv-python"
