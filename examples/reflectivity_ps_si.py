@@ -1,8 +1,8 @@
-# tests/test_data_plotting.py
+# examples/reflectivity_ps_si.py
 
 import os
-from xray_scatter_py import data_plotting, utils, calibration, reflectivity
 import numpy as np
+from xray_scatter_py import data_plotting, utils, calibration, reflectivity
 
 
 DATA_PATH = os.path.join(
@@ -18,10 +18,10 @@ QY_FWHM = 0.1
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
 print('obtained params_dict_list, image_array')
-theta_array, azimuth_array = calibration.calculate_angle(
+theta_array, azimuth_array = calibration.get_angle(
     DETX0, params_dict_list, image_array)
 print('theta_array, azimuth_array')
-qx_array, qy_array, qz_array = calibration.calculate_q(
+qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
 print('obtained qx_array, qy_array, qz_array')
 
@@ -32,8 +32,7 @@ normalized_reflectivity, fitted_spillover = reflectivity.calculate_normalized_re
 
 theta_1d = np.degrees(np.arcsin(qz_1d * 1.542 / 4 / np.pi))
 data_plotting.plot_1d(qz_1d[:-5],
-                      normalized_reflectivity[:-5],
-                      yunit='normalized reflectivity')
+                      normalized_reflectivity[:-5])
 data_plotting.plot_1d_compare(
     theta_1d,
     spillover_array,

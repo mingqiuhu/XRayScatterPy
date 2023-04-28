@@ -1,4 +1,5 @@
-# tests/test_data_plotting.py
+# examples/sans.py
+
 import os
 import numpy as np
 from xray_scatter_py import data_plotting, utils, calibration
@@ -21,15 +22,15 @@ INDEX_LIST = [0]
 
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
-theta_array, azimuth_array = calibration.calculate_angle(
+theta_array, azimuth_array = calibration.get_angle(
     DETX0, params_dict_list, image_array)
-qx_array, qy_array, qz_array = calibration.calculate_q(
+qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
-omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
-image_array_rel = calibration.calibrate_rel_intensity(
-    params_dict_list, image_array, omega)
+sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
+image_array_rel = calibration.get_rel_intensity(
+    params_dict_list, image_array, sr_array)
 
-data_plotting.plot_2d_scattering(qy_array,
+data_plotting.plot_2d(qy_array,
                                  qz_array,
                                  image_array_rel,
                                  index_list=INDEX_LIST,

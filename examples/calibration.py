@@ -1,4 +1,4 @@
-# tests/test_data_plotting.py
+# examples/calibration.py
 
 import os
 import numpy as np
@@ -18,15 +18,15 @@ Q_MIN, Q_MAX, Q_NUM = 3e-03, 3, 399
 
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
-theta_array, azimuth_array = calibration.calculate_angle(
+theta_array, azimuth_array = calibration.get_angle(
     DETX0, params_dict_list, image_array)
-qx_array, qy_array, qz_array = calibration.calculate_q(
+qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
 q_array = np.sqrt(qx_array**2 + qy_array**2 + qz_array**2)
-omega = calibration.calculate_omega(DETX0, params_dict_list, theta_array)
-image_array_rel = calibration.calibrate_rel_intensity(
-    params_dict_list, image_array, omega)
-image_array_abs = calibration.calibrate_abs_intensity(
+sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
+image_array_rel = calibration.get_rel_intensity(
+    params_dict_list, image_array, sr_array)
+image_array_abs = calibration.get_abs_intensity(
     params_dict_list, image_array_rel)
 
 
@@ -42,12 +42,12 @@ header_info, data_array_waxs, xml_dict = utils.read_grad_file(
 
 q_1d = np.linspace(Q_MIN, Q_MAX, Q_NUM)
 i_1d = data_processing.calculate_1d(
-    Q_MIN,
-    Q_MAX,
-    Q_NUM,
     q_array,
     image_array_abs,
-    omega,
+    sr_array,
+    q_min=Q_MIN,
+    q_max=Q_MAX,
+    q_num=Q_NUM,
     index_list=INDEX_LIST)
 
 

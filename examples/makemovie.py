@@ -1,5 +1,7 @@
-import cv2
+# examples/makemovie.py
+
 import os
+import cv2
 
 # Parameters
 image_folder = os.path.join(
@@ -7,10 +9,10 @@ image_folder = os.path.join(
     '..',
     'data',
     'movie',
-    'real_space')
-output_video = 'output_video.mp4'
-fps = 1  # 20
-compression_ratio = 1  # 0.5
+    '3d')
+OUTPUT_VIDEO = 'output_video.mp4'
+FPS = 1  # 20
+COMPRESSION_RATIO = 1  # 0.5
 
 # Get the image file names
 # images = [f'{i}.png' for i in range(200, -1, -1)] + [f'{i}.png' for i in range(201)]
@@ -21,14 +23,14 @@ frame = cv2.imread(os.path.join(image_folder, images[0]))
 height, width, layers = frame.shape
 
 # Resize dimensions
-new_width = int(width * compression_ratio)
-new_height = int(height * compression_ratio)
+new_width = int(width * COMPRESSION_RATIO)
+new_height = int(height * COMPRESSION_RATIO)
 
 # Set the video codec
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 # Create the video writer
-video = cv2.VideoWriter(output_video, fourcc, fps, (new_width, new_height))
+video = cv2.VideoWriter(OUTPUT_VIDEO, fourcc, FPS, (new_width, new_height))
 
 # Write the frames to the video
 for image in images:
@@ -39,4 +41,4 @@ for image in images:
 # Release the video writer
 video.release()
 
-print(f"Video saved as {output_video}")
+print(f"Video saved as {OUTPUT_VIDEO}")

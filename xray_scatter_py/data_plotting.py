@@ -124,7 +124,6 @@ def plot_2d(
     Returns:
         - None
     """
-
     utils.validate_array_dimension(images, 3)
     utils.validate_array_shape(images, qy_array, qz_array)
     utils.validate_kwargs(
@@ -202,7 +201,7 @@ def plot_2d_withmarkers(
         - None
     """
     utils.validate_array_dimension(images, 3)
-    utils.validate_array_dimension(qy_markers_array, 1)
+    # utils.validate_array_dimension(qy_markers_array, 2)
     utils.validate_array_shape(images, qy_array, qz_array)
     utils.validate_array_shape(qy_markers_array, qz_markers_array)
     utils.validate_kwargs({'index_list', 'crop'}, kwargs)
@@ -275,7 +274,6 @@ def plot_2d_onlymarkers(
     Returns:
         - None
     """
-
     utils.validate_array_dimension(qy_markers_array, 1)
     utils.validate_array_shape(qz_markers_array, qy_markers_array)
     utils.validate_kwargs(
@@ -341,7 +339,6 @@ def plot_2d_polar(
     Returns:
         - None
     """
-
     utils.validate_array_dimension(images, 3)
     utils.validate_array_shape(
         azimuth_array, qx_array, qy_array, qz_array, images)
@@ -418,7 +415,6 @@ def plot_2d_paralell(
     Returns:
         - None
     """
-
     utils.validate_array_dimension(images, 3)
     utils.validate_array_shape(qx_array, qy_array, qz_array, images)
     utils.validate_kwargs({'index_list'}, kwargs)
@@ -475,7 +471,6 @@ def plot_1d(
     Returns:
         - None
     """
-
     utils.validate_array_dimension(scattering_vec, 1)
     utils.validate_array_shape(intensity, scattering_vec)
     utils.validate_kwargs(
@@ -501,7 +496,7 @@ def plot_1d(
 # following not optimized yet.
 def plot_1d_compare(
         scattering_vec_1: np.ndarray,
-        intnesity_1: np.ndarray,
+        intensity_1: np.ndarray,
         scattering_vec_2: np.ndarray,
         intensity_2: np.ndarray,
         **kwargs):
@@ -516,12 +511,13 @@ def plot_1d_compare(
         - kwargs:
             - xscale (str, optional): the type of x axis scale.
                 If not provided, default to 'log'
-            - yscale (str, optional): the type of y axis scale.
-                If not provided, default to 'log'
             - xlabel (str, optional): the label of x axis.
                 If not provided, default to 'q'
+            - yscale (str, optional): the type of y axis scale.
+                If not provided, default to 'log'
             - ylabel (str, optional): the label of y axis.
                 If not provided, default to 'abs'
+            - yunit (str, optional): the y axis unit
             - legend (list[str], optional): the legend name list.
                 If not provided, default to None
             - legend_fontsize (int, optional): the font size of legend.
@@ -529,17 +525,26 @@ def plot_1d_compare(
     Returns:
         None
     """
+    utils.validate_array_dimension(scattering_vec_1, 1)
+    utils.validate_array_shape(scattering_vec_1, intensity_1)
+    utils.validate_array_dimension(scattering_vec_2, 1)
+    utils.validate_array_shape(scattering_vec_2, intensity_2)
+    utils.validate_kwargs(
+        {'xscale', 'xlabel', 'yscale', 'ylabel', 'yunit', 'legend',
+         'legend_fontsize'}, kwargs)
+
     xscale = kwargs.get('xscale', 'log')
     xlabel = kwargs.get('xlabel', 'q')
-    ylabel = kwargs.get('ylabel', 'abs')
     yscale = kwargs.get('yscale', 'log')
+    ylabel = kwargs.get('ylabel', 'abs')
+    yunit = kwargs.get('yunit')
     legend = kwargs.get('legend', None)
     legend_fontsize = kwargs.get('legend_fontsize', 20)
 
     plot_set()
     plt.figure()
-    plt.plot(q_1, i_1)
-    plt.plot(q_2, i_2)
+    plt.plot(scattering_vec_1, intensity_1)
+    plt.plot(scattering_vec_2, intensity_2)
     if xlabel == 'q':
         plt.xlabel(r'$q\ \mathrm{(Å^{-1})}$', fontsize=22)
     elif xlabel == 'qz':
@@ -561,8 +566,12 @@ def plot_1d_compare(
     plt.show()
 
 
-def plot_3d(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
-            images: np.ndarray, **kwargs):
+def plot_3d(
+        qx_array: np.ndarray,
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs):
     """
     Plot 3d plot with qx, qy, qz array and image array.
 
@@ -578,6 +587,11 @@ def plot_3d(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
     Returns:
         None
     """
+    # utils.validate_array_dimension(qx_array, 1)
+    utils.validate_array_shape(qx_array, qy_array, qz_array)
+    # utils.validate_array_dimension(images, 3)
+    utils.validate_kwargs({'index_list'}, kwargs)
+
     index_list = kwargs.get('index_list', None)
     if index_list is None:
         index_list = [0]
@@ -650,10 +664,13 @@ def plot_3d(qx_array: np.ndarray, qy_array: np.ndarray, qz_array: np.ndarray,
         plt.show()
 
 
-def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
-               images: np.ndarray, **kwargs):
+def plot_3d_mm(qx_array: np.ndarray,
+               qy_array: np.ndarray,
+               qz_array: np.ndarray,
+               images: np.ndarray,
+               **kwargs):
     """
-    Plot 3d plot with input qx, qy, qz array and image array in smaller tick size.
+    Plot 3d plot with input qx, qy, qz array and image array in smaller ticks.
 
     Args:
         - qx_array (np.ndarray): Array of q values in the x direction.
@@ -667,6 +684,11 @@ def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
     Returns:
         None
     """
+    utils.validate_array_dimension(qx_array, 1)
+    utils.validate_array_shape(qx_array, qy_array, qz_array)
+    utils.validate_array_dimension(images, 3)
+    utils.validate_kwargs({'index_list'}, kwargs)
+
     index_list = kwargs.get('index_list', None)
     if index_list is None:
         index_list = [0]
@@ -685,9 +707,9 @@ def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
 
-        x_min, x_max = 0, np.max(x_array)
-        y_min, y_max = np.min(y_array), np.max(y_array)
-        z_min, z_max = np.min(z_array), np.max(z_array)
+        x_min, x_max = 0, np.max(qx_array)
+        y_min, y_max = np.min(qy_array), np.max(qy_array)
+        z_min, z_max = np.min(qz_array), np.max(qz_array)
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
         ax.set_zlim(z_min, z_max)
@@ -714,9 +736,9 @@ def plot_3d_mm(x_array: np.ndarray, y_array: np.ndarray, z_array: np.ndarray,
         ax.set_zticks([-30, 0, 30])
         ax.invert_xaxis()
         ax.plot_surface(
-            x_array[i],
-            y_array[i],
-            z_array[i],
+            qx_array[i],
+            qy_array[i],
+            qz_array[i],
             rstride=1,
             cstride=1,
             facecolors=fcolors,
@@ -767,6 +789,11 @@ def plot_3d_grating(
     Returns:
         None
     """
+    utils.validate_array_dimension(qx_array, 1)
+    utils.validate_array_shape(qx_array, qy_array, qz_array)
+    utils.validate_array_dimension(images, 3)
+    utils.validate_kwargs({'qx', 'qy', 'qz', 'qx_0', 'qy_0', 'qz_0',
+                           'index_list'}, kwargs)
 
     qx = kwargs.get('qx')
     qy = kwargs.get('qy')
@@ -839,7 +866,9 @@ def plot_3d_grating(
         plt.show()
 
 
-def plot_2d_columns(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
+def plot_2d_columns(q_y: np.ndarray,
+                    q_z: np.ndarray,
+                    intensity: np.ndarray):
     """
     Plot 2D SANS contour plot with input qy, qz array and intensity array.
 
@@ -851,6 +880,10 @@ def plot_2d_columns(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
     Returns:
         None
     """
+    utils.validate_array_dimension(q_y, 1)
+    utils.validate_array_dimension(q_z, 1)
+    utils.validate_array_dimension(intensity, 2)
+
     plot_set()
     plt.figure()
     minimum = np.min(np.log10(intensity[intensity > 0]))
@@ -866,12 +899,15 @@ def plot_2d_columns(q_y: np.ndarray, q_z: np.ndarray, intensity: np.ndarray):
     plt.xlabel(r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$', fontsize=22)
     plt.ylabel(r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$', fontsize=22)
     plt.colorbar(label='I (a.u.)', ticks=[
-                 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e+1, 1e+2, 1e+3, 1e+4])
+                 1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2,
+                 1e-1, 1, 1e+1, 1e+2, 1e+3, 1e+4])
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
 
-def plot_1d_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
+def plot_1d_penetration(qz_1d: np.ndarray,
+                        depth_1d: np.ndarray,
+                        **kwargs):
     """
     Plot 1D penetration plot with input 1D qz array and 1D depth array.
 
@@ -891,6 +927,10 @@ def plot_1d_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
     Returns:
         None
     """
+    utils.validate_array_dimension(qz_1d, 1)
+    utils.validate_array_dimension(depth_1d, 1)
+    utils.validate_kwargs({'x_max', 'y_min', 'y_max', 'legend'}, kwargs)
+
     x_max = kwargs.get('x_max', None)
     y_min = kwargs.get('y_min', None)
     y_max = kwargs.get('y_max', None)
@@ -909,9 +949,11 @@ def plot_1d_penetration(qz_1d: np.ndarray, depth_1d: np.ndarray, **kwargs):
     plt.show()
 
 
-def plot_1d_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
-                             qz2_1d: np.ndarray, depth2_1d: np.ndarray,
-                             **kwargs):
+def plot_1d_penetration_compare(qz1_1d: np.ndarray,
+                                depth1_1d: np.ndarray,
+                                qz2_1d: np.ndarray,
+                                depth2_1d: np.ndarray,
+                                **kwargs):
     """
     Compare 1D penetration plot with of dataset 1 and dataset 2.
 
@@ -933,6 +975,10 @@ def plot_1d_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
     Returns:
         None
     """
+    utils.validate_array_dimension(qz1_1d, 1)
+    utils.validate_array_shape(qz1_1d, depth1_1d, qz2_1d, depth2_1d)
+    utils.validate_kwargs({'x_max', 'y_min', 'y_max', 'legend'}, kwargs)
+
     x_max = kwargs.get('x_max', None)
     y_min = kwargs.get('y_min', None)
     y_max = kwargs.get('y_max', None)
@@ -951,8 +997,10 @@ def plot_1d_penetration_compare(qz1_1d: np.ndarray, depth1_1d: np.ndarray,
     plt.show()
 
 
-def plot_2d_penetration(ki_mesh: np.ndarray, kf_mesh: np.ndarray,
-                        depth_mesh: np.ndarray, **kwargs):
+def plot_2d_penetration(ki_mesh: np.ndarray,
+                        kf_mesh: np.ndarray,
+                        depth_mesh: np.ndarray,
+                        **kwargs):
     """
     plot 2D penetration plot ki, kf and depth mesh array.
 
@@ -969,6 +1017,10 @@ def plot_2d_penetration(ki_mesh: np.ndarray, kf_mesh: np.ndarray,
     Returns:
         None
     """
+    # utils.validate_array_dimension(ki_mesh, 2)
+    utils.validate_array_shape(ki_mesh, kf_mesh, depth_mesh)
+    utils.validate_kwargs({'x_max', 'y_max'}, kwargs)
+
     x_max = kwargs.get('x_max', None)
     y_max = kwargs.get('y_max', None)
     plot_set()
