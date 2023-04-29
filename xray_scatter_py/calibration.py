@@ -12,15 +12,16 @@ The main functions in this module are used to:
 
 get_mm: get Cartesian coordinates of each detector pixel in mm.
 get_angle: get theta and azimuth angles for each detector pixel in radians.
-get_q: get the q-vectors (qx, qy, qz) for each detector pixel in angstrom^-1.
+get_q: get the q-vectors (qx, qy, qz) for each detector pixel in Å^-1.
 get_chi: get the sample stage rotation around the chi axis in radians.
-    The chi angle is the azimuthal angle with the largest integrated intensity
-    for each measurement. This is used to correct the non-zero rotation of the
+    The chi axis is the axis paralell to the incident x-ray beam. In a grazing
+    incidence experiment, chi is usually the azimuthal angle with the largest
+    integrated intensity. This is used to correct the non-zero rotation of the
     sample stage around chi axis, the axis parallel to the incident beam. In a
     grazing incidence experiment, it is usually the out-of-plane direction
     that has the strongest total scattering intensity, as a result of the
-    waveguiding effect in thin film samples. This feature is used to calculate
-    the chi angle.
+    specular reflection and the waveguiding effect in thin film samples. This
+    feature is used to calculatef the chi angle.
 get_sr: get the solid angle (sr) for each detector pixel.
 get_rel_intensity: Normalize the intensity for each detector pixel by exposure
     time and solid angle.
