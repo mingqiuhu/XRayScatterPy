@@ -6,19 +6,18 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="xray-scatter-py",
-    version="1.0.0",
+    name="XRayScatterPy",
+    version="1.0",
     author="Mingqiu Hu, Xuchen Gan",
-    author_email="your.email@example.com",
-    description="A Python package for processing and analyzing x-ray scattering, GISAXS, and x-ray reflectivity data",
+    author_email="mingqiuhu@mail.pse.umass.edu",
+    description="A Python package for processing and analyzing x-ray and neutron scattering and reflectivity data",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/xray-scatter-py",
+    url="https://github.com/mingqiuhu/XRayScatterPy",
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
+        "License :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
@@ -31,11 +30,9 @@ setup(
         "numpy",
         "matplotlib",
         "scipy",
-        "scikit-image",
-        "pandas",
         "tifffile",
         "xmltodict",
         "requests",
-        "opencv-python"
+        "json"
         ],
 )
