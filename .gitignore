@@ -2,8 +2,10 @@
 
 !.gitignore
 !examples/
-!tests/
+!examples/underdev/
+!tests_underdev/
 !xray_scatter_py/
+!xray_scatter_py/underdev/
 !data/
 !setup.py
 !README.md

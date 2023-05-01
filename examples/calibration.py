@@ -52,10 +52,14 @@ i_1d = data_processing.calculate_1d(
 
 
 data_plotting.plot_1d_compare(
-    q_1d, i_1d[0], data_array_esaxs[:, 0], data_array_esaxs[:, 1])
+    q_1d, i_1d[0], data_array_esaxs[:, 0], data_array_esaxs[:, 1],
+    legend=['from code', 'from GANESHA'], ylabel='abs')
 data_plotting.plot_1d_compare(
-    q_1d, i_1d[1], data_array_saxs[:, 0], data_array_saxs[:, 1])
+    q_1d, i_1d[1], data_array_saxs[:, 0], data_array_saxs[:, 1],
+    legend=['from code', 'from GANESHA'], ylabel='abs')
 data_plotting.plot_1d_compare(
-    q_1d, i_1d[2], data_array_maxs[:, 0], data_array_maxs[:, 1])
+    q_1d, i_1d[2], data_array_maxs[:, 0], data_array_maxs[:, 1],
+    legend=['from code', 'from GANESHA'], ylabel='abs')
 data_plotting.plot_1d_compare(
-    q_1d, i_1d[3], data_array_waxs[:, 0], data_array_waxs[:, 1])
+    q_1d, i_1d[3], data_array_waxs[:, 0], data_array_waxs[:, 1],
+    legend=['from code', 'from GANESHA'], ylabel='abs')

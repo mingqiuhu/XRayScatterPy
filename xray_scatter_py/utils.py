@@ -1,19 +1,38 @@
+# -*- coding: utf-8 -*-
 # xray_scatter_py/utils.py
+# Authors: Mingqiu Hu, Xuchen Gan in Prof. Thomas P. Russell's group
+# This package is developed using Umass Amherst central facility resources.
+"""Utility functions for reeading, writing, and type checking.
 
+This module provides functions to check the shape of numpy arrays, and to read
+the original experimental data, and to write the results to files.
+
+The main functions in this module are used to:
+
+validate_kwargs: Assert that all keyword arguments are valid.
+validate_array_dimension: Assert that the given array has expected dimension.
+validate_list_len: Assert that the given list has expected length.
+validate_array_shape: Assert that all given arrays have the same shape.
+read_image: Read a TIFF image file of GANESHA SAXSLAB and its metadata from.
+read_synchrotron_image: Read a TIFF image file from APS Berkeley.
+read_multiimage: Read multiple TIFF image files and their metadata.
+read_grad_file: Read an exported 1D data from GANESHA SAXSLAB.
+read_sans: Read a neutron scattering data file from Oak Ridge National Lab.
+"""
 import os
 import re
-import numpy as np
 import tifffile
+
+import numpy as np
 import xmltodict
 
 
 def validate_kwargs(valid_kwargs: set, kwargs: dict):
-    """
-    Assert that all keyword arguments are valid.
+    """Assert that all keyword arguments are valid.
 
     Args:
-    - valid_kwargs (set): A set of valid keyword arguments.
-    - kwargs (dict): A dictionary of keyword arguments.
+        - valid_kwargs (set): A set of valid keyword arguments.
+        - kwargs (dict): A dictionary of keyword arguments.
     """
 
     unrecognized_kwargs = set(kwargs.keys()) - valid_kwargs
@@ -23,57 +42,61 @@ def validate_kwargs(valid_kwargs: set, kwargs: dict):
 
 
 def validate_array_dimension(ndarray: np.ndarray, dimension: int):
-    """
-    Assert that the given array has the expected dimension.
+    """Assert that the given array has the expected dimension.
 
     Args:
-    - ndarray (np.ndarray): A NumPy array.
-    - dimension (int): The expected dimension of the array.
+        - ndarray (np.ndarray): A NumPy array.
+        - dimension (int): The expected dimension of the array.
     """
     if len(ndarray.shape) != dimension:
         raise ValueError(
-            f"Array dimension {len(ndarray.shape)} does not match expected dimension {dimension}")
+            f"The given array has a dimension of {len(ndarray.shape)}, "
+            f"but the expected dimension is {dimension}.")
 
 
 def validate_list_len(params_dict_list: list[dict], len_: int):
-    """
-    Assert that the params_dict_list has the expected length.
+    """Assert that the params_dict_list has the expected length.
 
     Args:
-    - params_dict_list (list[dict]): A list of the experiment parameters of each measurements.
-    - len_ (int): The expected number of total measurements.
+        - params_dict_list (list[dict]): A list of the experiment parameters
+            of each measurement.
+        - len_ (int): The expected number of total measurements.
     """
     if len(params_dict_list) != len_:
         raise ValueError(
-            f"length of parameters dictionary list does not match expected value {len_}")
+            f"The given parameters dictionary list has a length of "
+            f"{len(params_dict_list)}, "
+            f"but the expected length is {len_}.")
 
 
 def validate_array_shape(*args):
-    """
-    Assert that all given arrays have the same shape.
+    """Assert that all given arrays have the same shape.
 
     Args:
-    - *args (np.ndarray): A variable number of NumPy arrays.
+        - *args (np.ndarray): A variable number of NumPy arrays.
     """
 
     shapes = [arg.shape for arg in args]
     if not all(shape == shapes[0] for shape in shapes):
-        raise ValueError(f"Array shapes {shapes} are not uniform")
+        raise ValueError(f"Array shapes {shapes} are not uniform.")
 
 
-def read_image(directory_path: str, index: int) -> tuple:
-    """
-    Read a TIFF image file of GANESHA SAXSLAB and its metadata from the given directory path and index.
+def read_image(
+        directory_path: str,
+        index: int) -> tuple[np.ndarray, np.ndarray]:
+    """Read a TIFF image file of GANESHA SAXSLAB and its metadata.
 
     Args:
-        directory_path (str): The directory path where the TIFF file is located.
-        index (int): The index of the TIFF file to be read.
+        - directory_path (str): The directory path of the TIFF file.
+        - index (int): The serial nunmber of the measurement to be read.
 
     Returns:
-        tuple: A tuple containing a dictionary with the parsed metadata parameters and the image data as a NumPy array.
+        - tuple: A tuple containing a dictionary with the parsed metadata
+            parameters and the images data as 3D a NumPy array.
 
     Raises:
-        FileNotFoundError: If the given directory path or file index does not exist.
+        - FileNotFoundError: If the given directory path or file index does not
+            exist.
     """
     if not os.path.isdir(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
@@ -90,32 +113,31 @@ def read_image(directory_path: str, index: int) -> tuple:
         tags = first_page.tags
 
         xml_tag = next(
-            tag for tag_name,
-            tag in tags.items() if 'xml' in str(
-                tag.value))
+            tag for tag_name, tag in tags.items() if 'xml' in str(tag.value))
         xml = xml_tag.value
 
     xml_dict = xmltodict.parse(xml)
     parameters = xml_dict['SAXSLABparameters']
     params_dict = {
-        param['@name']: param.get('#text', None) for param in parameters['param']}
+        param['@name']: param.get('#text', None)
+        for param in parameters['param']}
 
     return params_dict, image
 
 
-def read_synchrotron_image(directory_path: str, file_name: str) -> tuple:
-    """
-    Read a TIFF image file of GANESHA SAXSLAB and its metadata from the given directory path and index.
+def read_synchrotron_image(directory_path: str, file_name: str) -> np.ndarray:
+    """Read a TIFF image file from the advanced light source in Berkeley.
 
     Args:
-        directory_path (str): The directory path where the TIFF file is located.
-        index (int): The index of the TIFF file to be read.
+        - directory_path (str): The directory path of the TIFF file.
+        - file_name (str): The name of the TIFF file.
 
     Returns:
-        tuple: A tuple containing a dictionary with the parsed metadata parameters and the image data as a NumPy array.
+        - np.ndarray: The 2D image of the measurement.
 
     Raises:
-        FileNotFoundError: If the given directory path or file index does not exist.
+        - FileNotFoundError: If the given directory path or file name does not
+            exist.
     """
     if not os.path.isdir(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
@@ -128,34 +150,30 @@ def read_synchrotron_image(directory_path: str, file_name: str) -> tuple:
     with tifffile.TiffFile(file_path) as tiff:
         first_page = tiff.pages[0]
         image = first_page.asarray()
-    # parameters = xml_dict['SAXSLABparameters']
-    # params_dict = {param['@name']: param.get('#text', None) for param in
-    # parameters['param']}
     return image
 
 
 def read_multiimage(
         directory_path: str,
         start_index: int,
-        end_index: int = 0) -> tuple:
-    """
-    Read multiple TIFF image files and their metadata from the given directory path and index range.
+        end_index: int = 0) -> tuple[list[dict], np.ndarray]:
+    """Read multiple TIFF images and their metadata from the given directory.
 
     Args:
-        directory_path (str): The directory path where the TIFF files are located.
-        start_index (int): The starting index of the TIFF files to be read.
-        end_index (int, optional): The ending index of the TIFF files to be read. If not provided, only the image
-                                   with the start_index will be read. Defaults to 0.
+        - directory_path (str): The directory where the TIFF files are located.
+        - start_index (int): The starting index of the TIFF files to be read.
+        - end_index (int, optional): The ending index of the TIFF files. If not
+            provided, only the image with the start_index will be read.
 
     Returns:
-        tuple: A tuple containing a list of dictionaries with the parsed metadata parameters and a NumPy array
-               with the image data for all images.
+        - tuple: A tuple containing a list of dictionaries with the parsed
+            metadata parameters and a 3D NumPy array for all images.
 
     Raises:
-        FileNotFoundError: If the given directory path or file path does not exist.
+        - FileNotFoundError: If the directory or file path does not exist.
     """
-    num_images = end_index - start_index + 1 if end_index else 1
 
+    num_images = end_index - start_index + 1 if end_index else 1
     first_params_dict, first_image = read_image(directory_path, start_index)
 
     image_shape = first_image.shape
@@ -173,22 +191,23 @@ def read_multiimage(
     return params_dict_list, image_array
 
 
-def read_grad_file(directory_path: str, file_name: str) -> tuple:
-    """
-    Read and parse data from a GRAD file with given directory and file_name.
+def read_grad_file(
+        directory_path: str,
+        file_name: str) -> tuple[dict, np.ndarray, dict]:
+    """Read and parse data from an exported GRAD from GANESHA SAXSLAB.
 
     Args:
-        directory_path (str): The directory where the file is located.
-        file_name (str): The name of the GRAD file.
+        - directory_path (str): The directory where the file is located.
+        - file_name (str): The name of the GRAD file.
 
     Returns:
         tuple: A tuple containing:
-            - header_info (dict): A dictionary containing the header information.
+            - header_info (dict): A dictionary containing the GRAD header.
             - data_array (np.ndarray): A NumPy array containing the data.
             - xml_dict (dict): A dictionary containing the parsed XML data.
 
     Raises:
-        FileNotFoundError: If the directory or file is not found.
+        - FileNotFoundError: If the directory or file is not found.
     """
 
     if not os.path.isdir(directory_path):
@@ -206,12 +225,14 @@ def read_grad_file(directory_path: str, file_name: str) -> tuple:
         lines = f.readlines()
 
         header_info.update({
-            "Number of Datasets": int(lines[0].split(',')[0]),
-            "Number of Columns per Dataset": int(lines[1].split(',')[0]),
-            "Maximum Number of Rows for Any Dataset": int(lines[2].split(',')[0])
+            "num_datasets": int(lines[0].split(',')[0]),
+            "num_col_per_dataset": int(lines[1].split(',')[0]),
+            "num_rows": int(lines[2].split(',')[0])
         })
 
-        pattern = r"(?P<x>\w+)(?=-units).*?\((?P<x_unit>[^)]+)\).*?(?P<y>\w+)(?=-units).*?\((?P<y_unit>[^)]+)\)"
+        pattern = (
+            r"(?P<x>\w+)(?=-units).*?\((?P<x_unit>[^)]+)\).*?"
+            r"(?P<y>\w+)(?=-units).*?\((?P<y_unit>[^)]+)\)")
         match = re.search(pattern, lines[3])
         x, y, x_unit, y_unit = match.group("x"), match.group(
             "y"), match.group("x_unit"), match.group("y_unit")
@@ -250,6 +271,14 @@ def read_grad_file(directory_path: str, file_name: str) -> tuple:
 
 
 def read_sans(directory_path: str, file_name: str, header=1):
+    """Read neutron scattering data from Oak Ridge National Lab.
+
+    Args:
+        - directory_path (str): The directory where the file is located.
+        - file_name (str): The name of the neutron scattering data containing
+            three columns, qy, qz, and intensity.
+        - header (int, optional): The number of header lines to skip.
+    """
     if not os.path.isdir(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
 

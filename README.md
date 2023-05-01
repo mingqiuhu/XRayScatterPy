@@ -1,5 +1,8 @@
 XRayScatterPy is a Python package for processing and analyzing x-ray scattering, grazing incidence x-ray scattering (GISAXS), and x-ray reflectivity data. The package provides functionalities for reading raw image data, performing calibrations, plotting scattering data in 2D and 1D, calculating beam divergence, extracting specular reflectivity, fitting data with models, and assisting in thin film grating metrology. It also supports data fitting using the BornAgain package.
 
+modules shuold be formated with pycodestyle
+variables commonly used in the x-ray scattering community, like q, qx, qy, qz, are exampted.
+
 Modules:
 
 calibration.py: This module contains functions to read calibration data from silver behenate and glassy carbon standard reference material for q-calibration and absolute intensity calibration.

@@ -41,7 +41,7 @@ thickness_dict = {
 
 Q_MIN = 0.00827568
 Q_MAX = 0.24740200
-Q_NUM = 59
+Q_NUM = 400
 
 
 def calculate_synchrotron_abs(FILE_NAME, thickness, Q_MIN, Q_MAX, Q_NUM):
@@ -172,8 +172,5 @@ def calculate_synchrotron_abs_lowmemo(FILE_NAME, thickness, Q_MIN, Q_MAX, Q_NUM)
     plt.legend(['measured', 'reference', '95% confidence range'], fontsize=20)
     plt.show()
 
-
-# calculate_synchrotron_abs('ST_60s_exposure_2m', 
-#                           0.1055, Q_MIN, Q_MAX, 400)
-calculate_synchrotron_abs_lowmemo('ST_60s_exposure_2m', 
-                                  0.1055, Q_MIN, Q_MAX, 300)
+calculate_synchrotron_abs_lowmemo('ST_60s_exposure_2m',
+                                  0.1055, Q_MIN, Q_MAX, Q_NUM)
