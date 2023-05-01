@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 setup(
     name="XRayScatterPy",
     version="1.0",
-    author="Mingqiu Hu, Xuchen Gan",
+    author="Mingqiu Hu and Xuchen Gan in Prof. Thomas P. Russell's group",
     author_email="mingqiuhu@mail.pse.umass.edu",
     description="A Python package for processing and analyzing x-ray and neutron scattering and reflectivity data",
     long_description=long_description,
