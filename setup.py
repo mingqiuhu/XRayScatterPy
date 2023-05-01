@@ -32,7 +32,6 @@ setup(
         "scipy",
         "tifffile",
         "xmltodict",
-        "requests",
-        "json"
+        "requests"
         ],
 )
