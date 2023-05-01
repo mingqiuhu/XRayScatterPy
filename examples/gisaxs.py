@@ -32,7 +32,8 @@ data_plotting.plot_2d(
     qy_array,
     qz_array,
     image_array_rel,
-    index_list=INDEX_LIST)
+    index_list=INDEX_LIST,
+    crop=False)
 data_plotting.plot_2d_paralell(
     qx_array,
     qy_array,
@@ -58,4 +59,4 @@ data_plotting.plot_1d_compare(
     i_1d_oop[3],
     xscale='linear',
     xlabel='qz',
-    yunit='a.u.')
+    ylabel='a.u.')

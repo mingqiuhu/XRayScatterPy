@@ -95,7 +95,7 @@ def get_mm(
                 beamcenter_y + 0.5) * pixelsize_y * (-1)
         mm_z = (np.arange(image.shape[1]) -
                 beamcenter_z + 0.5) * pixelsize_z * (-1)
-        y_array[i], z_array[i] = np.meshgrid(mm_y, mm_z)
+        z_array[i], y_array[i] = np.meshgrid(mm_z, mm_y)
 
         # For each measurement with the detector plane normal to the incidence
         # x-ray, the detector x coordinate is the same.

@@ -70,7 +70,7 @@ def calc_lilf(alpha_c: float,
 def calc_sym_depth(wavelength: float,
                    sld: float,
                    sldi: float,
-                   alpha_array: np.ndarray) -> tuple(np.ndarray, np.ndarray):
+                   alpha_array: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Calculate the scattering depth for symmetric geometry.
 
     Args:

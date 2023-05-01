@@ -28,7 +28,7 @@ print('obtained qx_array, qy_array, qz_array')
 qz_1d, reflectivity_array, spillover_array, total_array = reflectivity.calculate_relative_reflectivity(
     QY_FWHM, 0.1, qy_array, qz_array, params_dict_list, image_array)
 normalized_reflectivity, fitted_spillover = reflectivity.calculate_normalized_reflectivity(
-    params_dict_list, qz_1d, reflectivity_array, spillover_array)
+    params_dict_list, qz_1d, reflectivity_array, spillover_array, 0.064)
 
 theta_1d = np.degrees(np.arcsin(qz_1d * 1.542 / 4 / np.pi))
 data_plotting.plot_1d(qz_1d[:-5],
@@ -36,7 +36,9 @@ data_plotting.plot_1d(qz_1d[:-5],
                       yticks=[1,
                               1e-2,
                               1e-4,
-                              1e-6])
+                              1e-6],
+                      xlabel='qz',
+                      ylabel='reflectivity')
 data_plotting.plot_1d_compare(theta_1d[:-5],
                               spillover_array[:-5],
                               theta_1d[:-5],
@@ -44,7 +46,7 @@ data_plotting.plot_1d_compare(theta_1d[:-5],
                               xscale='linear',
                               yscale='linear',
                               xlabel='theta sample',
-                              ylabel='spill over',
+                              ylabel='spillover',
                               legend=['Original data',
                                       'Fitting with Gaussian beam'],
                               legend_fontsize=18)

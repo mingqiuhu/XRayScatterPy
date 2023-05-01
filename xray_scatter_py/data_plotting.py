@@ -172,11 +172,11 @@ def plot_2d(
             plt.yticks(yticks)
         if crop:
             plt.xlim(
-                -qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))],
-                -qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))])
+                qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))],
+                qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))])
             plt.ylim(
-                -qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))],
-                -qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))])
+                qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))],
+                qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))])
         if video:
             plt.xlim(np.min(qy_array), np.max(qy_array))
             plt.ylim(np.min(qz_array), np.max(qz_array))
@@ -199,8 +199,9 @@ def plot_2d_withmarkers(
         - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
         - images (np.ndarray): 3D array of scattering intensities.
             The first index is the serial number of measurement.
-        - qy_markers_array (np.ndarray): 1D array of qy of the markers.
-        - qz_markers_array (np.ndarray): 1D array of qz of the markers.
+        - qy_markers_array (np.ndarray): 2D array of qy of the markers.
+        - qz_markers_array (np.ndarray): 2D array of qz of the markers.
+            The first index is the serial number of measurement.
         - kwargs:
             - index_list (list[int], optional): list of indexes to plot.
                 If not provided, defaults to [0].
@@ -212,7 +213,7 @@ def plot_2d_withmarkers(
         - None
     """
     utils.validate_array_dimension(images, 3)
-    utils.validate_array_dimension(qy_markers_array, 1)
+    utils.validate_array_dimension(qy_markers_array, 2)
     utils.validate_array_shape(images, qy_array, qz_array)
     utils.validate_array_shape(qy_markers_array, qz_markers_array)
     utils.validate_kwargs({'index_list', 'crop'}, kwargs)
@@ -268,8 +269,9 @@ def plot_2d_onlymarkers(
     creates a 2D plot only showing the markers .
 
     Args:
-        - qy_markers_array (np.ndarray): 1D array of qy marker positions.
-        - qz_markers_array (np.ndarray): 1D array of qz marker positions.
+        - qy_markers_array (np.ndarray): 2D array of qy marker positions.
+        - qz_markers_array (np.ndarray): 2D array of qz marker positions.
+            The first index is the serial number of measurement.
         - kwargs:
             - xmin (float): the minimum value of horizontal axis.
             - xmax (float): the maximum value of horizontal axis.
@@ -285,7 +287,7 @@ def plot_2d_onlymarkers(
     Returns:
         - None
     """
-    utils.validate_array_dimension(qy_markers_array, 1)
+    utils.validate_array_dimension(qy_markers_array, 2)
     utils.validate_array_shape(qz_markers_array, qy_markers_array)
     utils.validate_kwargs(
         {'xmin', 'xmax', 'ymin', 'ymax', 'alpha', 'phi', 'write',
@@ -889,16 +891,17 @@ def plot_2d_columns(q_y: np.ndarray,
     plt.figure()
     minimum = np.min(np.log10(intensity[intensity > 0]))
     maximum = np.max(np.log10(intensity[intensity > 0]))
-    plt.contourf(q_z.reshape(*shape),
-                 -q_y.reshape(*shape),
-                 intensity.reshape(*shape),
+    plt.contourf(q_z.reshape(80, 80),
+                 -q_y.reshape(80, 80),
+                 intensity.reshape(80, 80),
                  cmap='jet',
                  linewidths=3,
                  locator=ticker.LogLocator(),
                  levels=10**np.linspace(minimum, maximum, 400))
     plt.xlabel(XLABEL_DICT['qy'])
     plt.ylabel(XLABEL_DICT['qz'])
-    plt.colorbar(label='I (a.u.)', ticks=[10**i for i in range(-100, 100, 1)])
+    ticks = [10**i for i in range(-10, 20, 1)]
+    plt.colorbar(label='I (a.u.)', ticks=ticks)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
