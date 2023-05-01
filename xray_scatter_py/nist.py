@@ -1,8 +1,35 @@
+# -*- coding: utf-8 -*-
+# xray_scatter_py/nist.py
+# Authors: Mingqiu Hu, Xuchen Gan in Prof. Thomas P. Russell's group
+# This package is developed using Umass Amherst central facility resources.
+"""Visity the website of naitonal institute of standards and technology (NIST)
+to get the scattering length density of a material.
+
+The main functions in this module are used to:
+
+get_scattering_json: get scattering length density of a material from NIST
+get_scattering_parsed: get the parsed scattering length density
+"""
+
 import requests
 import json
 
 
-def get_scattering_json(material, density, neutron_wavelength="7 Ang"):
+def get_scattering_json(material: str,
+                        density: str,
+                        neutron_wavelength: str = "7 Ang") -> str:
+    """Get the scattering length density of a material from NIST.
+
+    Args:
+        - material (str): chemical formula of the material.
+        - density (str): density of the material in g/cm^3.
+        - neutron_wavelength (str, optional): wavelength of the neutron in Å.
+            If not specified, the default value is 7 Å.
+
+    Returns:
+        - str: a json string containing the scattering length density of the
+            material.
+    """
     url = "https://www.ncnr.nist.gov/cgi-bin/nact.py"
 
     form_data = {
@@ -27,7 +54,9 @@ def get_scattering_json(material, density, neutron_wavelength="7 Ang"):
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/"
+                       "537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/"
+                       "537.36"),
         "Referer": "https://www.ncnr.nist.gov/resources/activation/",
         "Origin": "https://www.ncnr.nist.gov",
     }
@@ -42,7 +71,21 @@ def get_scattering_json(material, density, neutron_wavelength="7 Ang"):
         return None
 
 
-def get_scattering_parsed(material, density, neutron_wavelength="7 Ang"):
+def get_scattering_parsed(material: str,
+                          density: str,
+                          neutron_wavelength: str = "7 Ang") -> dict:
+    """Get the scattering length density of a material from NIST.
+        The json string is parsed into a dictionary.
+
+    Args:
+        - material (str): chemical formula of the material.
+        - density (str): density of the material in g/cm^3.
+        - neutron_wavelength (str, optional): wavelength of the neutron in Å.
+            If not specified, the default value is 7 Å.
+
+    Returns:
+        - dict: a dictionary containing the scattering length density.
+    """
     json_scattering = get_scattering_json(
         material, density, neutron_wavelength=neutron_wavelength)
     dict_scattering = json.loads(json_scattering)

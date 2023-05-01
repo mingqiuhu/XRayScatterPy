@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Calibration of the 2D images from x-ray scattering experiments
+# xray_scatter_py/calibration.py
+# Authors: Mingqiu Hu, Xuchen Gan in Prof. Thomas P. Russell's group
+# This package is developed using Umass Amherst central facility resources.
+"""Calibration of the 2D images of x-ray scattering experiments
 
 This module provides functions to calibrate the original 2D images in x-ray
 scattering experiments. The calibration mainly involves calculating real-space
@@ -56,7 +59,7 @@ def get_mm(
         - params (list[dict]): Each dict contains parameters of a measurement.
             Each dictionary must contain the following keys with string values:
                 - 'detx': Relative sample-detector distance in mm.
-                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in pixel.
                 - 'pixelsize': Detector pixel size '[y z]' in mm.
         - images (np.ndarray): A 3D array of the original detector images.
             The first index is the serial number of measurement.
@@ -113,7 +116,7 @@ def get_angle(
         - params (list[dict]): Each dict contains parameters of a measurement.
             Each dictionary must contain the following keys with string values:
                 - 'detx': Relative sample-detector distance in mm.
-                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in pixel.
                 - 'pixelsize': Detector pixel size '[y z]' in mm.
         - images (np.ndarray): A 3D array of the original detector images.
             The first index is the serial number of measurement.
@@ -175,9 +178,9 @@ def get_q(
         - params (list[dict]): Each dict contains parameters of a measurement.
             Each dictionary must contain the following keys with string values:
                 - 'detx': Relative sample-detector distance in mm.
-                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in pixel.
                 - 'pixelsize': Detector pixel size '[y z]' in mm.
-                - 'wavelength': The wavelength of the x-ray beam in angstrom.
+                - 'wavelength': The wavelength of the x-ray beam in Å.
         - images (np.ndarray): A 3D array of the original detector images.
             The first index is the serial number of measurement.
         - kwargs:
@@ -215,12 +218,12 @@ def get_chi(
         azimuth_array: np.ndarray,
         images: np.ndarray,
         **kwargs) -> np.ndarray:
-    """Get chi, the azimuthal angle with the largest integrated intensity.
+    """Get the azimuthal angle with the largest integrated intensity.
 
     Args:
         - params (list[dict]): Each dict contains parameters of a measurement.
             Each dictionary must contain the following keys with string values:
-                - 'beamcenter_actual': Beam center position '[y z]' in mm.
+                - 'beamcenter_actual': Beam center position '[y z]' in pixel.
         - azimuth_array (np.array): A 3D array of azimuth angle of each pixel.
         - images (np.ndarray): A 3D array of the original detector images.
             The first index is the serial number of measurement.

@@ -1,28 +1,68 @@
 # xray_scatter_py/reflectivity.py
+# xray_scatter_py/calibration.py
+# Authors: Mingqiu Hu, Xuchen Gan in Prof. Thomas P. Russell's group
+# This package is developed using Umass Amherst central facility resources.
+"""Calculate the reflectivity of the x-ray from a series of 2D GISAXS images
+at different incidence angles.
+
+The main functions in this module are:
+
+calculate_relative_reflectivity: Calculate the reflectivity without normalizing
+    with the incidence beam intensity.
+calculate_normalized_reflectivity: Calculate the reflectivity normalized with
+    the incidence beam intensity.
+"""
 
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.integrate import quad
 
 
 def calculate_relative_reflectivity(
-        qy_fwhm,
-        interval_degree,
-        qy_array,
-        qz_array,
-        params_dict_list,
-        image_array):
+        qy_fwhm: float,
+        interval_degree: float,
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        params: list[dict],
+        images: np.ndarray) -> tuple[np.ndarray, np.ndarray,
+                                     np.ndarray, np.ndarray]:
+    """Calculate the reflectivity from a series of 2D GISAXS images without
+    normalizing with the incidence beam intensity.
+
+    Args:
+        - qy_fwhm (float): The full width at half maximum around qy = 0.
+        - interval_degree (float): The interval of incidence angles in a series
+            of measurements.
+        - qy_array (np.ndarray): 3D array containing qy of each detector pixel.
+            The first index is the serial number of measurement.
+        - qz_array (np.ndarray): 3D array containing qz of each detector pixel.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'wavelength': The wavelength of the x-ray.
+                - 'sample_angle1': The incidence angle of the x-ray in degree.
+                - 'det_exposure_time': The exposure time of the measurement.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
+
+    Returns:
+        - qz_1d (np.ndarray): 1D array containing the qz of each measurement.
+        - reflectivity_array (np.ndarray): 1D array containing the reflectivity
+            at each incidence angle.
+        - spillover_array (np.ndarray): 1D array containing the spillover
+            intensity around q = 0 at each incidence angle.
+        - total_array (np.ndarray): 1D array containing the total intensity on
+            the 2D detector at each incidence angle.
+    """
     interval_degree = np.radians(interval_degree)
-    qz_1d = np.empty(image_array.shape[0])
-    reflectivity_array = np.empty(image_array.shape[0])
-    spillover_array = np.empty(image_array.shape[0])
-    total_array = np.empty(image_array.shape[0])
-    for i in range(image_array.shape[0]):
-        wavelength = float(params_dict_list[0]['wavelength'])
+    qz_1d = np.empty(images.shape[0])
+    reflectivity_array = np.empty(images.shape[0])
+    spillover_array = np.empty(images.shape[0])
+    total_array = np.empty(images.shape[0])
+    for i in range(images.shape[0]):
+        wavelength = float(params[0]['wavelength'])
         incidence_degree = np.radians(
-            float(params_dict_list[i]['sample_angle1']))
-        time = float(params_dict_list[i]['det_exposure_time'])
+            float(params[i]['sample_angle1']))
+        time = float(params[i]['det_exposure_time'])
 
         qz_upper = 4 * np.pi * \
             np.sin(incidence_degree + 0.25 * interval_degree) / wavelength
@@ -32,32 +72,54 @@ def calculate_relative_reflectivity(
             (qz_array[i]**2 + qy_array[i]**2) >= qz_lower**2,
             (qz_array[i]**2 + qy_array[i]**2) <= qz_upper**2)
         qy_bool = (np.abs(qy_array[i]) <= qy_fwhm)
-        image_bool = (image_array[i] != -1)
+        image_bool = (images[i] != -1)
         q_center_bool = ((qz_array[i]**2 + qy_array[i]**2) <= 0.0052**2)
 
         qz_1d[i] = 4 * np.pi * np.sin(incidence_degree) / wavelength
         reflectivity_array[i] = np.sum(
-            image_array[i] * qz_bool * qy_bool * image_bool) / time
+            images[i] * qz_bool * qy_bool * image_bool) / time
         spillover_array[i] = np.sum(
-            image_array[i] * image_bool * q_center_bool) / time
-        total_array[i] = np.sum(image_array[i] * image_bool) / time
+            images[i] * image_bool * q_center_bool) / time
+        total_array[i] = np.sum(images[i] * image_bool) / time
 
     return qz_1d, reflectivity_array, spillover_array, total_array
 
 
+# This function has some magic constants that need to be changed
 def calculate_normalized_reflectivity(
-        params_dict_list,
-        qz_1d,
-        reflectivity_array,
-        spillover_array,
-        fixed_sigma=0.064):
-    wavelength = float(params_dict_list[0]['wavelength'])
+        params: list[dict],
+        qz_1d: np.ndarray,
+        reflectivity_array: np.ndarray,
+        spillover_array: np.ndarray,
+        fixed_sigma: float) -> tuple[np.ndarray, np.ndarray]:
+    """Calculate the reflectivity from a series of 2D GISAXS images normalized
+    with the incidence beam intensity.
+
+    Args:
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'wavelength': The wavelength of the x-ray.
+        - qz_1d (np.ndarray): 1D array containing the qz of each measurement.
+        - reflectivity_array (np.ndarray): 1D array containing the relative
+            reflectivity at each incidence angle.
+        - spillover_array (np.ndarray): 1D array containing the spillover
+            intensity around q = 0 at each incidence angle.
+        - fixed_sigma (float): The standard deviation of the beam divergence.
+
+    Returns:
+        - normalized_reflectivity (np.ndarray): 1D array containing the
+            normalized reflectivity at each incidence angle.
+        - fitted_spillover (np.ndarray): 1D array containing the spillover
+            intensity around q = 0 predicted by the fitting results.
+    """
+    wavelength = float(params[0]['wavelength'])
     theta_1d = np.arcsin(qz_1d * wavelength / 4 / np.pi)
 
-    # Define the integrand function
+    # Define the integrand function to calculate the beam intensity on sample
     def integrand(y_sample, incidence_intensity):
-        return incidence_intensity / \
-            (fixed_sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * y_sample ** 2 / fixed_sigma ** 2)
+        return incidence_intensity /\
+            (fixed_sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * y_sample ** 2 /
+                                                        fixed_sigma ** 2)
 
     # Define the function to fit
     def spillover_func(theta, incidence_intensity, len_sample):
@@ -68,7 +130,7 @@ def calculate_normalized_reflectivity(
             fitted_spillover.append(0.5 * incidence_intensity - integral)
         return np.array(fitted_spillover)
 
-    # Fit the function to the data
+    # Fit the integrated spillover intensity to experimental data
     # Initial guess for incidence_intensity, len_sample
     initial_guess = [2.5e6, 10]
     optimal_params, _ = curve_fit(
@@ -86,102 +148,3 @@ def calculate_normalized_reflectivity(
         beam_on_sample.append(2 * integral)
     normalized_reflectivity = reflectivity_array / np.array(beam_on_sample)
     return normalized_reflectivity, np.array(fitted_spillover)
-
-
-def plot_specular_reflectivity(incidence_angles, reflectivity):
-    """
-    Plot the specular reflectivity as a function of the incidence angle.
-
-    Args:
-        incidence_angles (numpy.ndarray): Incidence angles.
-        reflectivity (numpy.ndarray): Specular reflectivity values.
-    """
-    plt.figure()
-    plt.plot(incidence_angles, reflectivity)
-    plt.xlabel('Incidence Angle')
-    plt.ylabel('Specular Reflectivity')
-    plt.title('Specular Reflectivity vs Incidence Angle')
-    plt.show()
-
-
-def extract_off_specular_scattering(images, incidence_angles, exit_angle):
-    """
-    Extract off-specular scattering from the calibrated 2D GISAXS images.
-
-    Args:
-        images (list): A list of calibrated 2D GISAXS images.
-        incidence_angles (list): A list of corresponding incidence angles.
-        exit_angle (float): The fixed non-zero angle between the incidence and exit beam.
-
-    Returns:
-        numpy.ndarray: Off-specular scattering intensity extracted from the images.
-    """
-    # Replace this with the actual method to extract off-specular scattering
-    # from the images
-    off_specular_scattering = np.array([np.sum(image) for image in images])
-
-    return off_specular_scattering
-
-
-def plot_off_specular_scattering(incidence_angles, scattering_intensity):
-    """
-    Plot the off-specular scattering intensity as a function of the incidence angle.
-
-    Args:
-        incidence_angles (numpy.ndarray): Incidence angles.
-        scattering_intensity (numpy.ndarray): Off-specular scattering intensity values.
-    """
-    plt.figure()
-    plt.plot(incidence_angles, scattering_intensity)
-    plt.xlabel('Incidence Angle')
-    plt.ylabel('Off-specular Scattering Intensity')
-    plt.title('Off-specular Scattering Intensity vs Incidence Angle')
-    plt.show()
-
-
-def calculate_rocking_scan(
-        images,
-        incidence_angles,
-        sum_angle,
-        mode='specular'):
-    """
-    Calculate rocking scans for the given images and incidence angles.
-
-    Args:
-        images (list): A list of calibrated 2D GISAXS images.
-        incidence_angles (list): A list of corresponding incidence angles.
-        sum_angle (float): The fixed summation of the incidence and exit angles.
-        mode (str, optional): 'specular' for specular intensity, 'off-specular' for off-specular intensity. Defaults to 'specular'.
-
-    Returns:
-        numpy.ndarray: Rocking scan intensity values.
-    """
-    # Replace this with the actual method to calculate rocking scans for the
-    # images
-    rocking_scan_intensity = np.array([np.sum(image) for image in images])
-
-    return rocking_scan_intensity
-
-
-def plot_rocking_scan(
-        incidence_angles,
-        rocking_scan_intensity,
-        mode='specular'):
-    """
-    Plot the rocking scan intensity as a function of the incidence angle.
-
-    Args:
-        incidence_angles (numpy.ndarray): Incidence angles.
-        rocking_scan_intensity (numpy.ndarray): Rocking scan intensity values.
-        mode (str, optional): 'specular' for specular intensity, 'off-specular' for off-specular intensity. Defaults to 'specular'.
-    """
-    plt.figure()
-    plt.plot(incidence_angles, rocking_scan_intensity)
-    plt.xlabel('Incidence Angle')
-    if mode == 'specular':
-        plt.ylabel('Specular Intensity')
-        plt.title('Rocking Scan: Specular Intensity vs Incidence Angle')
-    elif mode == 'off-specular':
-        plt.ylabel('Off-specular Intensity')
-        plt.title('Rocking Scan: Off-specular Intensity vs Incidence Angle')
-    plt.show()
