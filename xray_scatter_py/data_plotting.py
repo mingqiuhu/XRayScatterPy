@@ -450,8 +450,10 @@ def plot_2d_paralell(
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        q_paralell[qy_array < 0] *= -1
-        plt.xlim(np.min(q_paralell), np.max(q_paralell))
+        plt.xlim(np.min(np.concatenate((q_paralell[qy_array < 0] * -1,
+                                        q_paralell[qy_array >= 0]))),
+                 np.max(np.concatenate((q_paralell[qy_array < 0] * -1,
+                                        q_paralell[qy_array >= 0]))))
         plt.xlabel(XLABEL_DICT['q_parallel'])
         plt.ylabel(YLABEL_DICT['qz'])
         plt.colorbar(label='I (a.u.)')

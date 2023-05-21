@@ -54,6 +54,7 @@ def calculate_q(params: list[dict],
                 **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray,
                                    np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the reciprocal space lattice of a grating.
+    Reference: J. Appl. Cryst. (2007). 40, 1050–1055
 
     Args:
         - params (list[dict]): Each dict contains parameters of a measurement.

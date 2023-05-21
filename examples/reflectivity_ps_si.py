@@ -23,9 +23,9 @@ theta_array, azimuth_array = calibration.get_angle(
 print('theta_array, azimuth_array')
 qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
+qx_array_gi, qy_array_gi, qz_array_gi = calibration.get_q_gi(
+    qx_array, qy_array, qz_array, params_dict_list)
 print('obtained qx_array, qy_array, qz_array')
-
-qx_array_gi, qy_array_gi, qz_array_gi = calibration.get_q_gi(qx_array, qy_array, qz_array, params_dict_list)
 
 qz_1d, reflectivity_array, spillover_array, total_array = reflectivity.calculate_relative_reflectivity(
     QY_FWHM, 0.1, qy_array_gi, qz_array_gi, params_dict_list, image_array)
