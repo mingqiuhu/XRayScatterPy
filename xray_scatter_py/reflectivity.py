@@ -60,14 +60,14 @@ def calculate_relative_reflectivity(
     total_array = np.empty(images.shape[0])
     for i in range(images.shape[0]):
         wavelength = float(params[0]['wavelength'])
-        incidence_degree = np.radians(
+        incidence_radian = np.radians(
             float(params[i]['sample_angle1']))
         time = float(params[i]['det_exposure_time'])
 
         qz_upper = 4 * np.pi * \
-            np.sin(incidence_degree + 0.25 * interval_degree) / wavelength
+            np.sin(incidence_radian + 0.25 * interval_degree) / wavelength
         qz_lower = 4 * np.pi * \
-            np.sin(incidence_degree - 0.25 * interval_degree) / wavelength
+            np.sin(incidence_radian - 0.25 * interval_degree) / wavelength
         qz_bool = np.logical_and(
             (qz_array[i]**2 + qy_array[i]**2) >= qz_lower**2,
             (qz_array[i]**2 + qy_array[i]**2) <= qz_upper**2)
@@ -75,7 +75,7 @@ def calculate_relative_reflectivity(
         image_bool = (images[i] != -1)
         q_center_bool = ((qz_array[i]**2 + qy_array[i]**2) <= 0.0052**2)
 
-        qz_1d[i] = 4 * np.pi * np.sin(incidence_degree) / wavelength
+        qz_1d[i] = 4 * np.pi * np.sin(incidence_radian) / wavelength
         reflectivity_array[i] = np.sum(
             images[i] * qz_bool * qy_bool * image_bool) / time
         spillover_array[i] = np.sum(

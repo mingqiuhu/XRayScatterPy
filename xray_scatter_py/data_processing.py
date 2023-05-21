@@ -261,3 +261,90 @@ def calculate_1d_oop(
                                          qy_bool[:, :, np.newaxis],
                                          axis=(0, 1))
     return i_1d
+
+
+def calculate_1d_ip(
+        qpar_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        sr_array: np.ndarray,
+        params: list[dict],
+        **kwargs) -> np.ndarray:
+    """Calculate the 1D scattering intensity in in-plane direction at qz=2kzi.
+
+    Args:
+        - qpar_array (np.ndarray): 3D array of q paralell values of each pixel.
+            The first index is the serial number of measurement.
+        - qz_array (np.ndarray): 3D array of qz values for each detector pixel.
+        - images (np.ndarray): A 3D array of the original detector images.
+            The first index is the serial number of measurement.
+        - sr_array (np.ndarray): A 3D array of the solid angles for each pixel.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'wavelength': The wavelength of the x-ray.
+                - 'sample_angle1': The incidence angle of the x-ray in degree.
+        - kwargs:
+            - qz_fwhm (float, optional): integral range is 2kzi +- qz_fwhm.
+            - qpar_min (float, optional): minimum qpar in 1D profile, in Å^-1.
+            - qpar_max (float, optional): maximum qpar in 1D profile, in Å^-1.
+            - qpar_num (int, optional): number of qpar in 1D profile.
+            - index_list (list[int], optional): list of indexes to process.
+                If not provided, defaults to [0].
+    """
+
+    utils.validate_array_dimension(images, 3)
+    utils.validate_array_shape(qpar_array, qz_array, images, sr_array)
+    utils.validate_list_len(params, images.shape[0])
+    utils.validate_kwargs({'qz_fwhm', 'qpar_min', 'qpar_max',
+                          'qpar_num', 'index_list'}, kwargs)
+
+    qz_fwhm = kwargs.get('qz_fwhm', 0.002)
+    qpar_min = kwargs.get('qpar_min', 0)
+    qpar_max = kwargs.get('qpar_max', 0.27)
+    qpar_num = kwargs.get('qpar_num', 400)
+    index_list = kwargs.get('index_list', [0])
+
+    # calculate the qpar values to be used in the 1D intensity profile
+    qpar_1d = np.linspace(qpar_min, qpar_max, qpar_num)
+    # for each qpar value, the range used to calculate the intensity is
+    # qpar-q_fwhm to qpar+q_fwhm
+    qpar_fwhm = (qpar_max - qpar_min) / (qpar_num - 1) / 2
+    # initialize the 1D intensity array
+    # the first index is the serial number of measurement, the second index
+    # relates to the qpar value
+    i_1d = np.empty((images.shape[0], qpar_num))
+
+    # loop over all the serial numbers of measurements to be processed
+    for i in index_list:
+        incidence_degree = np.radians(float(params[i]['sample_angle1']))
+        wavelength = float(params[i]['wavelength'])
+        qz_specular = 4 * np.pi * np.sin(incidence_degree) / wavelength
+
+        # generate a 3D boolean mask with the same dimension as the images
+        # representing the q range used to calculate the 1D intensity profile
+        qz_bool = np.abs(qz_array[i] - qz_specular) <= qz_fwhm
+        # broadcast 2D q array to 3D and generate a boolean mask for averaging
+        # the third dimension is the same as the 1D qz array for the 1D
+        # intensity profile
+        qpar_bool = np.abs(qpar_array[i][:, :, np.newaxis] -
+                           qpar_1d[np.newaxis, np.newaxis, :]) <= qpar_fwhm
+        # generate a boolean mask for the image array excluding the pixels with
+        # -1 values
+        image_bool = images[i] != -1
+        # Since relative or absolute intensity is normalized by solid angle,
+        # the sum of the intensity image needs to be weighted by solid angle.
+        # after sum, the output is a 1D array with the same length as the 1D q
+        # array
+        sum_intensity = np.sum(images[i][:, :, np.newaxis] *
+                               sr_array[i][:, :, np.newaxis] *
+                               qpar_bool * image_bool[:, :, np.newaxis] *
+                               qz_bool[:, :, np.newaxis],
+                               axis=(0, 1))
+        # assign the 1D intensity profile to the 1D intensity array after
+        # normalization with the total solid angle of the pixels used in sum
+        i_1d[i] = sum_intensity / np.sum(sr_array[i][:, :, np.newaxis] *
+                                         qpar_bool *
+                                         image_bool[:, :, np.newaxis] *
+                                         qz_bool[:, :, np.newaxis],
+                                         axis=(0, 1))
+    return i_1d

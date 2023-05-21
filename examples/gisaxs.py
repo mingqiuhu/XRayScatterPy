@@ -28,23 +28,25 @@ sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
 image_array_rel = calibration.get_rel_intensity(
     params_dict_list, image_array, sr_array)
 
+qx_array_gi, qy_array_gi, qz_array_gi = calibration.get_q_gi(qx_array, qy_array, qz_array, params_dict_list)
+
 data_plotting.plot_2d(
-    qy_array,
-    qz_array,
+    qy_array_gi,
+    qz_array_gi,
     image_array_rel,
     index_list=INDEX_LIST,
     crop=False)
 data_plotting.plot_2d_paralell(
-    qx_array,
-    qy_array,
-    qz_array,
+    qx_array_gi,
+    qy_array_gi,
+    qz_array_gi,
     image_array_rel,
     index_list=INDEX_LIST)
 
 q_1d_oop = np.linspace(Q_MIN, Q_MAX, Q_NUM)
 i_1d_oop = data_processing.calculate_1d_oop(
-    qy_array,
-    qz_array,
+    qy_array_gi,
+    qz_array_gi,
     image_array_rel,
     sr_array,
     qy_fwhm=QY_FWHM,
