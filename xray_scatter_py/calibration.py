@@ -203,13 +203,48 @@ def get_q(
 
     theta_array, azimuth_array = get_angle(detx0, params, images, chi=chi)
     wavelength = float(params[0]['wavelength'])
-    qx_array = 2 * np.pi / wavelength * (1 - np.cos(2 * theta_array))
+    qx_array = 2 * np.pi / wavelength * (np.cos(2 * theta_array) - 1)
     qy_array = 2 * np.pi / wavelength * \
         np.sin(2 * theta_array) * np.cos(azimuth_array)
     qz_array = 2 * np.pi / wavelength * \
         np.sin(2 * theta_array) * np.sin(azimuth_array)
 
     return qx_array, qy_array, qz_array
+
+
+def get_q_gi(
+        qx_array: np.ndarray,
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        params: list[dict]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Get the q-vectors (qx, qy, qz) for each detector pixel in the images
+    for grazing incidence geometry.
+
+    Args:
+        - qx_array (np.ndarray): 3D array containing qx of each detector pixel.
+            The first index is the serial number of measurement.
+        - qy_array (np.ndarray): 3D array containing qy of each detector pixel.
+        - qz_array (np.ndarray): 3D array containing qz of each detector pixel.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'sample_angle1': The incidence angle of the x-ray in degree.
+        
+    Returns:
+        - tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple of three 3D arrays
+            representing the qx, qy, and qz of each detector pixel in grazing
+            incidence geometry, each with the same shape as the input arrays.
+    """
+
+    qy_arrray_gi = qy_array
+    qx_array_gi = np.empty_like(qx_array)
+    qz_array_gi = np.empty_like(qz_array)
+    for i, param in enumerate(params):
+        incidence_radian = np.radians(float(param['sample_angle1']))
+        qx_array_gi[i] = qx_array[i] * np.cos(incidence_radian) +\
+            qz_array[i] * np.sin(incidence_radian)
+        qz_array_gi[i] = -qx_array[i] * np.sin(incidence_radian) +\
+            qz_array[i] * np.cos(incidence_radian)
+    return qx_array_gi, qy_arrray_gi, qz_array_gi
 
 
 # -1 needs to be excluded

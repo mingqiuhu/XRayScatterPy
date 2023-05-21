@@ -25,8 +25,10 @@ qx_array, qy_array, qz_array = calibration.get_q(
     DETX0, params_dict_list, image_array)
 print('obtained qx_array, qy_array, qz_array')
 
+qx_array_gi, qy_array_gi, qz_array_gi = calibration.get_q_gi(qx_array, qy_array, qz_array, params_dict_list)
+
 qz_1d, reflectivity_array, spillover_array, total_array = reflectivity.calculate_relative_reflectivity(
-    QY_FWHM, 0.1, qy_array, qz_array, params_dict_list, image_array)
+    QY_FWHM, 0.1, qy_array_gi, qz_array_gi, params_dict_list, image_array)
 normalized_reflectivity, fitted_spillover = reflectivity.calculate_normalized_reflectivity(
     params_dict_list, qz_1d, reflectivity_array, spillover_array, 0.064)
 

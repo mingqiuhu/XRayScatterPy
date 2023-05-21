@@ -616,7 +616,7 @@ def plot_3d_q(
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
 
-        x_min, x_max = 0, 6  # np.min(qx_array[i]), np.max(qx_array[i])
+        x_min, x_max = 0, -6  # np.min(qx_array[i]), np.max(qx_array[i])
         y_min, y_max = np.min(qy_array), np.max(qy_array)
         z_min, z_max = np.min(qz_array), np.max(qz_array)
         ax.set_xlim(x_min, x_max)
@@ -640,7 +640,7 @@ def plot_3d_q(
         # ax.set_xlabel(r'$q_x\ (A^{-1})$')
         # ax.set_ylabel(r'$q_y\ (A^{-1})$')
         # ax.set_zlabel(r'$q_z\ (A^{-1})$')
-        ax.set_xticks([0, 1, 2, 3, 4, 5, 6])
+        ax.set_xticks([-6, -5, -4, -3, -2, -1, 0])
         ax.set_yticks([-1, 0, 1, 2])
         ax.set_zticks([-1, 0, 1])
 
@@ -654,11 +654,11 @@ def plot_3d_q(
             vmin=minn,
             vmax=maxx,
             shade=False)
-        ax.quiver(4 * np.pi / 1.542, 0, 0, -2 * np.pi / 1.542, 0, 0,
+        ax.quiver(-4 * np.pi / 1.542, 0, 0, 2 * np.pi / 1.542, 0, 0,
                   length=1.0, color='k', arrow_length_ratio=0.1)
-        ax.text(5.5, 0, -0.5, r'$k_i$', color='k')
-        ax.scatter(2 * np.pi / 1.542, 0, 0, color='r', s=50)
-        ax.text(2 * np.pi / 1.542, 0, 0.2, 'sample', color='r')
+        ax.text(-5.5, 0, -0.5, r'$k_i$', color='k')
+        ax.scatter(-2 * np.pi / 1.542, 0, 0, color='r', s=50)
+        ax.text(-2 * np.pi / 1.542, 0, 0.2, 'sample', color='r')
 
         ax.set_xlabel(XLABEL_DICT['qx'])
         ax.xaxis.labelpad = 15
