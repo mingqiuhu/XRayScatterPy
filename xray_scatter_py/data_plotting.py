@@ -70,7 +70,7 @@ def plot_set() -> None:
         - None
     """
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-    matplotlib.rcParams['figure.dpi'] = 600
+    matplotlib.rcParams['figure.dpi'] = 150
     matplotlib.rcParams['xtick.labelsize'] = 22
     matplotlib.rcParams['ytick.labelsize'] = 22
     matplotlib.rcParams['font.size'] = 22
@@ -436,20 +436,22 @@ def plot_2d_paralell(
     plot_set()
     for i in index_list:
         plt.figure()
-        plt.pcolormesh(q_paralell[i] * (qy_array[i] > 0),
-                       qz_array[i] * (qy_array[i] > 0),
+        plt.pcolormesh(q_paralell[i],
+                       qz_array[i],
                        images[i] * (qy_array[i] > 0),
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
-                       shading='nearest')
-        plt.pcolormesh(-q_paralell[i] * (qy_array[i] <= 0),
-                       qz_array[i] * (qy_array[i] <= 0),
+                       shading='gourand')
+        plt.pcolormesh(-q_paralell[i],
+                       qz_array[i],
                        images[i] * (qy_array[i] <= 0),
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
+        q_paralell[qy_array < 0] *= -1
+        plt.xlim(np.min(q_paralell), np.max(q_paralell))
         plt.xlabel(XLABEL_DICT['q_parallel'])
         plt.ylabel(YLABEL_DICT['qz'])
         plt.colorbar(label='I (a.u.)')
@@ -554,6 +556,12 @@ def plot_1d_compare(
 
     plot_set()
     plt.figure()
+
+    def mouse_move(event):
+        x, y = event.xdata, event.ydata
+        print(x, y)
+
+    plt.connect('motion_notify_event', mouse_move)
     plt.plot(scattering_vec_1, intensity_1)
     plt.plot(scattering_vec_2, intensity_2)
     plt.xlabel(XLABEL_DICT[xlabel])
