@@ -55,7 +55,8 @@ YLABEL_DICT = {
     'total': r'$I_\mathrm{total}\ \mathrm{(a.u.)}$',
     'spillover': r'$I_\mathrm{spill\ over}\ \mathrm{(a.u.)}$',
     'depth': r'$z_\mathrm{1/e}\ \mathrm{(Å)}$',
-    'kzf': r'$k_\mathrm{z,f}\ \mathrm{(Å^{-1})}$'
+    'kzf': r'$k_\mathrm{z,f}\ \mathrm{(Å^{-1})}$',
+    'q_vertical': r'$q_\mathrm{⊥}\ \mathrm{(Å^{-1})}$'
 }
 
 
@@ -455,7 +456,7 @@ def plot_2d_paralell(
                  np.max(np.concatenate((q_paralell[qy_array < 0] * -1,
                                         q_paralell[qy_array >= 0]))))
         plt.xlabel(XLABEL_DICT['q_parallel'])
-        plt.ylabel(YLABEL_DICT['qz'])
+        plt.ylabel(YLABEL_DICT['q_vertical'])
         plt.colorbar(label='I (a.u.)')
         plt.gca().set_aspect('equal', adjustable='box')
         plt.show()
