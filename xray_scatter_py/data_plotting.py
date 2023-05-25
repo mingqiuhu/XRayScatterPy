@@ -335,6 +335,7 @@ def plot_2d_polar(
         qy_array: np.ndarray,
         qz_array: np.ndarray,
         images: np.ndarray,
+        params: list[dict],
         **kwargs) -> None:
     """Plot 2D scattering data after polar transformation.
 
@@ -345,6 +346,9 @@ def plot_2d_polar(
         - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
         - images (np.ndarray): 3D array of scattering intensities.
             The first index is the serial number of measurement.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'beamcenter_actual': Beam center position '[y z]' in pixel.
         - kwargs:
             - index_list (list[int], optional): list of indexes to plot.
                 If not provided, defaults to [0].
@@ -367,30 +371,36 @@ def plot_2d_polar(
         # The polar transformation is plotted by four quadrants individually
         # to avoid the discontinuity at the boundary of the quadrants creating
         # fake lines in pcolormesh.
-        plt.pcolormesh(q_array[i, 0:351, 0:214],
-                       azimuth[0:351, 0:214],
-                       images[i, 0:351, 0:214],
+        beamcenter_y, beamcenter_z = map(
+            float, params[i]['beamcenter_actual'].strip('[]').split())
+        print(beamcenter_y, beamcenter_z)
+        beamcenter_y = int(np.ceil(beamcenter_y))
+        beamcenter_z = int(np.rint(beamcenter_z))
+        print(beamcenter_y, beamcenter_z)
+        plt.pcolormesh(q_array[i, 0:beamcenter_y, 0:beamcenter_z],
+                       azimuth[0:beamcenter_y, 0:beamcenter_z],
+                       images[i, 0:beamcenter_y, 0:beamcenter_z],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q_array[i, 0:351, 214:],
-                       azimuth[0:351, 214:],
-                       images[i, 0:351, 214:],
+        plt.pcolormesh(q_array[i, 0:beamcenter_y, beamcenter_z:],
+                       azimuth[0:beamcenter_y, beamcenter_z:],
+                       images[i, 0:beamcenter_y, beamcenter_z:],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q_array[i, 351:, 0:214],
-                       azimuth[351:, 0:214],
-                       images[i, 351:, 0:214],
+        plt.pcolormesh(q_array[i, beamcenter_y:, 0:beamcenter_z],
+                       azimuth[beamcenter_y:, 0:beamcenter_z],
+                       images[i, beamcenter_y:, 0:beamcenter_z],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q_array[i, 351:, 214:],
-                       azimuth[351:, 214:],
-                       images[i, 351:, 214:],
+        plt.pcolormesh(q_array[i, beamcenter_y:, beamcenter_z:],
+                       azimuth[beamcenter_y:, beamcenter_z:],
+                       images[i, beamcenter_y:, beamcenter_z:],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
