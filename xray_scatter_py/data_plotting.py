@@ -10,7 +10,7 @@ Set the global matplotlib settings (plot_set, plot_set_small).
 Plot 2D scattering colormaps with various projections. (plot_2d,
     plot_2d_withmarkers, plot_2d_onlymarkers, plot_2d_polar).
 Plot 2D grazing incidence scattering colormaps in q_parallel axis
-    (plot_2d_paralell).
+    (plot_2d_gi).
 Plot and compare 1D scattering and reflectivity data (plot_1d, plot_1d_compare)
 plot scattering colormaps in 3d real space or on the an Ewald sphere
     (plot_3d_q, plot_3d_mm, plot_3d_grating)
@@ -415,7 +415,7 @@ def plot_2d_polar(
         plt.show()
 
 
-def plot_2d_paralell(
+def plot_2d_gi(
         qx_array: np.ndarray,
         qy_array: np.ndarray,
         qz_array: np.ndarray,
