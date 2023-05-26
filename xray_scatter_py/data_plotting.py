@@ -44,7 +44,8 @@ XLABEL_DICT = {
     'qz0': r'$q_\mathrm{z,0}\ \mathrm{(Å^{-1})}$',
     'q_parallel': r'$q_\Vert\ \mathrm{(Å^{-1})}$',
     'theta sample': r'${\theta}_\mathrm{sample}\ (°)$',
-    'kzi': r'$k_\mathrm{z,i}\ \mathrm{(Å^{-1})}$'
+    'kzi': r'$k_\mathrm{z,i}\ \mathrm{(Å^{-1})}$',
+    'alpha i': r'$\alpha_\mathrm{i}\ (°)$',
 }
 YLABEL_DICT = {
     'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
