@@ -28,7 +28,7 @@ qx_array_gi, qy_array_gi, qz_array_gi = calibration.get_q_gi(
 print('obtained qx_array, qy_array, qz_array')
 
 qz_1d, reflectivity_array, spillover_array, total_array = reflectivity.calculate_relative_reflectivity(
-    QY_FWHM, 0.1, qy_array_gi, qz_array_gi, params_dict_list, image_array)
+    QY_FWHM, 0.01, qy_array_gi, qz_array_gi, params_dict_list, image_array)
 normalized_reflectivity, fitted_spillover = reflectivity.calculate_normalized_reflectivity(
     params_dict_list, qz_1d, reflectivity_array, spillover_array, 0.064)
 
@@ -42,7 +42,7 @@ data_plotting.plot_1d_compare(
     fitted_spillover,
     xscale='linear',
     yscale='linear',
-    xlabel='theta sample',
+    xlabel='alpha i',
     ylabel='spillover',
     legend=[
         'Original data',
@@ -51,6 +51,6 @@ data_plotting.plot_1d_compare(
 data_plotting.plot_1d(
     theta_1d,
     total_array,
-    xlabel='theta sample',
+    xlabel='alpha i',
     ylabel='total')
-np.savetxt('ps_si.txt', np.stack((qz_1d, normalized_reflectivity), axis=-1))
+np.savetxt('ps_si.txt', np.stack((qz_1d[:-1], normalized_reflectivity[:-1]), axis=-1))
