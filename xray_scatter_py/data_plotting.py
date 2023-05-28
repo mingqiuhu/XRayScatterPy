@@ -10,7 +10,7 @@ Set the global matplotlib settings (plot_set, plot_set_small).
 Plot 2D scattering colormaps with various projections. (plot_2d,
     plot_2d_withmarkers, plot_2d_onlymarkers, plot_2d_polar).
 Plot 2D grazing incidence scattering colormaps in q_parallel axis
-    (plot_2d_paralell).
+    (plot_2d_gi).
 Plot and compare 1D scattering and reflectivity data (plot_1d, plot_1d_compare)
 plot scattering colormaps in 3d real space or on the an Ewald sphere
     (plot_3d_q, plot_3d_mm, plot_3d_grating)
@@ -44,7 +44,8 @@ XLABEL_DICT = {
     'qz0': r'$q_\mathrm{z,0}\ \mathrm{(Å^{-1})}$',
     'q_parallel': r'$q_\Vert\ \mathrm{(Å^{-1})}$',
     'theta sample': r'${\theta}_\mathrm{sample}\ (°)$',
-    'kzi': r'$k_\mathrm{z,i}\ \mathrm{(Å^{-1})}$'
+    'kzi': r'$k_\mathrm{z,i}\ \mathrm{(Å^{-1})}$',
+    'alpha i': r'$\alpha_\mathrm{i}\ (°)$',
 }
 YLABEL_DICT = {
     'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
@@ -55,7 +56,8 @@ YLABEL_DICT = {
     'total': r'$I_\mathrm{total}\ \mathrm{(a.u.)}$',
     'spillover': r'$I_\mathrm{spill\ over}\ \mathrm{(a.u.)}$',
     'depth': r'$z_\mathrm{1/e}\ \mathrm{(Å)}$',
-    'kzf': r'$k_\mathrm{z,f}\ \mathrm{(Å^{-1})}$'
+    'kzf': r'$k_\mathrm{z,f}\ \mathrm{(Å^{-1})}$',
+    'q_vertical': r'$q_\mathrm{⊥}\ \mathrm{(Å^{-1})}$'
 }
 
 
@@ -334,6 +336,7 @@ def plot_2d_polar(
         qy_array: np.ndarray,
         qz_array: np.ndarray,
         images: np.ndarray,
+        params: list[dict],
         **kwargs) -> None:
     """Plot 2D scattering data after polar transformation.
 
@@ -344,6 +347,9 @@ def plot_2d_polar(
         - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
         - images (np.ndarray): 3D array of scattering intensities.
             The first index is the serial number of measurement.
+        - params (list[dict]): Each dict contains parameters of a measurement.
+            Each dictionary must contain the following keys with string values:
+                - 'beamcenter_actual': Beam center position '[y z]' in pixel.
         - kwargs:
             - index_list (list[int], optional): list of indexes to plot.
                 If not provided, defaults to [0].
@@ -366,30 +372,36 @@ def plot_2d_polar(
         # The polar transformation is plotted by four quadrants individually
         # to avoid the discontinuity at the boundary of the quadrants creating
         # fake lines in pcolormesh.
-        plt.pcolormesh(q_array[i, 0:351, 0:214],
-                       azimuth[0:351, 0:214],
-                       images[i, 0:351, 0:214],
+        beamcenter_y, beamcenter_z = map(
+            float, params[i]['beamcenter_actual'].strip('[]').split())
+        print(beamcenter_y, beamcenter_z)
+        beamcenter_y = int(np.ceil(beamcenter_y))
+        beamcenter_z = int(np.rint(beamcenter_z))
+        print(beamcenter_y, beamcenter_z)
+        plt.pcolormesh(q_array[i, 0:beamcenter_y, 0:beamcenter_z],
+                       azimuth[0:beamcenter_y, 0:beamcenter_z],
+                       images[i, 0:beamcenter_y, 0:beamcenter_z],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q_array[i, 0:351, 214:],
-                       azimuth[0:351, 214:],
-                       images[i, 0:351, 214:],
+        plt.pcolormesh(q_array[i, 0:beamcenter_y, beamcenter_z:],
+                       azimuth[0:beamcenter_y, beamcenter_z:],
+                       images[i, 0:beamcenter_y, beamcenter_z:],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q_array[i, 351:, 0:214],
-                       azimuth[351:, 0:214],
-                       images[i, 351:, 0:214],
+        plt.pcolormesh(q_array[i, beamcenter_y:, 0:beamcenter_z],
+                       azimuth[beamcenter_y:, 0:beamcenter_z],
+                       images[i, beamcenter_y:, 0:beamcenter_z],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.pcolormesh(q_array[i, 351:, 214:],
-                       azimuth[351:, 214:],
-                       images[i, 351:, 214:],
+        plt.pcolormesh(q_array[i, beamcenter_y:, beamcenter_z:],
+                       azimuth[beamcenter_y:, beamcenter_z:],
+                       images[i, beamcenter_y:, beamcenter_z:],
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
@@ -404,7 +416,7 @@ def plot_2d_polar(
         plt.show()
 
 
-def plot_2d_paralell(
+def plot_2d_gi(
         qx_array: np.ndarray,
         qy_array: np.ndarray,
         qz_array: np.ndarray,
@@ -455,7 +467,7 @@ def plot_2d_paralell(
                  np.max(np.concatenate((q_paralell[qy_array < 0] * -1,
                                         q_paralell[qy_array >= 0]))))
         plt.xlabel(XLABEL_DICT['q_parallel'])
-        plt.ylabel(YLABEL_DICT['qz'])
+        plt.ylabel(YLABEL_DICT['q_vertical'])
         plt.colorbar(label='I (a.u.)')
         plt.gca().set_aspect('equal', adjustable='box')
         plt.show()

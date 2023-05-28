@@ -53,7 +53,7 @@ def calculate_relative_reflectivity(
         - total_array (np.ndarray): 1D array containing the total intensity on
             the 2D detector at each incidence angle.
     """
-    interval_degree = np.radians(interval_degree)
+    interval_radian = np.radians(interval_degree)
     qz_1d = np.empty(images.shape[0])
     reflectivity_array = np.empty(images.shape[0])
     spillover_array = np.empty(images.shape[0])
@@ -65,9 +65,9 @@ def calculate_relative_reflectivity(
         time = float(params[i]['det_exposure_time'])
 
         qz_upper = 4 * np.pi * \
-            np.sin(incidence_radian + 0.25 * interval_degree) / wavelength
+            np.sin(incidence_radian + 0.5 * interval_radian) / wavelength
         qz_lower = 4 * np.pi * \
-            np.sin(incidence_radian - 0.25 * interval_degree) / wavelength
+            np.sin(incidence_radian - 0.5 * interval_radian) / wavelength
         qz_bool = np.logical_and(
             (qz_array[i]**2 + qy_array[i]**2) >= qz_lower**2,
             (qz_array[i]**2 + qy_array[i]**2) <= qz_upper**2)
