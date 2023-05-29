@@ -36,8 +36,9 @@ data_plotting.plot_2d_polar(
     qy_array,
     qz_array,
     image_array_abs,
+    params_dict_list,
     index_list=INDEX_LIST)
-
+"""
 data_plotting.plot_3d_q(
     qx_array,
     qy_array,
@@ -47,3 +48,4 @@ data_plotting.plot_3d_q(
 
 x_array, y_array, z_array = calibration.get_mm(DETX0, params_dict_list, image_array)
 data_plotting.plot_3d_mm(x_array, y_array, z_array, image_array_abs, index_list=INDEX_LIST)
+"""
