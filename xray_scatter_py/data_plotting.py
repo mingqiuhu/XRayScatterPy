@@ -182,8 +182,8 @@ def plot_2d(
         if video:
             plt.xlim(np.min(qy_array), np.max(qy_array))
             plt.ylim(np.min(qz_array), np.max(qz_array))
+        plt.savefig('2d.png', dpi=400, bbox_inches='tight')
         plt.show()
-
 
 def plot_2d_withmarkers(
         qy_array: np.ndarray,
@@ -559,6 +559,7 @@ def plot_2d_debyescherrer(
         if video:
             plt.xlim(np.min(qy_array), np.max(qy_array))
             plt.ylim(np.min(qz_array), np.max(qz_array))
+        plt.savefig('2d_ds.png', dpi=400, bbox_inches='tight')
         plt.show()
 
 def plot_1d(
@@ -605,6 +606,8 @@ def plot_1d(
     plt.yscale(yscale)
     if yticks is not None:
         plt.yticks(yticks)
+    plt.xticks([0.00, 0.05, 0.10, 0.15, 0.20])
+    plt.savefig('1d.png', dpi=400, bbox_inches='tight')
     plt.show()
 
 
