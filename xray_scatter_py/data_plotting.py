@@ -473,6 +473,94 @@ def plot_2d_gi(
         plt.show()
 
 
+def plot_2d_debyescherrer(
+        qy_array: np.ndarray,
+        qz_array: np.ndarray,
+        images: np.ndarray,
+        qyds_array: np.ndarray,
+        qzu_array: np.ndarray,
+        qzl_array: np.ndarray,
+        **kwargs) -> None:
+    """This function takes qy_array, qz_array, and images as inputs and
+    creates a 2D colormap plot for each index in index_list using the
+    provided arrays. qx is ignored when scatering data is plotted in this way.
+    Debye Scherrer ring is also plotted on this plot.
+
+    Args:
+        - qy_array (np.ndarray): 3D array of qy values (in Å^-1 units).
+        - qz_array (np.ndarray): 3D array of qz values (in Å^-1 units).
+        - images (np.ndarray): 3D array of the original detector images.
+            The first index is the serial number of measurement.
+        qyds_array (np.ndarray): 1D array of qy on the debye scherrer ring.
+        qzu_array (np.ndarray): 1D array of qz of upper debye scherrer ring
+        qzl_array (np.ndarray): 1D array of qz of lower debye scherrer ring
+        - kwargs:
+            - index_list (list[int], optional): list of indexes of the
+                measurements to plot. If not provided, defaults to [0].
+            - crop (bool, optional): decide whether the plot would be cropped
+                after correcting the chi rotation in a grazing incidence
+                measurement. If not providded, default to False.
+            - xticks (list[float], optional): set the xtick locations.
+                If not provided, default to None
+            - yticks (list[float], optional): set the ytick locations.
+                If not provided, default to None
+            - video (bool, optional): decide if the images would be used to
+                generate videos. If not provided, default to False.
+
+    Returns:
+        - None
+    """
+    utils.validate_array_dimension(images, 3)
+    utils.validate_array_shape(images, qy_array, qz_array)
+    utils.validate_kwargs(
+        {'index_list', 'crop', 'xticks', 'yticks', 'video'}, kwargs)
+
+    index_list = kwargs.get('index_list', [0])
+    crop = kwargs.get('crop', False)
+    xticks = kwargs.get('xticks', None)
+    yticks = kwargs.get('yticks', None)
+    video = kwargs.get('video', False)
+
+    plot_set()
+    for i in index_list:
+        plt.figure()
+        zmax = np.max(images[i])
+        zmin = np.min(images[i][images[i] > 0])
+        # zmin = max(zmax*1e-6, np.min(images[i][images[i] > 0]))
+        norm = matplotlib.colors.LogNorm(zmin, zmax)
+        plt.pcolormesh(
+            qy_array[i],
+            qz_array[i],
+            images[i],
+            cmap='jet',
+            linewidths=3,
+            norm=norm,
+            shading='nearest')
+        plt.xlabel(XLABEL_DICT['qy'])
+        plt.ylabel(YLABEL_DICT['qz'])
+        plt.plot(qyds_array, qzu_array, c='grey',
+                 marker ='.',linewidth=0, markersize=12)
+        plt.plot(qyds_array, qzl_array, c='black',
+                 marker ='.',linewidth=0, markersize=12)
+        if not video:
+            plt.colorbar(label='I (a.u.)')
+        plt.gca().set_aspect('equal', adjustable='box')
+        if xticks is not None:
+            plt.xticks(xticks)
+        if yticks is not None:
+            plt.yticks(yticks)
+        if crop:
+            plt.xlim(
+                qy_array[i][np.where(-qz_array[i] == np.max(-qz_array[i]))],
+                qy_array[i][np.where(-qz_array[i] == np.min(-qz_array[i]))])
+            plt.ylim(
+                qz_array[i][np.where(-qy_array[i] == np.min(-qy_array[i]))],
+                qz_array[i][np.where(-qy_array[i] == np.max(-qy_array[i]))])
+        if video:
+            plt.xlim(np.min(qy_array), np.max(qy_array))
+            plt.ylim(np.min(qz_array), np.max(qz_array))
+        plt.show()
+
 def plot_1d(
         scattering_vec: np.ndarray,
         intensity: np.ndarray,
