@@ -444,28 +444,28 @@ def plot_2d_gi(
 
     index_list = kwargs.get('index_list', [0])
 
-    q_paralell = np.sqrt(qx_array**2 + qy_array**2)
+    q_parallel = np.sqrt(qx_array**2 + qy_array**2)
     plot_set()
     for i in index_list:
         plt.figure()
-        plt.pcolormesh(q_paralell[i],
+        plt.pcolormesh(q_parallel[i],
                        qz_array[i],
                        images[i] * (qy_array[i] > 0),
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='gourand')
-        plt.pcolormesh(-q_paralell[i],
+        plt.pcolormesh(-q_parallel[i],
                        qz_array[i],
                        images[i] * (qy_array[i] <= 0),
                        cmap='jet',
                        linewidths=3,
                        norm=matplotlib.colors.LogNorm(),
                        shading='nearest')
-        plt.xlim(np.min(np.concatenate((q_paralell[qy_array < 0] * -1,
-                                        q_paralell[qy_array >= 0]))),
-                 np.max(np.concatenate((q_paralell[qy_array < 0] * -1,
-                                        q_paralell[qy_array >= 0]))))
+        plt.xlim(np.min(np.concatenate((q_parallel[qy_array < 0] * -1,
+                                        q_parallel[qy_array >= 0]))),
+                 np.max(np.concatenate((q_parallel[qy_array < 0] * -1,
+                                        q_parallel[qy_array >= 0]))))
         plt.xlabel(XLABEL_DICT['q_parallel'])
         plt.ylabel(YLABEL_DICT['q_vertical'])
         plt.colorbar(label='I (a.u.)')
