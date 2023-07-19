@@ -294,68 +294,57 @@ def read_sans(directory_path: str, file_name: str, header=1):
     return data_array
 
 
-def wave_vector(a, wl):
+def wave_vector(a, wavelength):
     """Calculate wave vector for certain incidence angle and wave length.
 
     Args:
-        - a (float): The incidence angle, in degree unit.
-        - wl (float): The wavelength of incidence beam, in Angstrom unit.
+        - a (float): The incidence angle, in radian unit.
+        - wavelength (float): The wavelength of incidence beam, in Angstrom unit.
 
     Return:
         - q (float): The corresponding wavevector, in Angstrom unit.
     """
-    q = 2*np.pi*np.sin(a*np.pi/180)/wl
-    return q
+    k = 2*np.pi*np.sin(a)/wavelength
+    return k
 
-def critical_angle(sld, wl):
-    """calculate critical angle of a material in certain wave length.
 
-    Args:
-        - sld (float): The scattering length density.
-        - wl (float): The wavelength of incidence beam, in Angstrom unit.
-
-    Return:
-        - ac (float): The critical angle value
-    """
-    ac = 180*np.arcsin(wl*(sld/np.pi)**0.5)/np.pi
-    return ac
-
-def debye_scherrer_xray(qy_array, L0, m, aiz, acp):
+def debye_scherrer_xray(qy_array, wavelength, L0, m, aiz, acp):
     """calculate the Debye Scherrer ring for X-Ray scattering.
 
     Args:
         - qy_array (np.ndarray): The qy value array, 1D.
         - L0 (float): The domain spacing size, in Angstrom unit.
         - m (Int): The order of scatering.
-        - aiz (float): The incidence angle, in degree unit.
+        - aiz (float): The incidence angle, in radian unit.
         - acp (float): The polymer air interface critical angle, degree.
 
     Returns:
         - qzu_array (np.ndarray): The qz list of upper Debye-Scherrer ring
         - qzl_array (np.ndarray): The qz list of lower Debye-Scherrer ring
     """
-    kiz = wave_vector(aiz)
-    kcp = wave_vector(acp)
+    kiz = wave_vector(aiz, wavelength)
+    kcp = wave_vector(acp, wavelength)
     sqrt1 = (kiz**2 - kcp**2)**0.5
-    qzu_array, qzl_array = qy_array[:], qy_array[:]
+    qzu_array, qzl_array = qy_array, qy_array
     for i in range(0, len(qy_array)):
         sqrt2 = ((2*np.pi*m/L0)**2 - qy_array[i]**2)**0.5
         # a_i > 0, a_f > 0, reflect from polymer air interface
         qzu_array[i] = kiz + (kcp**2 + (sqrt2 + sqrt1)**2)**0.5
         # a_i > 0, a_f > 0, reflect from polymer substrate interface
         qzl_array[i] = kiz + (kcp**2 + (sqrt2 - sqrt1)**2)**0.5
-    return qzu_array, qzl_array
+    return [qzu_array, qzl_array]
 
-def debye_scherrer_neutron(qy_array, L0, m, aiz, acp, acs):
+
+def debye_scherrer_neutron(qy_array, wavelength, L0, m, aiz, acp, acs):
     """calculate the Debye Scherrer ring for neutron scattering.
 
     Args:
         - qy_array (np.ndarray): The qy value array, 1D.
         - L0 (float): The domain spacing size, in Angstrom unit.
         - m (Int): The order of scatering.
-        - aiz (float): The incidence angle, in degree unit.
-        - acp (float): The polymer air interface critical angle, degree.
-        - acs (float): The substrate air interface critical angle, degree.
+        - aiz (float): The incidence angle, in radian unit.
+        - acp (float): The polymer air interface critical angle, radian.
+        - acs (float): The substrate air interface critical angle, radian.
 
     Returns:
         - qzru_array (np.ndarray): qz list of upper reflection DS ring
@@ -363,21 +352,34 @@ def debye_scherrer_neutron(qy_array, L0, m, aiz, acp, acs):
         - qztu_array (np.ndarray): qz list of upper transmission DS ring
         - qztl_array (np.ndarray): qz list of lower transmission DS ring
     """
-    kiz = wave_vector(aiz)
-    kcp = wave_vector(acp)
-    kcs = wave_vector(acs)
+    kiz = wave_vector(aiz, wavelength)
+    kcp = wave_vector(acp, wavelength)
+    kcs = wave_vector(acs, wavelength)
     kcsp = (kcp**2-kcs**2)**0.5
     sqrt1 = (kiz**2 - kcp**2)**0.5
-    qzru_array, qzrl_array = qy_array[:], qy_array[:]
-    qztu_array, qztl_array = qy_array[:], qy_array[:]
-    for i in range(0, len(qy_array)):
-        sqrt2 = ((2*np.pi*m/L0)**2 - qy_array[i]**2)**0.5
-        # a_i > 0, a_f > 0, upper reflection
-        qzru_array[i] = kiz + (kcp**2 + (sqrt2 + sqrt1)**2)**0.5
-        # a_i > 0, a_f > 0, lower reflection
-        qzrl_array[i] = kiz + (kcp**2 + (sqrt2 - sqrt1)**2)**0.5
-        # a_i > 0, a_f < 0, upper transmission
-        qztu_array[i] = kiz - (kcsp**2 + (sqrt2 - sqrt1)**2)**0.5
-        # a_i > 0, a_f < 0, lower transmission
-        qztl_array[i] = kiz - (kcsp**2 + (sqrt2 + sqrt1)**2)**0.5
-    return qzru_array, qzrl_array, qztu_array, qztl_array
+    sqrt2 = (kiz**2 - kcsp**2)**0.5
+    qzru_array, qzrl_array, qztu_array, qztl_array = [
+        np.zeros_like(qy_array) for _ in range(4)]
+    if aiz > 0:
+        for i in range(len(qy_array)):
+            sqrt0 = ((2*np.pi*m/L0)**2 - (qy_array[i])**2)**0.5
+            # a_i > 0, a_f > 0, upper reflection
+            qzru_array[i] = kiz + (kcp**2 + (sqrt0 + sqrt1)**2)**0.5
+            # a_i > 0, a_f > 0, lower reflection
+            qzrl_array[i] = kiz + (kcp**2 + (sqrt0 - sqrt1)**2)**0.5
+            # a_i > 0, a_f < 0, upper transmission
+            qztu_array[i] = kiz - (kcsp**2 + (sqrt0 - sqrt1)**2)**0.5
+            # a_i > 0, a_f < 0, lower transmission
+            qztl_array[i] = kiz - (kcsp**2 + (sqrt0 + sqrt1)**2)**0.5
+    if aiz <= 0:
+        for i in range(len(qy_array)):
+            sqrt0 = ((2*np.pi*m/L0)**2 - (qy_array[i])**2)**0.5
+            # a_i > 0, a_f > 0, upper reflection
+            qzru_array[i] = kiz + (kcp**2 + (sqrt0 + sqrt2)**2)**0.5
+            # a_i > 0, a_f > 0, lower reflection
+            qzrl_array[i] = kiz + (kcp**2 + (sqrt0 - sqrt2)**2)**0.5
+            # a_i > 0, a_f < 0, upper transmission
+            qztu_array[i] = kiz - (kcsp**2 + (sqrt0 - sqrt2)**2)**0.5
+            # a_i > 0, a_f < 0, lower transmission
+            qztl_array[i] = kiz - (kcsp**2 + (sqrt0 + sqrt2)**2)**0.5
+    return [qzru_array, qzrl_array, qztu_array, qztl_array]
