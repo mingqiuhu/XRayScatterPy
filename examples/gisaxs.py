@@ -68,16 +68,14 @@ i_1d_oop = data_processing.calculate_1d_oop(
     qz_max=Q_MAX,
     qz_num=Q_NUM,
     index_list=INDEX_LIST)
-data_plotting.plot_1d_compare(
-    q_1d_oop,
-    i_1d_oop[0],
+data_plotting.plot_1d(
     q_1d_oop,
     i_1d_oop[3],
     xscale='linear',
     xlabel='qz',
     ylabel='a.u.')
 
-QPAR_MIN, QPAR_MAX, QPAR_NUM = 0, 0.2, 399
+QPAR_MIN, QPAR_MAX, QPAR_NUM = 0, 0.1, 199
 QZ_FWHM = 0.002
 qpar_array = np.sqrt(qx_array**2 + qy_array**2)
 q_1d_ip = np.linspace(QPAR_MIN, QPAR_MAX, QPAR_NUM)
@@ -94,8 +92,8 @@ i_1d_ip = data_processing.calculate_1d_ip(
     index_list=INDEX_LIST)
 data_plotting.plot_1d(
     q_1d_ip,
-    i_1d_ip[0],
+    i_1d_ip[3],
     xscale='linear',
-    xlabel='qpar',
+    xlabel='q_parallel',
     ylabel='a.u.')
 """
