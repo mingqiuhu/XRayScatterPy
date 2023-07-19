@@ -76,4 +76,26 @@ data_plotting.plot_1d_compare(
     xscale='linear',
     xlabel='qz',
     ylabel='a.u.')
+
+QPAR_MIN, QPAR_MAX, QPAR_NUM = 0, 0.2, 399
+QZ_FWHM = 0.002
+qpar_array = np.sqrt(qx_array**2 + qy_array**2)
+q_1d_ip = np.linspace(QPAR_MIN, QPAR_MAX, QPAR_NUM)
+i_1d_ip = data_processing.calculate_1d_ip(
+    qpar_array,
+    qz_array_gi,
+    image_array_rel,
+    sr_array,
+    params_dict_list,
+    qz_fwhm=QZ_FWHM,
+    qpar_min=QPAR_MIN,
+    qpar_max=QPAR_MAX,
+    qpar_num=QPAR_NUM,
+    index_list=INDEX_LIST)
+data_plotting.plot_1d(
+    q_1d_ip,
+    i_1d_ip[0],
+    xscale='linear',
+    xlabel='qpar',
+    ylabel='a.u.')
 """
