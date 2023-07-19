@@ -316,7 +316,7 @@ def debye_scherrer_xray(qy_array, wavelength, L0, m, aiz, acp):
         - L0 (float): The domain spacing size, in Angstrom unit.
         - m (Int): The order of scatering.
         - aiz (float): The incidence angle, in radian unit.
-        - acp (float): The polymer air interface critical angle, degree.
+        - acp (float): The polymer air interface critical angle, radian.
 
     Returns:
         - qzu_array (np.ndarray): The qz list of upper Debye-Scherrer ring
