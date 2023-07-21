@@ -12,7 +12,8 @@ utils.py: This module contains utility functions for general tasks like file I/O
 You can download and install the XRayScatterPy package using pip:  
 In a terminal, firstly navigate to the root directory, the directoy containing the setup file.  
 Then run the following command in the terminal, including the "." at the end of the line.  
-pip install -e .  
+```
+pip install -e .
   
 # Contributing:  
 We welcome contributions to the XRayScatterPy package. If you'd like to contribute, please fork the repository, make your changes, and submit a pull request.  
