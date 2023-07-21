@@ -14,7 +14,7 @@ In a terminal, firstly navigate to the root directory, the directoy containing t
 Then run the following command in the terminal, including the "." at the end of the line.  
 ```
 pip install -e .
-  
+```
 # Contributing:  
 We welcome contributions to the XRayScatterPy package. If you'd like to contribute, please fork the repository, make your changes, and submit a pull request.  
   
