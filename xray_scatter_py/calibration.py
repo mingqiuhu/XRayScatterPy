@@ -19,7 +19,7 @@ get_q: get the q-vectors (qx, qy, qz) for each detector pixel in Å^-1.
 get_q_gi: get the q-vectors (qx, qy, qz) for each detector pixel in Å^-1 for
     grazing incidence experiments.
 get_chi: get the sample stage rotation around the chi axis in radians.
-    The chi axis is the axis paralell to the incident x-ray beam. In a grazing
+    The chi axis is the axis parallel to the incident x-ray beam. In a grazing
     incidence experiment, chi is usually the azimuthal angle with the largest
     integrated intensity. This is used to correct the non-zero rotation of the
     sample stage around chi axis, the axis parallel to the incident beam. In a

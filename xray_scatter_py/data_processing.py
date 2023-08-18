@@ -273,7 +273,7 @@ def calculate_1d_ip(
     """Calculate the 1D scattering intensity in in-plane direction at qz=2kzi.
 
     Args:
-        - qpar_array (np.ndarray): 3D array of q paralell values of each pixel.
+        - qpar_array (np.ndarray): 3D array of q parallel values of each pixel.
             The first index is the serial number of measurement.
         - qz_array (np.ndarray): 3D array of qz values for each detector pixel.
         - images (np.ndarray): A 3D array of the original detector images.
