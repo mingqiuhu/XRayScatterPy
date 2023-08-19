@@ -32,6 +32,7 @@ setup(
         "scipy",
         "tifffile",
         "xmltodict",
-        "requests"
+        "requests",
+        "pyqt5"
         ],
 )
