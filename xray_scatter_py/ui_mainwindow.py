@@ -200,10 +200,10 @@ class Ui_MainWindow(object):
 
         self.hlayout_browse.addWidget(self.pbutton_next)
 
-        self.pbuttoin_next10 = QPushButton(self.centralwidget)
-        self.pbuttoin_next10.setObjectName(u"pbuttoin_next10")
+        self.pbutton_next10 = QPushButton(self.centralwidget)
+        self.pbutton_next10.setObjectName(u"pbutton_next10")
 
-        self.hlayout_browse.addWidget(self.pbuttoin_next10)
+        self.hlayout_browse.addWidget(self.pbutton_next10)
 
         self.pbutton_next100 = QPushButton(self.centralwidget)
         self.pbutton_next100.setObjectName(u"pbutton_next100")
@@ -486,7 +486,7 @@ class Ui_MainWindow(object):
         self.pbutton_previous10.setText(QCoreApplication.translate("MainWindow", u"<<", None))
         self.pbutton_previous.setText(QCoreApplication.translate("MainWindow", u"< Previous", None))
         self.pbutton_next.setText(QCoreApplication.translate("MainWindow", u"Next >", None))
-        self.pbuttoin_next10.setText(QCoreApplication.translate("MainWindow", u">>", None))
+        self.pbutton_next10.setText(QCoreApplication.translate("MainWindow", u">>", None))
         self.pbutton_next100.setText(QCoreApplication.translate("MainWindow", u">>>", None))
         self.rbutton_orig.setText(QCoreApplication.translate("MainWindow", u"Original image: z - y", None))
         self.rbutton_polar.setText(QCoreApplication.translate("MainWindow", u"Polar transformation: azimuth - q", None))
@@ -513,13 +513,3 @@ class Ui_MainWindow(object):
         self.menuAuto.setTitle(QCoreApplication.translate("MainWindow", u"Auto", None))
         self.menuProcessing.setTitle(QCoreApplication.translate("MainWindow", u"Processing", None))
     # retranslateUi
-
-
-if __name__ == "__main__":
-    import sys
-    app = QApplication(sys.argv)
-    MainWindow = QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

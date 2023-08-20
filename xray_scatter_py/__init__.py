@@ -14,6 +14,7 @@ from . import gratings  # Calculate reciprocal space of gratings
 from . import utils  # Type checking, reading, writing, etc.
 from . import nist  # Connect to NIST website to calculate scattering length.
 from . import penetration  # Calculate x-ray and neutron penetration depth.
+from . import ui_mainwindow  # GUI
 
 __version__ = "1.0"
 __author__ = "Mingqiu Hu, Xuchen Gan, Prof. Thomas P. Russell"
