@@ -10,3 +10,6 @@
 !setup.py
 !README.md
 !CODEOWNERS
+!xray_scatter_py/ui_mainwindow.py
+!xray_scatter_py/ui_mainwindow.ui
+!xray_scatter_py/ui_mainwindow_functionalized.py
