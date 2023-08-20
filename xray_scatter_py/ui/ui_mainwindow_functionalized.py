@@ -1,4 +1,5 @@
-from xray_scatter_py.ui_mainwindow import Ui_MainWindow
+from xray_scatter_py.ui.ui_mainwindow import Ui_MainWindow
+from xray_scatter_py.ui.ui_reflectivity import ui_reflectivity
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QButtonGroup
 
@@ -131,8 +132,9 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
         self.actionintensity_calibration.triggered.connect(lambda *_: self.refresh_ui('graphicsview_left', 'graphicsview_right'))
         self.actionauto_correct_center.triggered.connect(lambda *_: self.auto_correct_center())
         self.actionauto_correct_center.triggered.connect(lambda *_: self.refresh_ui('graphicsview_left', 'graphicsview_right'))
-        # Processing
-        self.actionReflectivity.triggered.connect(lambda *_: self.reflectivity())
+
+        self.reflectivity_connector = ui_reflectivity(self)
+        self.reflectivity_connector.connect()
 
     def save_as(self):
         print('save_as')
@@ -174,10 +176,6 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
 
     def auto_correct_center(self):
         print('auto_correct_center')
-
-    def reflectivity(self):
-        # this function may need to be imported from another module
-        print('reflectivity')
 
     # refresh_ui
     def refresh_ui(self, *args):
