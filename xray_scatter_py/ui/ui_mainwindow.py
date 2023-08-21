@@ -176,10 +176,10 @@ class Ui_MainWindow(object):
 
         self.hlayout_browse.addWidget(self.pbutton_previous100)
 
-        self.pbutton_previous10 = QPushButton(self.centralwidget)
-        self.pbutton_previous10.setObjectName(u"pbutton_previous10")
+        self.pbutton_previous5 = QPushButton(self.centralwidget)
+        self.pbutton_previous5.setObjectName(u"pbutton_previous5")
 
-        self.hlayout_browse.addWidget(self.pbutton_previous10)
+        self.hlayout_browse.addWidget(self.pbutton_previous5)
 
         self.pbutton_previous = QPushButton(self.centralwidget)
         self.pbutton_previous.setObjectName(u"pbutton_previous")
@@ -200,10 +200,10 @@ class Ui_MainWindow(object):
 
         self.hlayout_browse.addWidget(self.pbutton_next)
 
-        self.pbutton_next10 = QPushButton(self.centralwidget)
-        self.pbutton_next10.setObjectName(u"pbutton_next10")
+        self.pbutton_next5 = QPushButton(self.centralwidget)
+        self.pbutton_next5.setObjectName(u"pbutton_next5")
 
-        self.hlayout_browse.addWidget(self.pbutton_next10)
+        self.hlayout_browse.addWidget(self.pbutton_next5)
 
         self.pbutton_next100 = QPushButton(self.centralwidget)
         self.pbutton_next100.setObjectName(u"pbutton_next100")
@@ -482,12 +482,12 @@ class Ui_MainWindow(object):
         self.label_cbar_max.setText(QCoreApplication.translate("MainWindow", u"Colorbar max:", None))
         self.cbox_monitor.setText(QCoreApplication.translate("MainWindow", u"Monitoring?", None))
         self.cbox_log.setText(QCoreApplication.translate("MainWindow", u"Log colorscale?", None))
-        self.pbutton_previous100.setText(QCoreApplication.translate("MainWindow", u"<<<", None))
-        self.pbutton_previous10.setText(QCoreApplication.translate("MainWindow", u"<<", None))
-        self.pbutton_previous.setText(QCoreApplication.translate("MainWindow", u"< Previous", None))
-        self.pbutton_next.setText(QCoreApplication.translate("MainWindow", u"Next >", None))
-        self.pbutton_next10.setText(QCoreApplication.translate("MainWindow", u">>", None))
-        self.pbutton_next100.setText(QCoreApplication.translate("MainWindow", u">>>", None))
+        self.pbutton_previous100.setText(QCoreApplication.translate("MainWindow", u"<<< 100", None))
+        self.pbutton_previous5.setText(QCoreApplication.translate("MainWindow", u"<< 5", None))
+        self.pbutton_previous.setText(QCoreApplication.translate("MainWindow", u"< 1", None))
+        self.pbutton_next.setText(QCoreApplication.translate("MainWindow", u"1 >", None))
+        self.pbutton_next5.setText(QCoreApplication.translate("MainWindow", u"5 >>", None))
+        self.pbutton_next100.setText(QCoreApplication.translate("MainWindow", u"100 >>>", None))
         self.rbutton_orig.setText(QCoreApplication.translate("MainWindow", u"Original image: z - y", None))
         self.rbutton_polar.setText(QCoreApplication.translate("MainWindow", u"Polar transformation: azimuth - q", None))
         self.rbutton_gi_qz_qy.setText(QCoreApplication.translate("MainWindow", u"GI coordinate: qz - qy", None))
