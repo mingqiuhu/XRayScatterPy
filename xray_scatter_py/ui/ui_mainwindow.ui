@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1211</width>
+    <height>715</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QVBoxLayout" name="vlayout_data_list">
+      <item>
+       <widget class="QPushButton" name="pbutton_open">
+        <property name="text">
+         <string>Open dir</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeView" name="treeview_datalist"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hlayout_find">
+        <item>
+         <widget class="QLabel" name="label_find">
+          <property name="text">
+           <string>Find:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineedit_find"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="vlayout_images">
+      <item>
+       <layout class="QGridLayout" name="glayout_left_image">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_left_image">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>2D image in qz - qy coordinate</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label_right_image">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Other coordinate options for 2D image</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="vlayout_left_settings">
+          <item>
+           <layout class="QGridLayout" name="glayout_cbar">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_cbar_min">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Colorbar min:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineedit_cbar_min">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QSlider" name="hslider_cbar_min">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_cbar_max">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Colorbar max:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineedit_cbar_max">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QSlider" name="hslider_cbar_max">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hlayout_monitor_log">
+            <item>
+             <widget class="QCheckBox" name="cbox_monitor">
+              <property name="text">
+               <string>Monitoring?</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbox_log">
+              <property name="text">
+               <string>Log colorscale?</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="hspacer_monitor_log">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hlayout_browse">
+            <item>
+             <widget class="QPushButton" name="pbutton_previous100">
+              <property name="text">
+               <string>&lt;&lt;&lt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbutton_previous10">
+              <property name="text">
+               <string>&lt;&lt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbutton_previous">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>&lt; Previous</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="hspacer_browse">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbutton_next">
+              <property name="text">
+               <string>Next &gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbuttoin_next10">
+              <property name="text">
+               <string>&gt;&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbutton_next100">
+              <property name="text">
+               <string>&gt;&gt;&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <layout class="QVBoxLayout" name="vlayout_right_options">
+          <item>
+           <widget class="QRadioButton" name="rbutton_orig">
+            <property name="text">
+             <string>Original image: z - y</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rbutton_polar">
+            <property name="text">
+             <string>Polar transformation: azimuth - q</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rbutton_gi_qz_qy">
+            <property name="text">
+             <string>GI coordinate: qz - qy</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rbutton_gi_perp_para">
+            <property name="text">
+             <string>GI coordinate: q⊥ - q∥</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="vspacer_right_options">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="0">
+         <layout class="QHBoxLayout" name="hlayout_left_save">
+          <item>
+           <widget class="QPushButton" name="pbutton_left_save">
+            <property name="text">
+             <string>Save Image</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="hspacer_left_save">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <layout class="QHBoxLayout" name="hlayout_right_save">
+          <item>
+           <widget class="QPushButton" name="pbutton_right_save">
+            <property name="text">
+             <string>Save Image</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="hspacer_right_save">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0">
+         <widget class="QGraphicsView" name="graphicsview_left">
+          <property name="minimumSize">
+           <size>
+            <width>400</width>
+            <height>400</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>400</width>
+            <height>400</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QGraphicsView" name="graphicsview_right">
+          <property name="minimumSize">
+           <size>
+            <width>400</width>
+            <height>400</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>400</width>
+            <height>400</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <layout class="QGridLayout" name="glayout_left_1d">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pbutton_left_draw">
+            <property name="text">
+             <string>Draw 1D Average Area</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="lebel_left_min1">
+            <property name="text">
+             <string>ymin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="lineedit_left_min1"/>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="label_left_min2">
+            <property name="text">
+             <string>zmin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLineEdit" name="lineedit_left_min2"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="pbutton_left_show">
+            <property name="text">
+             <string>Show 1D Average</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_left_max1">
+            <property name="text">
+             <string>ymax</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLineEdit" name="lineedit_left_max1"/>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="label_left_max2">
+            <property name="text">
+             <string>zmax</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLineEdit" name="lineedit_left_max2"/>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="1">
+         <layout class="QGridLayout" name="glayout_right_1d">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pbutton_right_draw">
+            <property name="text">
+             <string>Draw 1D Average Area</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_right_min1">
+            <property name="text">
+             <string>ymin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="lineedit_right_min1"/>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="label_right_min2">
+            <property name="text">
+             <string>zmin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLineEdit" name="lineedit_right_min2"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="pbutton_right_show">
+            <property name="text">
+             <string>Show 1D Average</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_right_max1">
+            <property name="text">
+             <string>ymax</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLineEdit" name="lineedit_right_max1"/>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="label_right_max2">
+            <property name="text">
+             <string>zmax</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLineEdit" name="lineedit_right_max2"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="vspacer_images">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1211</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuUI_Preferences">
+     <property name="title">
+      <string>UI preferences</string>
+     </property>
+     <addaction name="actionSet_UI_Preferences"/>
+     <addaction name="actionUse_Default_Preferences"/>
+     <addaction name="actionSave_current_preferences_as"/>
+    </widget>
+    <addaction name="actionSave_As"/>
+    <addaction name="menuUI_Preferences"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionGrid"/>
+    <addaction name="actionZoom"/>
+    <addaction name="actionRotate"/>
+    <addaction name="actionImage_History"/>
+   </widget>
+   <widget class="QMenu" name="menuCalibrations">
+    <property name="title">
+     <string>Calibrations</string>
+    </property>
+    <widget class="QMenu" name="menuAuto">
+     <property name="title">
+      <string>Auto</string>
+     </property>
+     <addaction name="actionq_calibration"/>
+     <addaction name="actionintensity_calibration"/>
+     <addaction name="actionauto_correct_center"/>
+    </widget>
+    <addaction name="actionLoad"/>
+    <addaction name="actionSave_current"/>
+    <addaction name="actionManually_set"/>
+    <addaction name="menuAuto"/>
+   </widget>
+   <widget class="QMenu" name="menuProcessing">
+    <property name="title">
+     <string>Processing</string>
+    </property>
+    <addaction name="actionReflectivity"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
+   <addaction name="menuCalibrations"/>
+   <addaction name="menuProcessing"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionmat_file">
+   <property name="text">
+    <string>mat-file</string>
+   </property>
+  </action>
+  <action name="actiontiff_file">
+   <property name="text">
+    <string>tiff-file</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="text">
+    <string>Save as</string>
+   </property>
+  </action>
+  <action name="actionSet_UI_Preferences">
+   <property name="text">
+    <string>Set UI preferences</string>
+   </property>
+  </action>
+  <action name="actionUse_Default_Preferences">
+   <property name="text">
+    <string>Use default preferences</string>
+   </property>
+  </action>
+  <action name="actionGrid">
+   <property name="text">
+    <string>Grid</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionImage_History">
+   <property name="text">
+    <string>Image history</string>
+   </property>
+  </action>
+  <action name="actionRotate">
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load last</string>
+   </property>
+  </action>
+  <action name="actionSave_current">
+   <property name="text">
+    <string>Save current</string>
+   </property>
+  </action>
+  <action name="actionManually_set">
+   <property name="text">
+    <string>Manually set</string>
+   </property>
+  </action>
+  <action name="actionq_calibration">
+   <property name="text">
+    <string>q-calibration</string>
+   </property>
+  </action>
+  <action name="actionintensity_calibration">
+   <property name="text">
+    <string>intensity-calibration</string>
+   </property>
+  </action>
+  <action name="actionSave_current_preferences_as">
+   <property name="text">
+    <string>Save current preferences as</string>
+   </property>
+  </action>
+  <action name="actionauto_correct_center">
+   <property name="text">
+    <string>auto-correct center</string>
+   </property>
+  </action>
+  <action name="actionReflectivity">
+   <property name="text">
+    <string>Reflectivity</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

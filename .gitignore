@@ -1,12 +1,4 @@
-*
-
-!.gitignore
-!examples/
-!examples/underdev/
-!tests_underdev/
-!xray_scatter_py/
-!xray_scatter_py/underdev/
-!data/
-!setup.py
-!README.md
-!CODEOWNERS
+/venv_ui/
+/xray_scatter_py/__pycache__/
+/xray_scatter_py/ui/__pycache__/
+/XRayScatterPy.egg-info/
