@@ -1,6 +1,51 @@
+import os
+
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+
+
+class CustomTreeView(QTreeView):
+
+    def __init__(self, parent=None, dir_path=None):
+        super(CustomTreeView, self).__init__(parent)
+        self.setSelectionMode(QTreeView.ExtendedSelection)
+        self.dir_path = dir_path
+        self.latest_selected_item = None
+
+    def selectionChanged(self, selected: QItemSelection, deselected: QItemSelection):
+        super(CustomTreeView, self).selectionChanged(selected, deselected)
+        
+        if selected.indexes():
+            source_model = self.model().sourceModel()
+            source_index = self.model().mapToSource(selected.indexes()[-2])
+            self.latest_selected_item = source_model.itemFromIndex(source_index)
+
+    def get_selected_paths(self):
+        paths = []
+        indexes = self.selectionModel().selectedIndexes()
+        source_model = self.model().sourceModel()
+        # We want every other index, starting from the first one
+        for i in range(0, len(indexes), 2):
+            index = indexes[i]
+            source_index = self.model().mapToSource(index)
+            file_name = source_model.itemFromIndex(source_index).text()
+
+            if len(file_name) == 7 and file_name.isdigit():
+                file_name = "latest_" + file_name + "_craw.tiff"
+            
+            file_name = os.path.join(self.dir_path, file_name)
+            paths.append(file_name)
+        return paths
+
+    def get_latest_selected_path(self):
+        if self.latest_selected_item:
+            file_name = self.latest_selected_item.text()
+            if len(file_name) == 7 and file_name.isdigit():
+                file_name = "latest_" + file_name + "_craw.tiff"
+            return os.path.join(self.dir_path, file_name)
+        return None
 
 
 class Ui_MainWindow(object):
@@ -53,7 +98,7 @@ class Ui_MainWindow(object):
 
         self.vlayout_data_list.addWidget(self.pbutton_open)
 
-        self.treeview_datalist = QTreeView(self.centralwidget)
+        self.treeview_datalist = CustomTreeView(self.centralwidget)
         self.treeview_datalist.setObjectName(u"treeview_datalist")
 
         self.vlayout_data_list.addWidget(self.treeview_datalist)
