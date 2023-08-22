@@ -1,8 +1,10 @@
 import sys
-
-
-from PyQt5.QtWidgets import QApplication, QMainWindow
-
+import os
+import datetime
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeWidgetItemIterator, QTreeWidgetItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt
 
 from xray_scatter_py.ui.ui_mainwindow import Ui_MainWindow
 from xray_scatter_py.ui.ui_reflectivity import connect_reflectivity
@@ -33,7 +35,9 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
         self.connect_signal_slots()
 
     def set_ui_params(self, **kwargs):
+        print('kwargs', kwargs)
         self.__ui_params.update(kwargs)
+        print('ui params', self.__ui_params)
 
     def connect_signal_slots(self):
         connect_file_handler(self)
@@ -46,9 +50,72 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
 
     def refresh_ui(self, *args):
 
-        def refresh_treeview_datalist():
-            print('refresh_treeview_datalist')
+        def refresh_treeview_datalist(reload=False):
+            if reload:
+                model = QStandardItemModel()
+                model.setHorizontalHeaderLabels(["No", "Date Modified"])
+                self.treeview_datalist.setModel(model)
+                self.treeview_datalist.dir_path = self.__ui_params['folder_path']
+
+                tiff_files = [f for f in os.listdir(self.__ui_params['folder_path']) if f.endswith('.tiff')]
+                tiff_files = sorted(tiff_files, key=lambda x: int(''.join(filter(str.isdigit, x))))
+                grad_files = [f for f in os.listdir(self.__ui_params['folder_path']) if f.endswith('.grad')]
+                grad_files = sorted(grad_files)
+
+                for f in tiff_files:
+                    full_path = os.path.join(self.__ui_params['folder_path'], f)
+                    date_modified = os.path.getmtime(full_path)
+                    number = ''.join(filter(str.isdigit, f))
+                    number_item = QStandardItem(number)
+                    number_item.setFlags(number_item.flags() & ~Qt.ItemIsEditable)
+
+                    date_modified_item = QStandardItem(datetime.datetime.fromtimestamp(date_modified).strftime('%Y-%m-%d %H:%M:%S'))
+                    date_modified_item.setFlags(date_modified_item.flags() & ~Qt.ItemIsEditable)
+
+                    model.appendRow([number_item, date_modified_item])
+
+                for f in grad_files:
+                    full_path = os.path.join(self.__ui_params['folder_path'], f)
+                    date_modified = os.path.getmtime(full_path)
+
+                    name_item = QStandardItem(f)
+                    name_item.setFlags(name_item.flags() & ~Qt.ItemIsEditable)
+
+                    date_modified_item = QStandardItem(datetime.datetime.fromtimestamp(date_modified).strftime('%Y-%m-%d %H:%M:%S'))
+                    date_modified_item.setFlags(date_modified_item.flags() & ~Qt.ItemIsEditable)
+
+                    model.appendRow([name_item, date_modified_item])
+
+                self.treeview_datalist.resizeColumnToContents(0)
+                self.treeview_datalist.resizeColumnToContents(1)
+
+                print('relaoded_treeview_datalist')
+
+            regex_input = self.lineedit_find.text()
+            full_regex = ".*" + regex_input + ".*"
+
+            reg_exp = QtCore.QRegExp(full_regex, QtCore.Qt.CaseInsensitive)
+
+            # Getting the proxy model for filtering
+            proxy_model = QtCore.QSortFilterProxyModel()
+            try:
+                proxy_model.setSourceModel(self.treeview_datalist.model().sourceModel())
+            except:
+                proxy_model.setSourceModel(self.treeview_datalist.model())
+            proxy_model.setFilterRegExp(reg_exp)
+
+            # Applying the filter on the first column
+            proxy_model.setFilterKeyColumn(0)
+
+            # Setting the filtered model to the treeview
+            self.treeview_datalist.setModel(proxy_model)
+            self.treeview_datalist.update()
+
+            print('filtered_data_list based on regex:', regex_input)           
+
         def refresh_graphicsview_left():
+            print("latest selected path", self.treeview_datalist.get_latest_selected_path())
+            print("all selected paths", self.treeview_datalist.get_selected_paths())
             print('refresh_graphicsview_left')
         def refresh_graphicsview_right():
             print('refresh_graphicsview_right')
@@ -79,6 +146,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
 
         refresh_dict = {
             'treeview_datalist': refresh_treeview_datalist,
+            'treeview_datalist_reload': lambda: refresh_treeview_datalist(reload=True),
             'graphicsview_left': refresh_graphicsview_left,
             'graphicsview_right': refresh_graphicsview_right,
             'lineedit_cbar_min': refresh_lineedit_cbar_min,
