@@ -79,6 +79,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
 
         def refresh_treeview_datalist(reload=False):
             if reload:
+                # garbage collection error when reloading a second time
                 model = QStandardItemModel()
                 model.setHorizontalHeaderLabels(["No", "Date Modified"])
                 self.treeview_datalist.setModel(model)
