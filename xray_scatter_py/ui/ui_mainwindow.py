@@ -113,18 +113,21 @@ class CustomTreeView(QTreeView):
         super(CustomTreeView, self).selectionChanged(selected, deselected)
         print(selected.indexes())
         if selected.indexes() and len(selected.indexes()) >= 2:
+            # a bug with multi selection with shift key
+            # this only works when select downwards, doesn't work when selecting upwards. need some ranking
             source_model = self.model().sourceModel()
             source_index = self.model().mapToSource(selected.indexes()[-2])
             self.latest_selected_item = source_model.itemFromIndex(source_index)
         if deselected.indexes() and len(self.selectionModel().selectedIndexes()) == 2:
             curr_index = self.selectionModel().selectedIndexes()[-2]
             self.latest_selected_item = self.model().sourceModel().itemFromIndex(self.model().mapToSource(curr_index))
+        self.viewport().update()
+
 
     def get_selected_paths(self):
         paths = []
         indexes = self.selectionModel().selectedIndexes()
         source_model = self.model().sourceModel()
-        # We want every other index, starting from the first one
         for i in range(0, len(indexes), 2):
             index = indexes[i]
             source_index = self.model().mapToSource(index)
@@ -160,9 +163,11 @@ class CustomTreeView(QTreeView):
         next_row = current_row + diff_idx        
         # If the next index is valid, select it
         if model.index(next_row, 0).isValid():
+            self.selectionModel().blockSignals(True)
             self.selectionModel().clearSelection()
+            self.selectionModel().blockSignals(False)
             self.selectionModel().select(model.index(next_row, 0), QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
-            self.scrollTo(model.index(next_row, 0), QAbstractItemView.PositionAtCenter)
+            # self.scrollTo(model.index(next_row, 0), QAbstractItemView.PositionAtCenter)
             return True
 
 
