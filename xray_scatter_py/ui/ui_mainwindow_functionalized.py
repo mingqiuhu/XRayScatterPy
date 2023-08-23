@@ -15,6 +15,33 @@ from xray_scatter_py.ui.ui_refresher import connect_refresher
 from xray_scatter_py.ui.ui_browse import connect_browse
 from xray_scatter_py.ui.ui_1d import connect_1d
 
+from xray_scatter_py import data_plotting, utils, calibration
+
+HLABEL_DICT = {
+    'q': r'$q\ \mathrm{(Å^{-1})}$',
+    'qx': r'$q_\mathrm{x}\ \mathrm{(Å^{-1})}$',
+    'qy': r'$q_\mathrm{y}\ \mathrm{(Å^{-1})}$',
+    'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
+    'qz0': r'$q_\mathrm{z,0}\ \mathrm{(Å^{-1})}$',
+    'q_parallel': r'$q_\Vert\ \mathrm{(Å^{-1})}$',
+    'theta sample': r'${\theta}_\mathrm{sample}\ (°)$',
+    'kzi': r'$k_\mathrm{z,i}\ \mathrm{(Å^{-1})}$',
+    'alpha i': r'$\alpha_\mathrm{i}\ (°)$',
+}
+VLABEL_DICT = {
+    'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
+    'azimuth': r'$\mathrm{azimuth}\ (°)$',
+    'abs': r'$I\ \mathrm{(cm^{-1}sr^{-1})}$',
+    'a.u.': r'$I\ \mathrm{(a.u.)}$',
+    'reflectivity': r'$R$',
+    'total': r'$I_\mathrm{total}\ \mathrm{(a.u.)}$',
+    'spillover': r'$I_\mathrm{spill\ over}\ \mathrm{(a.u.)}$',
+    'depth': r'$z_\mathrm{1/e}\ \mathrm{(Å)}$',
+    'kzf': r'$k_\mathrm{z,f}\ \mathrm{(Å^{-1})}$',
+    'q_vertical': r'$q_\mathrm{⊥}\ \mathrm{(Å^{-1})}$'
+}
+
+
 class ui_mainwindow_functionalized(Ui_MainWindow):
     def __init__(self, MainWindow):
         Ui_MainWindow.__init__(self)
@@ -111,12 +138,46 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
             self.treeview_datalist.setModel(proxy_model)
             self.treeview_datalist.update()
 
+            self.treeview_datalist.selectionModel().selectionChanged.connect(lambda *_: self.refresh_ui('graphicsview_left', 'graphicsview_right'))
+
+
             print('filtered_data_list based on regex:', regex_input)           
 
         def refresh_graphicsview_left():
+            selected_path = self.treeview_datalist.get_latest_selected_path()
+            if selected_path and selected_path.lower().endswith('.tiff'):
+                selected_dir = os.path.dirname(selected_path)
+                selected_no = int(''.join(filter(str.isdigit, os.path.basename(selected_path))))
+
+                DETX0 = 100.4
+
+                params_dict_list, image_array = utils.read_multiimage(
+                    selected_dir, selected_no)
+                theta_array, azimuth_array = calibration.get_angle(
+                    DETX0, params_dict_list, image_array)
+                qx_array, qy_array, qz_array = calibration.get_q(
+                    DETX0, params_dict_list, image_array)
+                sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
+                image_array_rel = calibration.get_rel_intensity(
+                    params_dict_list, image_array, sr_array)
+                try:
+                    image_array_abs = calibration.get_abs_intensity(
+                        params_dict_list, image_array_rel)
+                    self.graphicsview_left.update_figure(
+                        qy_array[0], qz_array[0], image_array_abs[0],
+                        hlabel=HLABEL_DICT['qy'], vlabel=VLABEL_DICT['qz'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                except:
+                    self.graphicsview_left.update_figure(
+                        qy_array[0], qz_array[0], image_array_rel[0],
+                        hlabel='qy (A-1)', vlabel='qz (A-1)', clabel='Intensity (a.u.)',
+                        if_log=self.cbox_log.isChecked()
+                    )
             print("latest selected path", self.treeview_datalist.get_latest_selected_path())
             print("all selected paths", self.treeview_datalist.get_selected_paths())
             print('refresh_graphicsview_left')
+
         def refresh_graphicsview_right():
             print('refresh_graphicsview_right')
         def refresh_lineedit_cbar_min():

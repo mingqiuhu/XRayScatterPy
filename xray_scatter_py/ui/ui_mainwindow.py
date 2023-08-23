@@ -1,9 +1,104 @@
 import os
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5 import QtWidgets, QtCore, QtGui
+import matplotlib
+import numpy as np
+import numpy as np
+import matplotlib
+import matplotlib.colors
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+from matplotlib import ticker
+class MplCanvas(FigureCanvas):
+    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
+    def __init__(self, parent=None):
+        # self.plot_set()
+        fig = Figure()
+        self.axes = fig.add_subplot(111)
+
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self,
+                                   QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+    
+    @staticmethod
+    def plot_set() -> None:
+        """Update the global matplotlib settings with following parameters for
+        higher figure resolution, larger tick labels, and thicker lines.
+
+        Args:
+            - None
+
+        Returns:
+            - None
+        """
+        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+        matplotlib.rcParams['figure.dpi'] = 120
+        matplotlib.rcParams['xtick.labelsize'] = 18
+        matplotlib.rcParams['ytick.labelsize'] = 18
+        matplotlib.rcParams['font.size'] = 18
+        matplotlib.rcParams['legend.fontsize'] = 18
+        matplotlib.rcParams['axes.linewidth'] = 2
+        matplotlib.rcParams['xtick.major.width'] = 3
+        matplotlib.rcParams['xtick.minor.width'] = 3
+        matplotlib.rcParams['ytick.major.width'] = 3
+        matplotlib.rcParams['ytick.minor.width'] = 3
+
+    def update_figure(self, h_mesh, v_mesh, c_mesh, **kwargs):
+        prev_fig_size = self.figure.get_size_inches()
+        self.figure = Figure(figsize=prev_fig_size)
+        self.axes = self.figure.add_subplot(111)
+
+        hticks = kwargs.get('hticks', None)
+        vticks = kwargs.get('vticks', None)
+        cticks = kwargs.get('cticks', None)
+        hlabel = kwargs.get('hlabel', None)
+        vlabel = kwargs.get('vlabel', None)
+        clabel = kwargs.get('clabel', None)
+        if_log = kwargs.get('if_log', False)
+
+        c_max = min(np.max(c_mesh), kwargs.get('c_max', np.inf))
+        c_min = max(np.min(c_mesh[c_mesh > 0]), kwargs.get('c_min', -np.inf))
+        norm = matplotlib.colors.LogNorm(c_min, c_max) if if_log else matplotlib.colors.Normalize(c_min, c_max)
+        mesh = self.axes.pcolormesh(h_mesh, v_mesh, c_mesh, cmap='jet', linewidths=3, norm=norm, shading='nearest')
+        if hticks:
+            self.axes.set_xticks(hticks)
+        if vticks:
+            self.axes.set_yticks(vticks)
+        if hlabel:
+            self.axes.set_xlabel(hlabel)
+        if vlabel:
+            self.axes.set_ylabel(vlabel)
+
+        if kwargs.get('crop', False):
+            self.axes.set_xlim(
+                h_mesh[np.where(-v_mesh == np.max(-v_mesh))],
+                h_mesh[np.where(-v_mesh == np.min(-v_mesh))])
+
+            self.axes.set_ylim(
+                v_mesh[np.where(-h_mesh == np.min(-h_mesh))],
+                v_mesh[np.where(-h_mesh == np.max(-h_mesh))])
+                
+        self.axes.set_aspect('equal')
+        cbar = plt.colorbar(mesh, ax=self.axes)
+        if cticks:
+            cbar.set_ticks(cticks)
+        if clabel:
+            cbar.set_label(clabel)
+        self.draw()
+
+    def update_patch(self, patch):
+        pass
 
 
 class CustomTreeView(QTreeView):
@@ -16,11 +111,14 @@ class CustomTreeView(QTreeView):
 
     def selectionChanged(self, selected: QItemSelection, deselected: QItemSelection):
         super(CustomTreeView, self).selectionChanged(selected, deselected)
-        
-        if selected.indexes():
+        print(selected.indexes())
+        if selected.indexes() and len(selected.indexes()) >= 2:
             source_model = self.model().sourceModel()
             source_index = self.model().mapToSource(selected.indexes()[-2])
             self.latest_selected_item = source_model.itemFromIndex(source_index)
+        if deselected.indexes() and len(self.selectionModel().selectedIndexes()) == 2:
+            curr_index = self.selectionModel().selectedIndexes()[-2]
+            self.latest_selected_item = self.model().sourceModel().itemFromIndex(self.model().mapToSource(curr_index))
 
     def get_selected_paths(self):
         paths = []
@@ -46,13 +144,36 @@ class CustomTreeView(QTreeView):
                 file_name = "latest_" + file_name + "_craw.tiff"
             return os.path.join(self.dir_path, file_name)
         return None
+    
+    def select_previous_next(self, diff_idx=0):
+        model = self.model()
+        indexes = self.selectionModel().selectedIndexes()
+        
+        # If there's no current selection, exit
+        if not indexes:
+            return
+
+        # Get the current row
+        current_row = indexes[-2].row()
+        
+        # Get the next index in the first column
+        next_row = current_row + diff_idx        
+        # If the next index is valid, select it
+        if model.index(next_row, 0).isValid():
+            self.selectionModel().clearSelection()
+            self.selectionModel().select(model.index(next_row, 0), QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
+            self.scrollTo(model.index(next_row, 0), QAbstractItemView.PositionAtCenter)
+            return True
+
+
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1211, 715)
+        MainWindow.showMaximized()
+        #MainWindow.resize(1211, 715)
         self.actionmat_file = QAction(MainWindow)
         self.actionmat_file.setObjectName(u"actionmat_file")
         self.actiontiff_file = QAction(MainWindow)
@@ -318,17 +439,17 @@ class Ui_MainWindow(object):
 
         self.glayout_left_image.addLayout(self.hlayout_right_save, 2, 1, 1, 1)
 
-        self.graphicsview_left = QGraphicsView(self.centralwidget)
+        self.graphicsview_left = MplCanvas(self.centralwidget)
         self.graphicsview_left.setObjectName(u"graphicsview_left")
-        self.graphicsview_left.setMinimumSize(QSize(400, 400))
-        self.graphicsview_left.setMaximumSize(QSize(400, 400))
+        # self.graphicsview_left.setMinimumSize(QSize(400, 400))
+        # self.graphicsview_left.setMaximumSize(QSize(400, 400))
 
         self.glayout_left_image.addWidget(self.graphicsview_left, 3, 0, 1, 1)
 
-        self.graphicsview_right = QGraphicsView(self.centralwidget)
+        self.graphicsview_right = MplCanvas(self.centralwidget)
         self.graphicsview_right.setObjectName(u"graphicsview_right")
-        self.graphicsview_right.setMinimumSize(QSize(400, 400))
-        self.graphicsview_right.setMaximumSize(QSize(400, 400))
+        # self.graphicsview_right.setMinimumSize(QSize(400, 400))
+        # self.graphicsview_right.setMaximumSize(QSize(400, 400))
 
         self.glayout_left_image.addWidget(self.graphicsview_right, 3, 1, 1, 1)
 

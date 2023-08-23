@@ -4,7 +4,7 @@ class connect_browse(object):
         self.connect()
     
     def connect(self):
-        self.ui.pbutton_previous.clicked.connect(lambda *_: self.previous_next_data(diff_idx=-1))
+        self.ui.pbutton_previous.clicked.connect(lambda *_: self.ui.treeview_datalist.select_previous_next(diff_idx=-1))
         self.ui.pbutton_previous.clicked.connect(lambda *_: self.ui.refresh_ui('graphicsview_left', 'graphicsview_right'))
         self.ui.pbutton_previous5.clicked.connect(lambda *_: self.previous_next_data(diff_idx=-5))
         self.ui.pbutton_previous5.clicked.connect(lambda *_: self.ui.refresh_ui('graphicsview_left', 'graphicsview_right'))
