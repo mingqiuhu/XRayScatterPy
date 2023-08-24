@@ -111,18 +111,18 @@ class CustomTreeView(QTreeView):
 
     def selectionChanged(self, selected: QItemSelection, deselected: QItemSelection):
         super(CustomTreeView, self).selectionChanged(selected, deselected)
-        print(selected.indexes())
         if selected.indexes() and len(selected.indexes()) >= 2:
-            # a bug with multi selection with shift key
-            # this only works when select downwards, doesn't work when selecting upwards. need some ranking
             source_model = self.model().sourceModel()
-            source_index = self.model().mapToSource(selected.indexes()[-2])
+            sorted_indexes = sorted(selected.indexes(), key=lambda index: index.row())
+            if sorted_indexes[0].row() == self.currentIndex().row():
+                source_index = self.model().mapToSource(selected.indexes()[0])
+            else:
+                source_index = self.model().mapToSource(selected.indexes()[-2])
             self.latest_selected_item = source_model.itemFromIndex(source_index)
         if deselected.indexes() and len(self.selectionModel().selectedIndexes()) == 2:
             curr_index = self.selectionModel().selectedIndexes()[-2]
             self.latest_selected_item = self.model().sourceModel().itemFromIndex(self.model().mapToSource(curr_index))
         self.viewport().update()
-
 
     def get_selected_paths(self):
         paths = []
@@ -141,12 +141,14 @@ class CustomTreeView(QTreeView):
         return paths
 
     def get_latest_selected_path(self):
-        if self.latest_selected_item:
+        try:
             file_name = self.latest_selected_item.text()
             if len(file_name) == 7 and file_name.isdigit():
                 file_name = "latest_" + file_name + "_craw.tiff"
             return os.path.join(self.dir_path, file_name)
-        return None
+        except:
+            print("No file selected")
+            return None
     
     def select_previous_next(self, diff_idx=0):
         model = self.model()

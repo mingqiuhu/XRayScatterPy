@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeWidgetItemIterator, 
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 
-from xray_scatter_py.ui.ui_mainwindow import Ui_MainWindow
+from xray_scatter_py.ui.ui_mainwindow import Ui_MainWindow, CustomTreeView
 from xray_scatter_py.ui.ui_reflectivity import connect_reflectivity
 from xray_scatter_py.ui.ui_calibration import connect_calibration
 from xray_scatter_py.ui.ui_view import connect_view
@@ -79,7 +79,6 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
 
         def refresh_treeview_datalist(reload=False):
             if reload:
-                # garbage collection error when reloading a second time
                 model = QStandardItemModel()
                 model.setHorizontalHeaderLabels(["No", "Date Modified"])
                 self.treeview_datalist.setModel(model)
@@ -140,9 +139,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
             self.treeview_datalist.update()
 
             self.treeview_datalist.selectionModel().selectionChanged.connect(lambda *_: self.refresh_ui('graphicsview_left', 'graphicsview_right'))
-
-
-            print('filtered_data_list based on regex:', regex_input)           
+            print('filtered_data_list based on regex:', regex_input)   
 
         def refresh_graphicsview_left():
             selected_path = self.treeview_datalist.get_latest_selected_path()
@@ -175,8 +172,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
                         hlabel='qy (A-1)', vlabel='qz (A-1)', clabel='Intensity (a.u.)',
                         if_log=self.cbox_log.isChecked()
                     )
-            print("latest selected path", self.treeview_datalist.get_latest_selected_path())
-            print("all selected paths", self.treeview_datalist.get_selected_paths())
+
             print('refresh_graphicsview_left')
 
         def refresh_graphicsview_right():
@@ -225,8 +221,11 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
             'lineedit_right_max2': refresh_lineedit_right_max2,
         }
 
+        print('\nrefreshing ui: -----------------------------------')
         [refresh_dict[arg]() for arg in args]
-
+        print("latest selected path", self.treeview_datalist.get_latest_selected_path())
+        print("all selected paths", self.treeview_datalist.get_selected_paths())   
+        print('---------------------------------------------------\n')     
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
