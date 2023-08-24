@@ -18,46 +18,25 @@ from matplotlib import ticker
 class MplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None):
-        # self.plot_set()
+    def __init__(self, parent=None):        
         fig = Figure()
         self.axes = fig.add_subplot(111)
-
+        self.axes.set_position([0, 0, 1, 1])
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
-
         FigureCanvas.setSizePolicy(self,
                                    QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-    
-    @staticmethod
-    def plot_set() -> None:
-        """Update the global matplotlib settings with following parameters for
-        higher figure resolution, larger tick labels, and thicker lines.
 
-        Args:
-            - None
-
-        Returns:
-            - None
-        """
-        matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-        matplotlib.rcParams['figure.dpi'] = 120
-        matplotlib.rcParams['xtick.labelsize'] = 18
-        matplotlib.rcParams['ytick.labelsize'] = 18
-        matplotlib.rcParams['font.size'] = 18
-        matplotlib.rcParams['legend.fontsize'] = 18
-        matplotlib.rcParams['axes.linewidth'] = 2
-        matplotlib.rcParams['xtick.major.width'] = 3
-        matplotlib.rcParams['xtick.minor.width'] = 3
-        matplotlib.rcParams['ytick.major.width'] = 3
-        matplotlib.rcParams['ytick.minor.width'] = 3
+    def resizeEvent(self, event):
+        super(MplCanvas, self).resizeEvent(event)
+        self.draw()
 
     def update_figure(self, h_mesh, v_mesh, c_mesh, **kwargs):
-        prev_fig_size = self.figure.get_size_inches()
-        self.figure = Figure(figsize=prev_fig_size)
+        self.figure.clear()
         self.axes = self.figure.add_subplot(111)
+        self.axes.set_position([0, 0, 1, 1])
 
         hticks = kwargs.get('hticks', None)
         vticks = kwargs.get('vticks', None)
