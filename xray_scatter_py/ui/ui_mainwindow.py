@@ -21,7 +21,7 @@ class MplCanvas(FigureCanvas):
     def __init__(self, parent=None):        
         fig = Figure()
         self.axes = fig.add_subplot(111)
-        self.axes.set_position([0, 0, 1, 1])
+        self.axes.set_position([0.1, 0.1, 0.8, 0.8])
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
         FigureCanvas.setSizePolicy(self,
@@ -36,7 +36,7 @@ class MplCanvas(FigureCanvas):
     def update_figure(self, h_mesh, v_mesh, c_mesh, **kwargs):
         self.figure.clear()
         self.axes = self.figure.add_subplot(111)
-        self.axes.set_position([0, 0, 1, 1])
+        self.axes.set_position([0.1, 0.1, 0.8, 0.8])
 
         hticks = kwargs.get('hticks', None)
         vticks = kwargs.get('vticks', None)
@@ -74,8 +74,137 @@ class MplCanvas(FigureCanvas):
             cbar.set_ticks(cticks)
         if clabel:
             cbar.set_label(clabel)
+        hticks = self.axes.get_xticks()
+        self.axes.set_xticklabels([f'{tick:.2f}' for tick in hticks])
+        vticks = self.axes.get_yticks()
+        self.axes.set_yticklabels([f'{tick:.2f}' for tick in vticks])
         self.draw()
 
+    def update_figure_gi(self, qx_mesh, qy_mesh, qz_mesh, c_mesh, **kwargs):
+        self.figure.clear()
+        self.axes = self.figure.add_subplot(111)
+        self.axes.set_position([0.1, 0.1, 0.8, 0.8])
+
+        
+        hticks = kwargs.get('hticks', None)
+        vticks = kwargs.get('vticks', None)
+        cticks = kwargs.get('cticks', None)
+        hlabel = kwargs.get('hlabel', None)
+        vlabel = kwargs.get('vlabel', None)
+        clabel = kwargs.get('clabel', None)
+        if_log = kwargs.get('if_log', False)
+        c_max = min(np.max(c_mesh), kwargs.get('c_max', np.inf))
+        c_min = max(np.min(c_mesh[c_mesh > 0]), kwargs.get('c_min', -np.inf))
+        norm = matplotlib.colors.LogNorm(c_min, c_max) if if_log else matplotlib.colors.Normalize(c_min, c_max)
+        
+        q_parallel = np.sqrt(qx_mesh**2 + qy_mesh**2)
+        self.axes.pcolormesh(q_parallel, qz_mesh, c_mesh*(qy_mesh > 0), cmap='jet', linewidths=3, norm=norm, shading='nearest')
+        mesh = self.axes.pcolormesh(-q_parallel, qz_mesh, c_mesh*(qy_mesh <= 0), cmap='jet', linewidths=3, norm=norm, shading='nearest')
+        self.axes.set_xlim(np.min(np.concatenate((q_parallel[qy_mesh < 0] * -1,
+                                                  q_parallel[qy_mesh >= 0]))),
+                           np.max(np.concatenate((q_parallel[qy_mesh < 0] * -1,
+                                                  q_parallel[qy_mesh >= 0]))))
+
+        if hticks:
+            self.axes.set_xticks(hticks)
+        if vticks:
+            self.axes.set_yticks(vticks)
+        if hlabel:
+            self.axes.set_xlabel(hlabel)
+        if vlabel:
+            self.axes.set_ylabel(vlabel)
+        self.axes.set_aspect('equal')
+        cbar = plt.colorbar(mesh, ax=self.axes)
+        if cticks:
+            cbar.set_ticks(cticks)
+        if clabel:
+            cbar.set_label(clabel)
+
+
+        hticks = self.axes.get_xticks()
+        self.axes.set_xticklabels([f'{tick:.2f}' for tick in hticks])
+        vticks = self.axes.get_yticks()
+        self.axes.set_yticklabels([f'{tick:.2f}' for tick in vticks])
+        self.draw()
+
+    def update_figure_polar(
+            self,
+            azimuth_mesh,
+            qx_mesh,
+            qy_mesh,
+            qz_mesh,
+            c_mesh,
+            params,
+            **kwargs):
+        self.figure.clear()
+        self.axes = self.figure.add_subplot(111)
+        self.axes.set_position([0.1, 0.1, 0.8, 0.8])
+
+        
+        hticks = kwargs.get('hticks', None)
+        cticks = kwargs.get('cticks', None)
+        hlabel = kwargs.get('hlabel', None)
+        vlabel = kwargs.get('vlabel', None)
+        clabel = kwargs.get('clabel', None)
+        if_log = kwargs.get('if_log', False)
+        c_max = min(np.max(c_mesh), kwargs.get('c_max', np.inf))
+        c_min = max(np.min(c_mesh[c_mesh > 0]), kwargs.get('c_min', -np.inf))
+        norm = matplotlib.colors.LogNorm(c_min, c_max) if if_log else matplotlib.colors.Normalize(c_min, c_max)
+        
+        q_mesh = np.sqrt(qx_mesh**2 + qy_mesh**2 + qz_mesh**2)
+        azimuth_mesh_deg = np.degrees(azimuth_mesh)
+
+        beamcenter_y, beamcenter_z = map(
+            float, params['beamcenter_actual'].strip('[]').split())
+        beamcenter_y = int(np.ceil(beamcenter_y))
+        beamcenter_z = int(np.rint(beamcenter_z))
+        self.axes.pcolormesh(q_mesh[0:beamcenter_y, 0:beamcenter_z],
+                             azimuth_mesh_deg[0:beamcenter_y, 0:beamcenter_z],
+                             c_mesh[0:beamcenter_y, 0:beamcenter_z],
+                             cmap='jet',
+                             linewidths=3,
+                             norm=norm,
+                             shading='nearest')
+        self.axes.pcolormesh(q_mesh[0:beamcenter_y, beamcenter_z:],
+                             azimuth_mesh_deg[0:beamcenter_y, beamcenter_z:],
+                             c_mesh[0:beamcenter_y, beamcenter_z:],
+                             cmap='jet',
+                             linewidths=3,
+                             norm=norm,
+                             shading='nearest')
+        self.axes.pcolormesh(q_mesh[beamcenter_y:, 0:beamcenter_z],
+                             azimuth_mesh_deg[beamcenter_y:, 0:beamcenter_z],
+                             c_mesh[beamcenter_y:, 0:beamcenter_z],
+                             cmap='jet',
+                             linewidths=3,
+                             norm=norm,
+                             shading='nearest')
+        mesh = self.axes.pcolormesh(q_mesh[beamcenter_y:, beamcenter_z:],
+                             azimuth_mesh_deg[beamcenter_y:, beamcenter_z:],
+                             c_mesh[beamcenter_y:, beamcenter_z:],
+                             cmap='jet',
+                             linewidths=3,
+                             norm=norm,
+                             shading='nearest')
+        self.axes.set_xlim(np.min(q_mesh), np.max(q_mesh))
+        self.axes.set_ylim(np.min(azimuth_mesh_deg), np.max(azimuth_mesh_deg))
+        self.axes.set_yticks([0, 60, 120, 180, 240, 300, 360])
+        if hticks:
+            self.axes.set_xticks(hticks)
+        if hlabel:
+            self.axes.set_xlabel(hlabel)
+        if vlabel:
+            self.axes.set_ylabel(vlabel)
+        cbar = plt.colorbar(mesh, ax=self.axes)
+        if cticks:
+            cbar.set_ticks(cticks)
+        if clabel:
+            cbar.set_label(clabel)
+
+
+        hticks = self.axes.get_xticks()
+        self.axes.set_xticklabels([f'{tick:.2f}' for tick in hticks])
+        self.draw()
     def update_patch(self, patch):
         pass
 
@@ -104,20 +233,24 @@ class CustomTreeView(QTreeView):
         self.viewport().update()
 
     def get_selected_paths(self):
-        paths = []
-        indexes = self.selectionModel().selectedIndexes()
-        source_model = self.model().sourceModel()
-        for i in range(0, len(indexes), 2):
-            index = indexes[i]
-            source_index = self.model().mapToSource(index)
-            file_name = source_model.itemFromIndex(source_index).text()
+        try:
+            paths = []
+            indexes = self.selectionModel().selectedIndexes()
+            source_model = self.model().sourceModel()
+            for i in range(0, len(indexes), 2):
+                index = indexes[i]
+                source_index = self.model().mapToSource(index)
+                file_name = source_model.itemFromIndex(source_index).text()
 
-            if len(file_name) == 7 and file_name.isdigit():
-                file_name = "latest_" + file_name + "_craw.tiff"
-            
-            file_name = os.path.join(self.dir_path, file_name)
-            paths.append(file_name)
-        return paths
+                if len(file_name) == 7 and file_name.isdigit():
+                    file_name = "latest_" + file_name + "_craw.tiff"
+                
+                file_name = os.path.join(self.dir_path, file_name)
+                paths.append(file_name)
+            return paths
+        except:
+            print("No file selected")
+            return None
 
     def get_latest_selected_path(self):
         try:
@@ -148,7 +281,7 @@ class CustomTreeView(QTreeView):
             self.selectionModel().clearSelection()
             self.selectionModel().blockSignals(False)
             self.selectionModel().select(model.index(next_row, 0), QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
-            # self.scrollTo(model.index(next_row, 0), QAbstractItemView.PositionAtCenter)
+            self.scrollTo(model.index(next_row, 0), QAbstractItemView.PositionAtCenter)
             return True
 
 

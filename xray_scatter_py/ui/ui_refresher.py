@@ -12,7 +12,7 @@ class connect_refresher(object):
         self.ui.hslider_cbar_max.valueChanged.connect(lambda *_: self.ui.refresh_ui('lineedit_cbar_max', 'graphicsview_left', 'graphicsview_right'))
         # self.cbox_monitor multithreading
         self.ui.cbox_log.stateChanged.connect(lambda *_: self.ui.refresh_ui('lineedit_cbar_min', 'lineedit_cbar_max', 'hslider_cbar_min', 'hslider_cbar_max', 'graphicsview_left', 'graphicsview_right'))
-
+        
         self.ui.rbutton_group = QButtonGroup(self.ui.centralwidget)
         self.ui.rbutton_group.addButton(self.ui.rbutton_orig)
         self.ui.rbutton_group.addButton(self.ui.rbutton_polar)
@@ -29,7 +29,6 @@ class connect_refresher(object):
             'lineedit_right_min2',
             'lineedit_right_max2',
         ))
-
         self.ui.lineedit_left_min1.editingFinished.connect(lambda *_: self.ui.refresh_ui('graphicsview_left'))
         self.ui.lineedit_left_max1.editingFinished.connect(lambda *_: self.ui.refresh_ui('graphicsview_left'))
         self.ui.lineedit_left_min2.editingFinished.connect(lambda *_: self.ui.refresh_ui('graphicsview_left'))

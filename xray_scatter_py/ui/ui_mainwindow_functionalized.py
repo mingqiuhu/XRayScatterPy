@@ -27,6 +27,7 @@ HLABEL_DICT = {
     'theta sample': r'${\theta}_\mathrm{sample}\ (°)$',
     'kzi': r'$k_\mathrm{z,i}\ \mathrm{(Å^{-1})}$',
     'alpha i': r'$\alpha_\mathrm{i}\ (°)$',
+    'y': r'$y\ \mathrm{(mm)}$',
 }
 VLABEL_DICT = {
     'qz': r'$q_\mathrm{z}\ \mathrm{(Å^{-1})}$',
@@ -38,7 +39,8 @@ VLABEL_DICT = {
     'spillover': r'$I_\mathrm{spill\ over}\ \mathrm{(a.u.)}$',
     'depth': r'$z_\mathrm{1/e}\ \mathrm{(Å)}$',
     'kzf': r'$k_\mathrm{z,f}\ \mathrm{(Å^{-1})}$',
-    'q_vertical': r'$q_\mathrm{⊥}\ \mathrm{(Å^{-1})}$'
+    'q_vertical': r'$q_\mathrm{⊥}\ \mathrm{(Å^{-1})}$',
+    'z': r'$z\ \mathrm{(mm)}$',
 }
 
 
@@ -48,7 +50,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
         self.setupUi(MainWindow)
 
         self.__ui_params = {}
-
+        self.loaded_data = {}
         self.params_dict_list = None
         self.image_array = None
         self.detx0 = None
@@ -138,44 +140,154 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
             self.treeview_datalist.setModel(proxy_model)
             self.treeview_datalist.update()
 
-            self.treeview_datalist.selectionModel().selectionChanged.connect(lambda *_: self.refresh_ui('graphicsview_left', 'graphicsview_right'))
+            self.treeview_datalist.selectionModel().selectionChanged.connect(lambda *_: self.refresh_ui('graphicsview_left_reload', 'graphicsview_right'))
             print('filtered_data_list based on regex:', regex_input)   
 
-        def refresh_graphicsview_left():
-            selected_path = self.treeview_datalist.get_latest_selected_path()
-            if selected_path and selected_path.lower().endswith('.tiff'):
-                selected_dir = os.path.dirname(selected_path)
-                selected_no = int(''.join(filter(str.isdigit, os.path.basename(selected_path))))
+        def refresh_graphicsview_left(reload=False):
+            if reload:
+                print('reloading graphicsview_left')
+                self.loaded_data = {}
+                selected_path = self.treeview_datalist.get_latest_selected_path()
+                if selected_path and selected_path.lower().endswith('.tiff'):
+                    selected_dir = os.path.dirname(selected_path)
+                    selected_no = int(''.join(filter(str.isdigit, os.path.basename(selected_path))))
 
-                DETX0 = 100.4
+                    DETX0 = 100.4
 
-                params_dict_list, image_array = utils.read_multiimage(
-                    selected_dir, selected_no)
-                theta_array, azimuth_array = calibration.get_angle(
-                    DETX0, params_dict_list, image_array)
-                qx_array, qy_array, qz_array = calibration.get_q(
-                    DETX0, params_dict_list, image_array)
-                sr_array = calibration.get_sr(DETX0, params_dict_list, theta_array)
-                image_array_rel = calibration.get_rel_intensity(
-                    params_dict_list, image_array, sr_array)
-                try:
-                    image_array_abs = calibration.get_abs_intensity(
-                        params_dict_list, image_array_rel)
+                    self.loaded_data['params_dict_list'], self.loaded_data['image_array'] = utils.read_multiimage(
+                        selected_dir, selected_no)
+                    self.loaded_data['theta_array'], self.loaded_data['azimuth_array'] = calibration.get_angle(
+                        DETX0, self.loaded_data['params_dict_list'], self.loaded_data['image_array'])
+                    self.loaded_data['qx_array'], self.loaded_data['qy_array'], self.loaded_data['qz_array'] = calibration.get_q(
+                        DETX0, self.loaded_data['params_dict_list'], self.loaded_data['image_array'])
+                    self.loaded_data['sr_array'] = calibration.get_sr(DETX0, self.loaded_data['params_dict_list'], self.loaded_data['theta_array'])
+                    self.loaded_data['image_array_rel'] = calibration.get_rel_intensity(
+                        self.loaded_data['params_dict_list'], self.loaded_data['image_array'], self.loaded_data['sr_array'])
+            try:
+                self.loaded_data['image_array_abs'] = calibration.get_abs_intensity(
+                    self.loaded_data['params_dict_list'], self.loaded_data['image_array'])
+                self.graphicsview_left.update_figure(
+                    self.loaded_data['qy_array'][0], self.loaded_data['qz_array'][0], self.loaded_data['image_array_abs'][0],
+                    hlabel=HLABEL_DICT['qy'], vlabel=VLABEL_DICT['qz'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
+                    if_log=self.cbox_log.isChecked()
+                )
+            except:
+                if 'image_array_rel' in self.loaded_data.keys():
                     self.graphicsview_left.update_figure(
-                        qy_array[0], qz_array[0], image_array_abs[0],
-                        hlabel=HLABEL_DICT['qy'], vlabel=VLABEL_DICT['qz'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
-                        if_log=self.cbox_log.isChecked()
-                    )
-                except:
-                    self.graphicsview_left.update_figure(
-                        qy_array[0], qz_array[0], image_array_rel[0],
-                        hlabel='qy (A-1)', vlabel='qz (A-1)', clabel='Intensity (a.u.)',
+                        self.loaded_data['qy_array'][0], self.loaded_data['qz_array'][0], self.loaded_data['image_array_rel'][0],
+                        hlabel=HLABEL_DICT['qy'], vlabel=VLABEL_DICT['qz'], clabel=r'$Intensity\ \mathrm{(a.u.)}$',
                         if_log=self.cbox_log.isChecked()
                     )
 
             print('refresh_graphicsview_left')
 
         def refresh_graphicsview_right():
+            DETX0 = 100.4
+            def plt_orig():
+                if 'x_array' not in self.loaded_data.keys():
+                    try:
+                        self.loaded_data['x_array'], self.loaded_data['y_array'], self.loaded_data['z_array'] = calibration.get_mm(
+                            DETX0,
+                            self.loaded_data['params_dict_list'],
+                            self.loaded_data['image_array']
+                        )
+                    except:
+                        return
+                if 'image_array_abs' in self.loaded_data.keys():
+                    self.graphicsview_right.update_figure(
+                        self.loaded_data['y_array'][0], self.loaded_data['z_array'][0], self.loaded_data['image_array_abs'][0],
+                        hlabel=HLABEL_DICT['y'], vlabel=VLABEL_DICT['z'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                else:
+                    self.graphicsview_right.update_figure(
+                        self.loaded_data['y_array'][0], self.loaded_data['z_array'][0], self.loaded_data['image_array_rel'][0],
+                        hlabel=HLABEL_DICT['y'], vlabel=VLABEL_DICT['z'], clabel=r'$Intensity\ \mathrm{(a.u.)}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+
+            def plt_polar():
+                if 'image_array_abs' in self.loaded_data.keys():
+                    self.graphicsview_right.update_figure_polar(
+                        self.loaded_data['azimuth_array'][0],
+                        self.loaded_data['qx_array'][0],
+                        self.loaded_data['qy_array'][0],
+                        self.loaded_data['qz_array'][0],
+                        self.loaded_data['image_array_abs'][0],
+                        self.loaded_data['params_dict_list'][0],
+                        hlabel=HLABEL_DICT['q'], vlabel=VLABEL_DICT['azimuth'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                elif 'image_array_rel' in self.loaded_data.keys():
+                    self.graphicsview_right.update_figure_polar(
+                        self.loaded_data['azimuth_array'][0],
+                        self.loaded_data['qx_array'][0],
+                        self.loaded_data['qy_array'][0],
+                        self.loaded_data['qz_array'][0],
+                        self.loaded_data['image_array_rel'][0],
+                        self.loaded_data['params_dict_list'][0],
+                        hlabel=HLABEL_DICT['q'], vlabel=VLABEL_DICT['azimuth'], clabel=r'$Intensity\ \mathrm{(a.u.)}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                print('plt_polar')
+            def plt_gi_qz_qy():
+                if 'qx_array_gi' not in self.loaded_data.keys():
+                    try:
+                        self.loaded_data['qx_array_gi'], self.loaded_data['qy_array_gi'], self.loaded_data['qz_array_gi'] = calibration.get_q_gi(
+                            self.loaded_data['qx_array'], self.loaded_data['qy_array'], self.loaded_data['qz_array'], self.loaded_data['params_dict_list']
+                        )
+                    except:
+                        return
+                if 'image_array_abs' in self.loaded_data.keys():
+                    self.graphicsview_right.update_figure(
+                        self.loaded_data['qy_array_gi'][0], self.loaded_data['qz_array_gi'][0], self.loaded_data['image_array_abs'][0],
+                        hlabel=HLABEL_DICT['qy'], vlabel=VLABEL_DICT['qz'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                else:
+                    self.graphicsview_right.update_figure(
+                        self.loaded_data['qy_array_gi'][0], self.loaded_data['qz_array_gi'][0], self.loaded_data['image_array_rel'][0],
+                        hlabel=HLABEL_DICT['qy'], vlabel=VLABEL_DICT['qz'], clabel=r'$Intensity\ \mathrm{(a.u.)}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                print('plt_gi_qz_qy')
+            def plt_gi_perp_para():
+                if 'qx_array_gi' not in self.loaded_data.keys():
+                    try:
+                        self.loaded_data['qx_array_gi'], self.loaded_data['qy_array_gi'], self.loaded_data['qz_array_gi'] = calibration.get_q_gi(
+                            self.loaded_data['qx_array'], self.loaded_data['qy_array'], self.loaded_data['qz_array'], self.loaded_data['params_dict_list']
+                        )
+                    except:
+                        return
+                if 'image_array_abs' in self.loaded_data.keys():
+                    self.graphicsview_right.update_figure_gi(
+                        self.loaded_data['qx_array_gi'][0],
+                        self.loaded_data['qy_array_gi'][0],
+                        self.loaded_data['qz_array_gi'][0],
+                        self.loaded_data['image_array_abs'][0],
+                        hlabel=HLABEL_DICT['q_parallel'], vlabel=VLABEL_DICT['q_vertical'], clabel=r'$Intensity\ \mathrm{(cm^{-1}sr^{-1})}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                else:
+                    self.graphicsview_right.update_figure_gi(
+                        self.loaded_data['qx_array_gi'][0],
+                        self.loaded_data['qy_array_gi'][0],
+                        self.loaded_data['qz_array_gi'][0],
+                        self.loaded_data['image_array_rel'][0],
+                        hlabel=HLABEL_DICT['q_parallel'], vlabel=VLABEL_DICT['q_vertical'], clabel=r'$Intensity\ \mathrm{(a.u.)}$',
+                        if_log=self.cbox_log.isChecked()
+                    )
+                print('plt_gi_perp_para')
+
+            refresh_dict = {
+                'rbutton_orig': plt_orig,
+                'rbutton_polar': plt_polar,
+                'rbutton_gi_qz_qy': plt_gi_qz_qy,
+                'rbutton_gi_perp_para': plt_gi_perp_para
+
+            }
+            if self.rbutton_group.checkedButton():
+                refresh_dict[self.rbutton_group.checkedButton().objectName()]()
             print('refresh_graphicsview_right')
         def refresh_lineedit_cbar_min():
             print('refresh_lineedit_cbar_min')
@@ -206,6 +318,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
             'treeview_datalist': refresh_treeview_datalist,
             'treeview_datalist_reload': lambda: refresh_treeview_datalist(reload=True),
             'graphicsview_left': refresh_graphicsview_left,
+            'graphicsview_left_reload': lambda: refresh_graphicsview_left(reload=True),
             'graphicsview_right': refresh_graphicsview_right,
             'lineedit_cbar_min': refresh_lineedit_cbar_min,
             'lineedit_cbar_max': refresh_lineedit_cbar_max,
