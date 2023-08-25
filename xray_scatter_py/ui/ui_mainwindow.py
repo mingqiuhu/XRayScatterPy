@@ -15,10 +15,16 @@ import matplotlib.colors
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
+from matplotlib.patches import Rectangle
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
+
 class MplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None):        
+    def __init__(self, parent=None, ui=None):
+        self.ui = ui
+        self.type = 'trans'        
         fig = Figure()
         self.axes = fig.add_subplot(111)
         self.axes.set_position([0.1, 0.1, 0.8, 0.8])
@@ -28,10 +34,109 @@ class MplCanvas(FigureCanvas):
                                    QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+        self.update_patch()
+        self.press = None
+        self.connect_events()
+
+    def connect_events(self):
+        self.mpl_connect('button_press_event', self.on_press)
+        self.mpl_connect('motion_notify_event', self.on_drag)
+        self.mpl_connect('button_release_event', self.on_release)
+
+    def on_press(self, event):
+        if self.type == 'trans' and not self.ui.pbutton_left_draw.isChecked(): return
+        if self.type in {'polar', 'gi_qz_qy', 'gi_perp_para', 'orig'} and not self.ui.pbutton_right_draw.isChecked(): return
+        if event.inaxes != self.axes: return
+        if self.type in {'polar', 'gi_qz_qy', 'gi_perp_para'}:
+            self.press = (event.xdata, event.ydata)
+            self.patch.set_width(0)
+            self.patch.set_height(0)
+            self.patch.set_xy((event.xdata, event.ydata))
+            self.draw()
+        elif self.type in {'orig', 'trans'}:
+            self.patch.remove()
+            self.press = (event.xdata, event.ydata)
+            self.patch = self.create_annular_sector((0, 0), 0, 2*np.pi, 0, 0)
+            self.axes.add_patch(self.patch)
+            self.draw()
+
+    def on_drag(self, event):
+        if self.type == 'trans' and not self.ui.pbutton_left_draw.isChecked(): return
+        if self.type in {'polar', 'gi_qz_qy', 'gi_perp_para', 'orig'} and not self.ui.pbutton_right_draw.isChecked(): return
+        if self.press is None: return
+        if event.inaxes != self.axes: return
+        if self.type in {'polar', 'gi_qz_qy', 'gi_perp_para'}:
+            x0, y0 = self.press
+            dx = event.xdata - x0
+            dy = event.ydata - y0
+            self.patch.set_width(dx)
+            self.patch.set_height(dy)
+            self.patch.set_xy((x0, y0))
+            self.draw()
+        elif self.type in {'orig', 'trans'}:
+            self.patch.remove()
+            rmin = np.sqrt(self.press[0]**2 + self.press[1]**2)
+            rmax = np.sqrt(event.xdata**2 + event.ydata**2)
+            theta1 = np.arctan2(self.press[1], self.press[0])
+            theta2 = np.arctan2(event.ydata, event.xdata)
+            self.patch = self.create_annular_sector((0, 0), theta1, theta2, rmin, rmax)
+            self.axes.add_patch(self.patch)
+            self.draw()
+        if self.type == 'trans':
+            self.ui.lineedit_left_min1.setText("{:.5g}".format(min(rmin, rmax)))
+            self.ui.lineedit_left_max1.setText("{:.5g}".format(max(rmin, rmax)))
+            self.ui.lineedit_left_min2.setText("{:.5g}".format(np.rad2deg(theta1)))
+            self.ui.lineedit_left_max2.setText("{:.5g}".format(np.rad2deg(theta2)))
+        elif self.type == 'polar':
+            self.ui.lineedit_right_min1.setText("{:.5g}".format(min(event.xdata, x0)))
+            self.ui.lineedit_right_max1.setText("{:.5g}".format(max(event.xdata, x0)))
+            self.ui.lineedit_right_min2.setText("{:.5g}".format(min(event.ydata, y0)))
+            self.ui.lineedit_right_max2.setText("{:.5g}".format(max(event.ydata, y0)))
+        elif self.type == 'gi_qz_qy':
+            self.ui.lineedit_right_min1.setText("{:.5g}".format(min(event.xdata, x0)))
+            self.ui.lineedit_right_max1.setText("{:.5g}".format(max(event.xdata, x0)))
+            self.ui.lineedit_right_min2.setText("{:.5g}".format(min(event.ydata, y0)))
+            self.ui.lineedit_right_max2.setText("{:.5g}".format(max(event.ydata, y0)))
+        elif self.type == 'gi_perp_para':
+            self.ui.lineedit_right_min1.setText("{:.5g}".format(min(event.xdata, x0)))
+            self.ui.lineedit_right_max1.setText("{:.5g}".format(max(event.xdata, x0)))
+            self.ui.lineedit_right_min2.setText("{:.5g}".format(min(event.ydata, y0)))
+            self.ui.lineedit_right_max2.setText("{:.5g}".format(max(event.ydata, y0)))
+        elif self.type == 'orig':
+            self.ui.lineedit_right_min1.setText("{:.5g}".format(min(rmin, rmax)))
+            self.ui.lineedit_right_max1.setText("{:.5g}".format(max(rmin, rmax)))
+            self.ui.lineedit_right_min2.setText("{:.5g}".format(np.rad2deg(theta1)))
+            self.ui.lineedit_right_max2.setText("{:.5g}".format(np.rad2deg(theta2)))
+
+
+
+    def on_release(self, event):
+        if self.type == 'trans' and not self.ui.pbutton_left_draw.isChecked(): return
+        if self.type in {'polar', 'gi_qz_qy', 'gi_perp_para', 'orig'} and not self.ui.pbutton_right_draw.isChecked(): return
+        self.press = None
+        self.draw()
 
     def resizeEvent(self, event):
         super(MplCanvas, self).resizeEvent(event)
         self.draw()
+
+    def create_annular_sector(self, center, theta1, theta2, rmin, rmax):
+        # Create the vertices for the annular sector
+        while theta2 <= theta1:
+            theta2 += 2 * np.pi
+        while theta2 > theta1 + 2 * np.pi:
+            theta2 -= 2 * np.pi
+        t = np.linspace(theta1, theta2, 100)
+        inner_points = np.column_stack([center[0] + rmin * np.cos(t),
+                                        center[1] + rmin * np.sin(t)])
+        outer_points = np.column_stack([center[0] + rmax * np.cos(t),
+                                        center[1] + rmax * np.sin(t)])
+        vertices = np.vstack([outer_points, outer_points[-1, :], inner_points[::-1], inner_points[0, :]])
+        codes = [Path.MOVETO] + [Path.LINETO] * (len(vertices)-2) + [Path.CLOSEPOLY]
+        path = Path(vertices, codes)
+        patch = PathPatch(path, facecolor='none', edgecolor='red', lw=2)
+        return patch
+
 
     def update_figure(self, h_mesh, v_mesh, c_mesh, **kwargs):
         self.figure.clear()
@@ -79,6 +184,8 @@ class MplCanvas(FigureCanvas):
         vticks = self.axes.get_yticks()
         self.axes.set_yticklabels([f'{tick:.2f}' for tick in vticks])
         self.draw()
+        self.update_patch()
+
 
     def update_figure_gi(self, qx_mesh, qy_mesh, qz_mesh, c_mesh, **kwargs):
         self.figure.clear()
@@ -126,6 +233,7 @@ class MplCanvas(FigureCanvas):
         vticks = self.axes.get_yticks()
         self.axes.set_yticklabels([f'{tick:.2f}' for tick in vticks])
         self.draw()
+        self.update_patch()
 
     def update_figure_polar(
             self,
@@ -205,8 +313,17 @@ class MplCanvas(FigureCanvas):
         hticks = self.axes.get_xticks()
         self.axes.set_xticklabels([f'{tick:.2f}' for tick in hticks])
         self.draw()
-    def update_patch(self, patch):
-        pass
+        self.update_patch()
+
+
+
+    def update_patch(self):
+        if self.type in {'polar', 'gi_qz_qy', 'gi_perp_para'}:
+            self.patch = Rectangle((0, 0), 0, 0, facecolor='none', edgecolor='red', lw=2)
+            self.axes.add_patch(self.patch)
+        elif self.type in {'orig', 'trans'}:
+            self.patch = self.create_annular_sector((0, 0), 0, 2*np.pi, 0, 0)
+            self.axes.add_patch(self.patch)
 
 
 class CustomTreeView(QTreeView):
@@ -558,14 +675,14 @@ class Ui_MainWindow(object):
 
         self.glayout_left_image.addLayout(self.hlayout_right_save, 2, 1, 1, 1)
 
-        self.graphicsview_left = MplCanvas(self.centralwidget)
+        self.graphicsview_left = MplCanvas(parent=self.centralwidget, ui=self)
         self.graphicsview_left.setObjectName(u"graphicsview_left")
         # self.graphicsview_left.setMinimumSize(QSize(400, 400))
         # self.graphicsview_left.setMaximumSize(QSize(400, 400))
 
         self.glayout_left_image.addWidget(self.graphicsview_left, 3, 0, 1, 1)
 
-        self.graphicsview_right = MplCanvas(self.centralwidget)
+        self.graphicsview_right = MplCanvas(parent=self.centralwidget, ui=self)
         self.graphicsview_right.setObjectName(u"graphicsview_right")
         # self.graphicsview_right.setMinimumSize(QSize(400, 400))
         # self.graphicsview_right.setMaximumSize(QSize(400, 400))
@@ -575,6 +692,7 @@ class Ui_MainWindow(object):
         self.glayout_left_1d = QGridLayout()
         self.glayout_left_1d.setObjectName(u"glayout_left_1d")
         self.pbutton_left_draw = QPushButton(self.centralwidget)
+        self.pbutton_left_draw.setCheckable(True)
         self.pbutton_left_draw.setObjectName(u"pbutton_left_draw")
 
         self.glayout_left_1d.addWidget(self.pbutton_left_draw, 0, 0, 1, 1)
@@ -630,6 +748,7 @@ class Ui_MainWindow(object):
         self.glayout_right_1d = QGridLayout()
         self.glayout_right_1d.setObjectName(u"glayout_right_1d")
         self.pbutton_right_draw = QPushButton(self.centralwidget)
+        self.pbutton_right_draw.setCheckable(True)
         self.pbutton_right_draw.setObjectName(u"pbutton_right_draw")
 
         self.glayout_right_1d.addWidget(self.pbutton_right_draw, 0, 0, 1, 1)
@@ -780,11 +899,11 @@ class Ui_MainWindow(object):
         self.pbutton_left_save.setText(QCoreApplication.translate("MainWindow", u"Save Image", None))
         self.pbutton_right_save.setText(QCoreApplication.translate("MainWindow", u"Save Image", None))
         self.pbutton_left_draw.setText(QCoreApplication.translate("MainWindow", u"Draw 1D Average Area", None))
-        self.lebel_left_min1.setText(QCoreApplication.translate("MainWindow", u"ymin", None))
-        self.label_left_min2.setText(QCoreApplication.translate("MainWindow", u"zmin", None))
+        self.lebel_left_min1.setText(QCoreApplication.translate("MainWindow", u"q min", None))
+        self.label_left_min2.setText(QCoreApplication.translate("MainWindow", u"azimuth start", None))
         self.pbutton_left_show.setText(QCoreApplication.translate("MainWindow", u"Show 1D Average", None))
-        self.label_left_max1.setText(QCoreApplication.translate("MainWindow", u"ymax", None))
-        self.label_left_max2.setText(QCoreApplication.translate("MainWindow", u"zmax", None))
+        self.label_left_max1.setText(QCoreApplication.translate("MainWindow", u"q max", None))
+        self.label_left_max2.setText(QCoreApplication.translate("MainWindow", u"azimuth end", None))
         self.pbutton_right_draw.setText(QCoreApplication.translate("MainWindow", u"Draw 1D Average Area", None))
         self.label_right_min1.setText(QCoreApplication.translate("MainWindow", u"ymin", None))
         self.label_right_min2.setText(QCoreApplication.translate("MainWindow", u"zmin", None))

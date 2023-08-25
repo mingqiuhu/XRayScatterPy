@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeWidgetItemIterator, QTreeWidgetItem
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
-
+from PyQt5.QtCore import QCoreApplication
 from xray_scatter_py.ui.ui_mainwindow import Ui_MainWindow, CustomTreeView
 from xray_scatter_py.ui.ui_reflectivity import connect_reflectivity
 from xray_scatter_py.ui.ui_calibration import connect_calibration
@@ -182,8 +182,14 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
             print('refresh_graphicsview_left')
 
         def refresh_graphicsview_right():
+            
             DETX0 = 100.4
             def plt_orig():
+                self.label_right_min1.setText(QCoreApplication.translate("MainWindow", u"r min", None))
+                self.label_right_max1.setText(QCoreApplication.translate("MainWindow", u"r max", None))
+                self.label_right_min2.setText(QCoreApplication.translate("MainWindow", u"azimuth start", None))
+                self.label_right_max2.setText(QCoreApplication.translate("MainWindow", u"azimuth end", None))
+                self.graphicsview_right.type = 'orig'
                 if 'x_array' not in self.loaded_data.keys():
                     try:
                         self.loaded_data['x_array'], self.loaded_data['y_array'], self.loaded_data['z_array'] = calibration.get_mm(
@@ -193,6 +199,7 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
                         )
                     except:
                         return
+                
                 if 'image_array_abs' in self.loaded_data.keys():
                     self.graphicsview_right.update_figure(
                         self.loaded_data['y_array'][0], self.loaded_data['z_array'][0], self.loaded_data['image_array_abs'][0],
@@ -207,6 +214,12 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
                     )
 
             def plt_polar():
+                self.label_right_min1.setText(QCoreApplication.translate("MainWindow", u"q min", None))
+                self.label_right_max1.setText(QCoreApplication.translate("MainWindow", u"q max", None))
+                self.label_right_min2.setText(QCoreApplication.translate("MainWindow", u"azimuth min", None))
+                self.label_right_max2.setText(QCoreApplication.translate("MainWindow", u"azimuth max", None))
+
+                self.graphicsview_right.type = 'polar'
                 if 'image_array_abs' in self.loaded_data.keys():
                     self.graphicsview_right.update_figure_polar(
                         self.loaded_data['azimuth_array'][0],
@@ -231,6 +244,12 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
                     )
                 print('plt_polar')
             def plt_gi_qz_qy():
+                self.label_right_min1.setText(QCoreApplication.translate("MainWindow", u"qy min", None))
+                self.label_right_max1.setText(QCoreApplication.translate("MainWindow", u"qy max", None))
+                self.label_right_min2.setText(QCoreApplication.translate("MainWindow", u"qz min", None))
+                self.label_right_max2.setText(QCoreApplication.translate("MainWindow", u"qz max", None))
+
+                self.graphicsview_right.type = 'gi_qz_qy'
                 if 'qx_array_gi' not in self.loaded_data.keys():
                     try:
                         self.loaded_data['qx_array_gi'], self.loaded_data['qy_array_gi'], self.loaded_data['qz_array_gi'] = calibration.get_q_gi(
@@ -252,6 +271,12 @@ class ui_mainwindow_functionalized(Ui_MainWindow):
                     )
                 print('plt_gi_qz_qy')
             def plt_gi_perp_para():
+                self.label_right_min1.setText(QCoreApplication.translate("MainWindow", u"q parallel min", None))
+                self.label_right_max1.setText(QCoreApplication.translate("MainWindow", u"q parallel max", None))
+                self.label_right_min2.setText(QCoreApplication.translate("MainWindow", u"q perpendicular min", None))
+                self.label_right_max2.setText(QCoreApplication.translate("MainWindow", u"q perpendicular max", None))
+
+                self.graphicsview_right.type = 'gi_perp_para'
                 if 'qx_array_gi' not in self.loaded_data.keys():
                     try:
                         self.loaded_data['qx_array_gi'], self.loaded_data['qy_array_gi'], self.loaded_data['qz_array_gi'] = calibration.get_q_gi(
