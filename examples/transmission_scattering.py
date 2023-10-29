@@ -9,10 +9,10 @@ DATA_PATH = os.path.join(
     '..',
     'data',
     'tiff_files_calibration_q')
-START_INDEX = 77023
-END_INDEX = 77026
+START_INDEX = 34654
+END_INDEX = 34654
 DETX0 = 100.4
-INDEX_LIST = [0, 1, 2, 3]
+INDEX_LIST = [0]
 
 params_dict_list, image_array = utils.read_multiimage(
     DATA_PATH, START_INDEX, END_INDEX)
