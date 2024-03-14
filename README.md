@@ -39,3 +39,8 @@ If you encounter any issues or have questions related to the XRayScatterPy packa
 The XRayScatterPy package is released under the MIT License.  
 
 By providing a comprehensive suite of functionalities for x-ray scattering, grazing incidence x-ray scattering, and x-ray reflectivity data analysis, the XRayScatterPy package aims to streamline your research and analysis process. We hope you find this package useful, and we look forward to your feedback and contributions.
+
+Please cite the following paper if you use this package for data processing and plotting in publications:
+
+Hu, M.; Gan, X.; Chen, Z.; Seong, H.-G.; Emrick, T.; Russell, T. P. Quantitative X‐ray Scattering and Reflectivity Measurements of Polymer Thin Films with 2D Detectors. J. Polym. Sci. 2023. 
+https://doi.org/10.1002/pol.20230530
