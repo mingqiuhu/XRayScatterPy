@@ -2,14 +2,14 @@ XRayScatterPy is a Python package for processing and analyzing x-ray scattering,
   
 # Installation:
 Python 3 is required for running the XRayScatterPy package. After downloading and unzipping the XRayScatterPy package, you can install it in a virtual environment using `pip` and the built-in `venv` module with terminal tools.  
-For MacOS and Linux users, the system built-in terminal tool is recommanded; for Windows users, `git bash` is recommanded.
-In a terminal, firstly use `cd` command to navigate to the work directory, where you want to run your scripts and keep your data in.
+For MacOS and Linux users, the system built-in terminal tool is recommanded; for Windows users, `git bash` is recommanded.  
+In a terminal, firstly use `cd` command to navigate to the work directory, where you want to run your scripts and keep your data in.  
 Then run the following commands in the terminal to create a virtual environment:
 ```
 python -m venv <name_of_venv>
 ```
-you can replace `<name_of_venv>` with an arbitrary name for the virtual environment, like `xrsp`.
-Next, activate the virtual environment with the following command,
+you can replace `<name_of_venv>` with an arbitrary name for the virtual environment, like `xrsp`.  
+Next, activate the virtual environment with the following command,  
 for MacOS and Linux, use:
 ```
 source <name_of_venv>/bin/activate
@@ -23,13 +23,13 @@ Then install the downloaded package:
 pip install <directory_to_package>
 ```
 Replace `<directory_to_downloaded_package>` with the directory to the downloaded and unzipped package, for example: 
-/Users/username/Documents/XRayScatterPy
+/Users/username/Documents/XRayScatterPy  
 You can find out the currect directory by typing `pwd` command in the terminal.
 
 # Using the package:
 For running the package, firstly navigate to the working directory and activate the virtual environment.
 Then, write the python script with any text edit tool or IDE. you can find examples of scripts in `XRayScatterPy/examples/`.
-For example, `gisaxs.py` is an example script of processing raw GISAXS data; `transmission_scattering.py` is the example for generating 2D scattering patterns for transmission X-ray scattering measurements;
+For example, `gisaxs.py` is an example script of processing raw GISAXS data; `transmission_scattering.py` is the example for generating 2D scattering patterns for transmission X-ray scattering measurements;  
 then run the script with:
 ```
 python script.py
