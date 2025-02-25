@@ -8,7 +8,7 @@ Then run the following commands in the terminal to create a virtual environment:
 ```
 python -m venv <name_of_venv>
 ```
-you can replace `<name_of_venv>` with an arbitrary name for the virtual environment, like `xrsp`
+you can replace `<name_of_venv>` with an arbitrary name for the virtual environment, like `xrsp`.
 Next, activate the virtual environment with the following command,
 for MacOS and Linux, use:
 ```
