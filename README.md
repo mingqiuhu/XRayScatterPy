@@ -36,15 +36,15 @@ python script.py
 ```
 
 # Modules:  
-calibration.py: This module contains functions to calculate the real and reciprocal space coordinates for each detector pixel.  
-data_processing.py: This module provides functions to calculate 1D average, and normalize the scattering intensity.  
-data_plotting.py: This module contains functions for plotting the scattering data in 2D and 1D.  
-reflectivity.py: This module provides functionalities to extract specular reflectivity from a set of hundreds of GISAXS measurements at different incidence angles.  
-grating.py: This module provides functions for assisting in thin film grating metrology by predicting the position of the peaks of a grating.  
-utils.py: This module contains utility functions for general tasks like file I/O, and type checking.  
+`calibration.py`: This module contains functions to calculate the real and reciprocal space coordinates for each detector pixel.  
+`data_processing.py`: This module provides functions to calculate 1D average, and normalize the scattering intensity.  
+`data_plotting.py`: This module contains functions for plotting the scattering data in 2D and 1D.  
+`reflectivity.py`: This module provides functionalities to extract specular reflectivity from a set of hundreds of GISAXS measurements at different incidence angles.  
+`grating.py`: This module provides functions for assisting in thin film grating metrology by predicting the position of the peaks of a grating.  
+`utils.py`: This module contains utility functions for general tasks like file I/O, and type checking.  
 
 # Contributing:  
-We welcome contributions to the XRayScatterPy package. If you'd like to contribute, please fork the repository, make your changes, and submit a pull request.  
+We welcome contributions to the `XRayScatterPy` package. If you'd like to contribute, please fork the repository, make your changes, and submit a pull request.  
   
 # Documentation:  
 This is a pre-release of the codes, the GUI and detailed documentation are under preparation. Please feel free to try out the examples.
@@ -52,13 +52,13 @@ This is a pre-release of the codes, the GUI and detailed documentation are under
 # Dependencies:  
 The XRayScatterPy package relies on the following external libraries:  
   
-numpy: For efficient numerical operations and data manipulation.  
-scipy: For scientific computing and optimization.  
-matplotlib: For data visualization and plotting.  
-tifffile: To read and write tiff images.  
-xmltodict: To parse the headers of an experiment.  
-requests: To access the NIST website to get the scattering length density of different materials.  
-These dependencies will be automatically installed when you install the XRayScatterPy package using pip install -e .  
+`numpy`: For efficient numerical operations and data manipulation.  
+`scipy`: For scientific computing and optimization.  
+`matplotlib`: For data visualization and plotting.  
+`tifffile`: To read and write tiff images.  
+`xmltodict`: To parse the headers of an experiment.  
+`requests`: To access the NIST website to get the scattering length density of different materials.  
+These dependencies will be automatically installed when you install the `XRayScatterPy` package.  
   
 # Support:  
 If you encounter any issues or have questions related to the XRayScatterPy package, please open an issue on the GitHub repository or reach out to the maintainers at mingqiuhu@mail.pse.umass.edu or xgan@mail.pse.umass.edu.  
