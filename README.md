@@ -18,7 +18,7 @@ for Windows, run in git bash:
 ```
 source <name_of_venv>/Scripts/activate
 ```
-Then install the downloaded package:
+Then install the package:
 ```
 pip install <directory_to_package>
 ```
@@ -28,8 +28,8 @@ You can find out the currect directory with `pwd` command.
 
 # Using the package:
 For running the package, firstly navigate to the working directory and activate the virtual environment.
-Then, write the python script with any text edit tool or IDE. you can find examples of scripts in `XRayScatterPy/examples/`.  
-For example, `gisaxs.py` is an example script of processing raw GISAXS data; `transmission_scattering.py` is the example for generating 2D scattering patterns for transmission X-ray scattering measurements;  
+Then, write the python script with any text edit tool or IDE, and you can find examples of scripts in folder `XRayScatterPy/examples/`.  
+`gisaxs.py` is an example script of processing raw GISAXS data; `transmission_scattering.py` is the example for generating 2D scattering patterns for transmission X-ray scattering measurements;  `synchrontron.py` is example of processing data acquired in ALS, LBNL.
 then run the script with:
 ```
 python script.py
