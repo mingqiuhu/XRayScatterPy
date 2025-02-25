@@ -1,7 +1,7 @@
 XRayScatterPy is a Python package for processing and analyzing x-ray scattering, grazing incidence x-ray scattering (GISAXS), and x-ray reflectivity data. It can process neutron scattering data in transmission and grazing incidence geometry. The package provides functionalities for reading raw image data, performing calibrations, plotting scattering data in 2D and 1D, calculating beam divergence, extracting specular reflectivity, fitting data with models, and assisting in thin film grating metrology. We intend to integrate bornagain package into this package in future developments. 
   
 # Installation:
-Python 3 is required for running the XRayScatterPy package. After downloading and unzipping the XRayScatterPy package, you can install it in a virtual environment using `pip` and the built-in `venv` module with terminal tools.  
+Python 3 is required for running the `XRayScatterPy` package. After downloading and unzipping the package, you can install it in a virtual environment using `pip` and the built-in `venv` module with terminal tools.  
 For MacOS and Linux users, the system built-in terminal tool is recommanded; for Windows users, `git bash` is recommanded.  
 In a terminal, firstly use `cd` command to navigate to the work directory, where you want to run your scripts and keep your data in.  
 Then run the following commands in the terminal to create a virtual environment:
