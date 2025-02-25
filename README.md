@@ -28,7 +28,7 @@ You can find out the currect directory with `pwd` command.
 
 # Using the package:
 For running the package, firstly navigate to the working directory and activate the virtual environment.
-Then, write the python script with any text edit tool or IDE. you can find examples of scripts in `XRayScatterPy/examples/`.
+Then, write the python script with any text edit tool or IDE. you can find examples of scripts in `XRayScatterPy/examples/`.  
 For example, `gisaxs.py` is an example script of processing raw GISAXS data; `transmission_scattering.py` is the example for generating 2D scattering patterns for transmission X-ray scattering measurements;  
 then run the script with:
 ```
