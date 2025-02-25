@@ -24,7 +24,7 @@ pip install <directory_to_package>
 ```
 Replace `<directory_to_downloaded_package>` with the directory to the downloaded and unzipped package, for example: 
 /Users/username/Documents/XRayScatterPy  
-You can find out the currect directory by typing `pwd` command in the terminal.
+You can find out the currect directory with `pwd` command.
 
 # Using the package:
 For running the package, firstly navigate to the working directory and activate the virtual environment.
