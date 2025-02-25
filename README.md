@@ -70,5 +70,5 @@ By providing a comprehensive suite of functionalities for x-ray scattering, graz
 
 Please cite the following paper if you use this package for data processing and plotting in publications:
 
-Hu, M.; Gan, X.; Chen, Z.; Seong, H.-G.; Emrick, T.; Russell, T. P. Quantitative X‐ray Scattering and Reflectivity Measurements of Polymer Thin Films with 2D Detectors. J. Polym. Sci. 2024, 62(16), 3642-3662. 
-[https://doi.org/10.1002/pol.20230530](https://doi.org/10.1002/pol.20230530)
+Hu, M.; Gan, X.; Chen, Z.; Seong, H.-G.; Emrick, T.; Russell, T. P. Quantitative X‐ray Scattering and Reflectivity Measurements of Polymer Thin Films with 2D Detectors. J. Polym. Sci. 2024, 62(16), 3642-3662.  
+https://doi.org/10.1002/pol.20230530
