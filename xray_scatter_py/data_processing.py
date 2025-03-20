@@ -348,3 +348,75 @@ def calculate_1d_ip(
                                          qz_bool[:, :, np.newaxis],
                                          axis=(0, 1))
     return i_1d
+
+
+import numpy as np
+
+def calculate_1d_azimuth(
+        q_array: np.ndarray,
+        azimuth_array: np.ndarray,
+        sr_array: np.ndarray,
+        images: np.ndarray,
+        **kwargs) -> tuple[np.ndarray, np.ndarray]:
+    """Calculate the 1D azimuthal scattering intensity profile at a specific q value.
+
+    This function extracts a 1D intensity profile as a function of azimuthal angle 
+    from 2D scattering images by integrating intensity over a small range of q-values.
+
+    Args:
+        - q_array (np.ndarray): 3D array representing the q values (momentum transfer) 
+          for each detector pixel. The first index corresponds to the measurement serial 
+          number, while the second and third indices correspond to the detector's y and 
+          z pixel positions.
+        - azimuth_array (np.ndarray): 3D array containing azimuthal angles (in radians) 
+          for each detector pixel.
+        - sr_array (np.ndarray): 3D array of solid angles for each detector pixel.
+        - images (np.ndarray): 3D array containing the scattering intensity measurements 
+          from the detector. The first index corresponds to the measurement serial number.
+        - kwargs:
+            - index_list (list[int], optional): List of measurement indices to process. 
+              Defaults to [0].
+            - q_target (float, optional): The q value at which to extract the azimuthal 
+              intensity profile. Defaults to 1.5 Å⁻¹.
+            - q_tol (float, optional): Tolerance range for q values to be included in 
+              the integration. Defaults to 0.1 Å⁻¹.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]:
+            - azimuth_1d (np.ndarray): 1D array of azimuthal angles (0 to 360 degrees).
+            - i_1d (np.ndarray): 2D array of integrated intensity values, where each row 
+              corresponds to a different measurement.
+
+    """
+
+    # Retrieve parameters from kwargs or use default values
+    index_list = kwargs.get('index_list', [0])
+    q_target = kwargs.get('q_target', 1.5)
+    q_tol = kwargs.get('q_tol', 0.1)
+    # Convert azimuth angles from radians to degrees
+    azimuth = np.degrees(azimuth_array)
+    # Define 1D azimuthal angle range (0° to 360° with 359 bins)
+    azimuth_1d = np.linspace(0, 360, 359)
+    # Initialize the 1D intensity array
+    i_1d = np.empty((images.shape[0], 359))
+    # Loop over selected measurements
+    for i in index_list:
+        # Mask invalid pixels where the intensity is -1
+        image_bool = images[i] != -1
+        # Create a boolean mask for pixels within the specified q range
+        q_bool = np.abs(q_array[i][:, :, np.newaxis] - q_target) <= q_tol
+        # Create a boolean mask for azimuthal angle bins
+        azimuth_bool = np.abs(azimuth[i][:, :, np.newaxis] -
+                              azimuth_1d[np.newaxis, np.newaxis, :]) <= 0.5
+        # Compute the sum of intensities weighted by solid angle
+        sum_intensity = np.sum(images[i][:, :, np.newaxis] *
+                               sr_array[i][:, :, np.newaxis] *
+                               image_bool[:, :, np.newaxis] *
+                               q_bool * azimuth_bool,
+                               axis=(0, 1))
+        # Normalize by the total solid angle of selected pixels
+        i_1d[i] = sum_intensity / np.sum(sr_array[i][:, :, np.newaxis] *
+                                         image_bool[:, :, np.newaxis] *
+                                         q_bool * azimuth_bool,
+                                         axis=(0, 1))
+    return azimuth_1d, i_1d
