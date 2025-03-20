@@ -15,13 +15,17 @@ The main functions in this module are used to:
 3. calculate_1d_oop: Calculates the 1D scattering intensity in the out-of-
     plane direction at qy=0, for grazing indicence x-ray scattering, with I as
     a function of qz (Å*^-1).
+4. calculate_1d_azimuth: Calculates the 1D intensity as a function of azimuth 
+    angle (degree) from a 2D image array. The intensity is integraled over a 
+    small range of q-values.
 
 Each function takes the following inputs:
 q_array: a 3D array of q values corresponding to every pixel on the detector
 images: a 3D array of detector images, either relative or absolute intensity
-sr_array: a 3D array of solid angles corresponding to every pixel on detector.
+sr_array: a 3D array of solid angles corresponding to every pixel on detector
+azimuth_array: a 3D array of azimuth angles corresponding to every pixel on detector.
 
-These functions return 1D scattering intensity profile in numpy array.
+These functions' returns contain 1D scattering intensity profile in numpy array.
 """
 
 
