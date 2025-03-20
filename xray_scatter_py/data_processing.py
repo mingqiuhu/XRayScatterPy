@@ -349,9 +349,6 @@ def calculate_1d_ip(
                                          axis=(0, 1))
     return i_1d
 
-
-import numpy as np
-
 def calculate_1d_azimuth(
         q_array: np.ndarray,
         azimuth_array: np.ndarray,
