@@ -48,8 +48,8 @@ data_plotting.plot_1d(azmimuth_1d, i_1d[0])
 def calculate_order_param(azimuth: np.ndarray, intensity: np.ndarray) -> float:
     azimuth_rad = np.radians(azimuth)
     intensity = np.nan_to_num(intensity, nan=0.0)
-    iop = np.sum(intensity * np.cos(azimuth_rad)**2) / np.sum(intensity)
+    iop = np.sum(intensity * np.cos(azimuth_rad)**2 * np.sin(azimuth_rad)) / np.sum(intensity * np.sin(azimuth_rad)) 
     s = 0.5 * (3 * iop - 1)
-    print("Order parameter (S) =", s)
+    print("order parameter (S) = ", s)
     return s
 calculate_order_param(azmimuth_1d, i_1d[0])
