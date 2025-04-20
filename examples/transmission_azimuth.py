@@ -36,14 +36,29 @@ data_plotting.plot_2d_polar(
     qz_array,
     image_array_rel,
     params_dict_list)
-azmimuth_1d, i_1d = data_processing.calculate_1d_azimuth(
+azimuth_1d, i_1d = data_processing.calculate_1d_azimuth(
     q_array,
     azimuth_array,
     sr_array,
     image_array_rel,
     q_target=Q_TARGET,
     q_tol=Q_TOL)
-data_plotting.plot_1d(azmimuth_1d, i_1d[0])
+
+def plot_azimuth():
+    data_plotting.plot_set()
+    plt.figure()
+    plt.xlabel('azimuth angle (°)')
+    plt.ylabel(r'$I(a.u.)$')
+    plt.xscale('linear')
+    plt.yscale('log')
+    plt.xticks([0, 90, 180, 270, 360])
+    plt.yticks([])
+    plt.xlim(0, 360)
+    plt.plot(azimuth_1d, i_1d[0], c='black', linewidth=2)
+    plt.tight_layout(pad=0.1)
+    # plt.savefig(os.path.join(os.path.dirname(__file__),'azimuth.pdf'))
+    plt.show()
+plot_azimuth()
 
 def calculate_order_param(azimuth: np.ndarray, intensity: np.ndarray) -> float:
     azimuth_rad = np.radians(azimuth)
@@ -52,4 +67,4 @@ def calculate_order_param(azimuth: np.ndarray, intensity: np.ndarray) -> float:
     s = 0.5 * (3 * iop - 1)
     print("order parameter (S) = ", s)
     return s
-calculate_order_param(azmimuth_1d, i_1d[0])
+calculate_order_param(azimuth_1d, i_1d[0])
