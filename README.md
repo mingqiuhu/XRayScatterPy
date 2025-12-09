@@ -61,7 +61,7 @@ The XRayScatterPy package relies on the following external libraries:
 These dependencies will be automatically installed when you install the `XRayScatterPy` package.  
   
 # Support:  
-If you encounter any issues or have questions related to the XRayScatterPy package, please open an issue on the GitHub repository or reach out to the maintainers at mingqiuhu@mail.pse.umass.edu or xgan@mail.pse.umass.edu.  
+If you encounter any issues or have questions related to the XRayScatterPy package, please open an issue on the GitHub repository or reach out to the maintainers at xgan@umass.edu or pkumingqiuhu@gmail.com.  
   
 # License:  
 The XRayScatterPy package is released under the MIT License.  
